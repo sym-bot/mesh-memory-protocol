@@ -32,7 +32,7 @@ Feedback and errata: spec@sym.bot or github.com/sym-bot/sym/issues.
 
 | Version | Date | Changes |
 |---|---|---|
-| 0.2.1 | 2026-04-02 | Node model clarified: every autonomous agent MUST be a full peer node with own identity, coupling engine, and memory store. Removed physical/virtual node distinction. Handshake adds version and extensions fields. Error frame type. |
+| 0.2.1 | 2026-04-02 | Node model: every autonomous agent MUST be a full peer node with own identity, coupling engine, and memory store. SVAF band-pass evaluation: four-class model (redundant/aligned/guarded/rejected) with per-field redundancy detection. CMB lifecycle: observed/remixed/validated/canonical/archived with anchor weight progression. Semantic encoder SHOULD for SVAF drift computation. Handshake adds version and extensions fields. Error frame type. |
 | 0.2.0 | 2026-03-27 | Formal specification published. 8-layer architecture. CAT7 CMB schema with lineage (parents + ancestors). SVAF per-field evaluation. Wire format normatively specified. Error frame. Frame type registry. Extension mechanism. JSON Schema. Connection state machine. Wire examples. |
 | 0.1.0 | 2025-08-01 | Initial protocol design (Consenix Labs Ltd). 4-layer architecture. Scalar drift evaluation. |
 
