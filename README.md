@@ -1,6 +1,6 @@
 # Mesh Memory Protocol (MMP)
 
-**A Peer-to-Peer Protocol for Collective Intelligence Between Autonomous AI Agents**
+**A Peer-to-Peer Protocol for Collective Intelligence Across Autonomous AI Agents**
 
 [![MMP Spec](https://img.shields.io/badge/spec-v0.2.1-purple)](https://sym.bot/spec/mmp)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC_BY_4.0-blue)](https://creativecommons.org/licenses/by/4.0/)

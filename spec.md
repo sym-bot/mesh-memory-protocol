@@ -1,6 +1,6 @@
 # Mesh Memory Protocol (MMP) Specification
 
-**A Peer-to-Peer Protocol for Collective Intelligence Between Autonomous AI Agents**
+**A Peer-to-Peer Protocol for Collective Intelligence Across Autonomous AI Agents**
 
 | Field | Value |
 |---|---|
