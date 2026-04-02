@@ -636,7 +636,7 @@ Coupling decision based on drift:
 
 When a node receives a `cmb` frame, it MUST evaluate the signal independently of peer coupling state. Implementations MUST support at least the non-neural evaluation path (cosine-distance SVAF). Neural evaluation is RECOMMENDED. The encoder that maps field text to vectors SHOULD use semantic embeddings (e.g. sentence-transformers) rather than lexical hashing -- per-field evaluation quality is bounded by encoder quality (see Section 17.7).
 
-The SVAF evaluation computes per-field drift between the incoming CMB and local anchor CMBs, applies per-agent field weights (α_f), combines with temporal drift, and produces a three-class decision (aligned / guarded / rejected):
+The SVAF evaluation computes per-field drift between the incoming CMB and local anchor CMBs, applies per-agent field weights (α_f), combines with temporal drift, and produces a four-class decision using a **band-pass** model:
 
 ```
 totalDrift = (1 - λ) × fieldDrift + λ × temporalDrift
@@ -644,10 +644,15 @@ totalDrift = (1 - λ) × fieldDrift + λ × temporalDrift
 fieldDrift    = Σ(α_f × δ_f) / Σ(α_f)
 temporalDrift = 1 - exp(-age / τ_freshness)
 
-κ = aligned   if totalDrift ≤ T_stable    (default 0.25)
-κ = guarded   if totalDrift ≤ T_guarded   (default 0.50)
+κ = redundant if max(δ_f) < T_redundant  (default 0.10)
+κ = aligned   if totalDrift ≤ T_aligned    (default 0.25)
+κ = guarded   if totalDrift ≤ T_guarded    (default 0.50)
 κ = rejected  otherwise
 ```
+
+The **redundancy test** is the key addition: a signal is redundant if *every* field falls below T_redundant -- meaning no field carries novel content relative to local anchors. If any field is novel (e.g., same topic but different intent), the signal passes. This preserves per-field selectivity while preventing paraphrase accumulation.
+
+Information-theoretic basis: a signal's value is proportional to its surprise (Shannon, 1948). A signal identical to existing knowledge carries zero information gain regardless of domain alignment. The band-pass model reflects the Wundt curve (Berlyne, 1970): intermediate novelty produces maximal value, while both overly familiar (redundant) and overly foreign (rejected) signals are disengaged from.
 
 If accepted, the implementation SHOULD produce a remixed CMB -- a new CMB created from the incoming signal processed through the agent's domain intelligence -- with lineage (parents + ancestors) pointing to the source CMBs. The remixed CMB is stored locally; the original incoming CMB is not stored.
 
@@ -1661,13 +1666,14 @@ Custom weights: derive from your domain using these patterns. Implementations SH
 
 ### 18.4 SVAF Drift Thresholds
 
-SVAF computes a `totalDrift` score (0-1) for each incoming memory. Three zones determine acceptance:
+SVAF computes a `totalDrift` score (0-1) for each incoming memory. Four zones determine acceptance:
 
 | Zone | Drift | Action | Default |
 |---|---|---|---|
-| Aligned | ≤ T_stable | Accepted, full blending | 0.25 |
-| Guarded | T_stable < drift ≤ T_guarded | Accepted, attenuated blending | 0.50 |
-| Rejected | > T_guarded | Discarded | -- |
+| Redundant | max(δ_f) < T_redundant | Discarded -- no field carries novel content | 0.10 |
+| Aligned | δ_total ≤ T_aligned | Accepted, full blending | 0.25 |
+| Guarded | T_aligned < δ_total ≤ T_guarded | Accepted, attenuated blending | 0.50 |
+| Rejected | δ_total > T_guarded | Discarded -- irrelevant domain | -- |
 
 Defaults work for most agents. Override only with domain-specific reason: tighter thresholds for high-precision domains (legal, health), wider for exploratory domains (research, knowledge).
 
