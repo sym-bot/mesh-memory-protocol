@@ -634,7 +634,7 @@ Coupling decision based on drift:
 
 ### 9.2 Content-Level Evaluation (SVAF)
 
-When a node receives a `cmb` frame, it MUST evaluate the signal independently of peer coupling state. Implementations MUST support at least the non-neural evaluation path (cosine-distance SVAF). Neural evaluation is RECOMMENDED.
+When a node receives a `cmb` frame, it MUST evaluate the signal independently of peer coupling state. Implementations MUST support at least the non-neural evaluation path (cosine-distance SVAF). Neural evaluation is RECOMMENDED. The encoder that maps field text to vectors SHOULD use semantic embeddings (e.g. sentence-transformers) rather than lexical hashing -- per-field evaluation quality is bounded by encoder quality (see Section 17.7).
 
 The SVAF evaluation computes per-field drift between the incoming CMB and local anchor CMBs, applies per-agent field weights (α_f), combines with temporal drift, and produces a three-class decision (aligned / guarded / rejected):
 
@@ -1582,18 +1582,18 @@ CMB quality depends on field extraction accuracy. The protocol does not extract 
 
 | Layer | Defense | Limitation |
 |---|---|---|
-| Context Encoder | Deterministic n-gram hashing -- similar text produces similar vectors, enabling drift comparison | Not a semantic model. "I'm exhausted" and "I need rest" produce moderate similarity, not high -- because the words differ even though meaning is the same |
+| Context Encoder | Maps field text to vectors for drift comparison. Quality directly bounds SVAF quality. | N-gram hashing: paraphrases score 0.31 cosine similarity (poor). Semantic embeddings: 0.69 (good). Implementations SHOULD use semantic embeddings for production deployment. |
 | SVAF heuristic | Per-field cosine drift against local memory anchors with temporal decay -- misaligned fields are rejected | Catches drift from the agent's own state, not absolute quality. A consistently poor extractor will pass its own drift checks |
 | Neural SVAF | Trained model with learned per-field gate values -- mood gates highest (0.50), perspective lowest (0.06) | Requires trained model; falls back to heuristic when unavailable |
 
-The context encoder is a **deliberate design trade-off**: deterministic, zero-cost, zero-latency, works offline, no API key. It does not capture semantic meaning -- it captures lexical similarity. The agent's LLM provides semantic understanding at the extraction step; the encoder provides vectors that are similar enough for drift comparison to function correctly.
+**Per-field evaluation quality is bounded by encoder quality, not model capacity.** Production deployment revealed that n-gram encoding (character trigrams + word bigrams) produces 0.31 cosine similarity for paraphrases -- SVAF cannot distinguish "submit IETF draft today" from "IETF submission, zero blockers, execute now" because the encoder represents them as distant vectors. Replacing n-gram with semantic embeddings (all-MiniLM-L6-v2, 384-dim) raises paraphrase similarity to 0.69 -- a 2.2x improvement -- while preserving topic separation (different topics: 0.03). Implementations SHOULD use semantic embeddings for SVAF evaluation. N-gram encoding is suitable only for prototyping or resource-constrained environments where the quality trade-off is acceptable.
 
 Implementations targeting domains where field extraction quality is critical (healthcare, legal, finance) SHOULD validate extraction output before calling `remember()`. Strategies include:
 
 - **Schema validation** -- reject CMBs with empty or defaulted fields before they enter the mesh
 - **Confidence thresholds** -- the LLM can assign a confidence score to its extraction; low-confidence CMBs can be withheld
 - **Lineage feedback** -- CMBs that get remixed by other agents (have descendants in the DAG) signal high quality; CMBs that expire without children signal noise. This feedback loop lets the mesh itself shape extraction quality over time
-- **Semantic embedding upgrade** -- implementations MAY replace the n-gram encoder with a semantic embedding model (sentence-transformers, etc.) for higher drift precision. The SVAF evaluation pipeline is encoder-agnostic -- any function that maps text to vectors works
+- **Semantic embedding encoder** -- implementations SHOULD use a semantic embedding model (e.g. all-MiniLM-L6-v2) for SVAF drift computation. The evaluation pipeline is encoder-agnostic -- any function that maps text to unit-normalised vectors works. N-gram encoding MAY be used as a zero-dependency fallback.
 
 ### 17.8 Consent as a Security Mechanism
 
