@@ -231,6 +231,32 @@ A node's identity is created once and persists until the node is uninstalled. Th
 
 MMP does not define an identity rotation or revocation mechanism in v0.2.0. Compromised nodes MUST generate a fresh identity (new nodeId and keypair). The old identity becomes permanently orphaned. Implementations SHOULD document this limitation to operators.
 
+### 3.5 Node Lifecycle Role
+
+Each node has a `lifecycleRole` that determines which CMB lifecycle transitions it may perform. The role is bound to the node's cryptographic identity (nodeId + keypair) and MUST be declared in the handshake frame.
+
+| Role | Default | May produce | May advance lifecycle to |
+|---|---|---|---|
+| observer | Yes | CMBs (observed), remixes | observed, remixed |
+| validator | No | CMBs, remixes, validation CMBs | observed, remixed, **validated** |
+| anchor | No | CMBs, remixes, validation CMBs, canonization CMBs | observed, remixed, validated, **canonical** |
+
+A node with `lifecycleRole: observer` (the default) MUST NOT produce CMBs that advance another CMB's lifecycle to `validated` or `canonical`. Receiving nodes MUST verify that a validation CMB's `createdBy` matches a node whose handshake declared `validator` or `anchor` role. Validation CMBs from observer nodes MUST be ignored for lifecycle advancement (the CMB itself is still stored as a normal remix).
+
+#### 3.5.1 Role Progression
+
+Lifecycle roles are not static. An observer node MAY be promoted to validator by an existing validator or anchor node. Promotion is a protocol frame, not an out-of-band configuration change.
+
+| Transition | Granted by | Conditions |
+|---|---|---|
+| observer → validator | Existing validator or anchor | Node has produced CMBs that were remixed by peers (demonstrated quality). Granting node sends `role-grant` frame. |
+| validator → anchor | Existing anchor | Node has validated CMBs that reached canonical state. Track record of quality validation. |
+| Bootstrap | Self-declared | The first node in a mesh MAY self-declare as validator or anchor. Subsequent nodes MUST be promoted by existing validators. |
+
+Role progression is monotonically upward: observer → validator → anchor. Demotion is not defined in v0.2.1. A compromised validator MUST generate a fresh identity (Section 3.4) and re-earn its role.
+
+The `role-grant` frame carries the granting node's signature over the promoted node's nodeId and new role. Receiving nodes SHOULD verify the signature against the granting node's public key from the handshake. This prevents role spoofing without requiring a central authority.
+
 ### Q&A
 
 **Why UUID v7 instead of v4?** -- UUID v7 (RFC 9562) provides the same global uniqueness and privacy properties as v4, with an additional benefit: time-ordering. The embedded timestamp aids log correlation, debugging, and determining which node was created first -- without revealing device identity. The 74 random bits provide sufficient collision resistance for any practical mesh size.
@@ -242,6 +268,12 @@ MMP does not define an identity rotation or revocation mechanism in v0.2.0. Comp
 **What happens when two nodes have the same nodeId?** -- The connection state machine rejects duplicate nodeIds (error code 1005). The second connection is closed. This prevents impersonation and ensures each nodeId maps to exactly one active node.
 
 **Why is Ed25519 mandatory?** -- Without cryptographic identity, any node can claim any nodeId. A relay could impersonate peers (MITM), and peer gossip (Section 5.6) would propagate unverified claims. For autonomous AI agents making coupling decisions, authenticated identity is foundational -- not optional.
+
+**Why are lifecycle roles identity-bound, not content-based?** -- If validation authority were determined by content (e.g. perspective field containing "founder"), any agent could spoof it. Binding roles to cryptographic identity means only nodes that have been explicitly promoted by existing validators can advance CMB lifecycle. The mesh knows who validated, not just what was said.
+
+**Why is role progression earned, not configured?** -- An agent that produces quality remixes -- remixes that other agents cite and build upon -- has demonstrated value to the mesh. Granting validation authority to such agents is a natural extension of their demonstrated competence. This prevents arbitrary role assignment and creates a meritocratic trust hierarchy that emerges from mesh activity.
+
+**Can an observer node dismiss a decision?** -- An observer can produce a CMB with lineage pointing to a decision, but receiving nodes MUST NOT treat it as validation. The CMB is stored as a normal remix -- it does not advance the parent CMB's lifecycle. Only validator or anchor nodes can validate or dismiss decisions in a way that removes them from the decision queue.
 
 ---
 
@@ -505,6 +537,19 @@ The lifecycle is monotonically upward under activity: observed → remixed → v
 
 Anchor weight influences SVAF evaluation: when computing per-field drift against local anchors, canonical and validated CMBs contribute more to the fused anchor vector than observed or archived CMBs. This creates a natural hierarchy where human-confirmed knowledge and collective consensus outweigh raw observations -- without overriding agent autonomy. Each agent still evaluates incoming signals through its own field weights.
 
+### 6.5 Validation Authority
+
+The transition from `remixed` to `validated` is the most consequential lifecycle event -- it commits human or authorised-agent judgment to the mesh and permanently increases anchor weight from 1.5 to 2.0. This transition MUST be restricted to nodes with appropriate lifecycle roles (Section 3.5).
+
+When a receiving node processes a CMB with `lineage.parents` pointing to an existing CMB, it MUST check the `createdBy` field against the known lifecycle roles of connected peers:
+
+- If `createdBy` matches a node with `lifecycleRole: validator` or `anchor`, the parent CMB advances to `validated`.
+- If `createdBy` matches a node with `lifecycleRole: observer`, the parent CMB advances to `remixed` only. The CMB is stored normally but does not confer validation.
+
+This prevents agent-level spoofing of validation authority. An agent cannot self-promote to validator by including "founder" or "validator" in its CMB text fields. The authority is bound to the node's cryptographic identity and the `role-grant` chain from an existing validator (Section 3.5.1).
+
+**Dismiss vs. validate:** Both are validation CMBs -- they advance the parent CMB's lifecycle and prevent it from resurfacing as an actionable decision. The distinction is in the `intent` field: "founder action completed" vs. "founder dismissed -- not actionable". Both require validator or anchor role. Both broadcast to the mesh so other agents see the founder's response.
+
 ### Q&A
 
 **Why a pluggable storage interface instead of prescribing a backend?** -- Agents run on different platforms with different constraints. A CLI agent on a server uses flat files. An iOS app uses CoreData with iCloud. A compliance agent needs a cloud database with audit logging. The protocol defines what to store and how to query it -- not where to put it.
@@ -517,6 +562,10 @@ Anchor weight influences SVAF evaluation: when computing per-field drift against
 
 **Why do validated CMBs have higher anchor weight?** -- A human acting on a signal is the strongest confirmation that the signal was correct and actionable. Giving validated CMBs higher anchor weight means future SVAF evaluations are shaped by confirmed knowledge rather than speculation. This does not override agent autonomy -- each agent still applies its own field weights. It means the anchors against which incoming signals are compared are more trustworthy.
 
+**Why must validation authority be identity-bound?** -- If any agent could advance a CMB to validated by producing a CMB with lineage, an agent could dismiss founder decisions or fake human approval. Binding validation to cryptographic node identity (Section 3.5) ensures only explicitly authorised nodes -- the founder's node or promoted agents -- can affect lifecycle transitions. The content of the CMB (perspective, intent) is informational; the authority comes from who created it.
+
+**Can an agent earn validator role automatically?** -- The protocol defines the role-grant mechanism (Section 3.5.1) but does not prescribe automated promotion criteria. An implementation MAY define heuristics (e.g. promote after N remixes cited by peers), but the grant itself MUST come from an existing validator via a signed role-grant frame. This keeps the trust chain auditable.
+
 ---
 
 ## 7. Frame Types
@@ -525,7 +574,7 @@ All frames are JSON objects with a `type` field (string). Implementations MUST s
 
 | Type | Layer | Gated | Fields |
 |---|---|---|---|
-| `handshake` | 2 | No | nodeId (string), name (string), version (string), extensions (string[]) |
+| `handshake` | 2 | No | nodeId (string), name (string), version (string), extensions (string[]), lifecycleRole (string: observer/validator/anchor) |
 | `state-sync` | 2/3 | No | h1 (float[]), h2 (float[]), confidence (float) |
 | `cmb` | 3/4 | SVAF | timestamp (int), cmb (object: { key, createdBy, createdAt, fields, lineage }) |
 | `message` | 2 | No | from, fromName, content, timestamp |
@@ -533,6 +582,7 @@ All frames are JSON objects with a `type` field (string). Implementations MUST s
 | `peer-info` | 2 | No | peers: [{ nodeId, name, wakeChannel?, lastSeen }] |
 | `wake-channel` | 2 | No | platform (string), token (string), environment (string) |
 | `error` | 2 | No | code (int), message (string), detail? (string) |
+| `role-grant` | 0 | No | targetNodeId (string), role (string: validator/anchor), grantedBy (string), signature (string) |
 | `ping` | 2 | No | (no additional fields) |
 | `pong` | 2 | No | (no additional fields) |
 
