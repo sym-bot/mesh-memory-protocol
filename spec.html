@@ -3342,6 +3342,48 @@ them.</p>
 Coupling is autonomous. An agent may receive collective insight and
 decide it’s not relevant. That’s by design – the mesh influences, never
 overrides. An agent that ignores everything is just a lonely node.</p>
+
+<p><strong>Why does the local event interface require subscriber field weights?</strong> – For the same reason SVAF uses per-agent field weights between peers: each application has a different domain perspective. A coding tool and a music app on the same node should see different signals from the same mesh. Without subscriber weights, every application receives unfiltered noise – the local equivalent of scalar evaluation.</p>
+
+<h3 id="local-event-interface">13.9 Local Event Interface</h3>
+
+<p>A node’s value to the mesh depends on the applications running on it. A music agent curates playlists. A coding tool suggests breaks. A dashboard visualises collective intelligence. These applications need <strong>real-time access</strong> to mesh events – not polling, not batch retrieval, but push delivery as events occur.</p>
+
+<p>Implementations <span class="rfc">MUST</span> provide a <strong>local event interface</strong> that allows applications on the same host to subscribe to mesh events and receive them in real-time. The interface is transport-agnostic – IPC socket, named pipe, WebSocket, in-process callback, or any mechanism that provides persistent bidirectional communication.</p>
+
+<h4>13.9.1 Required Events</h4>
+
+<p>A node <span class="rfc">MUST</span> emit the following events to local subscribers:</p>
+
+<table>
+<thead><tr><th>Event</th><th>Fires when</th><th>Data</th></tr></thead>
+<tbody>
+<tr><td><code>cmb-accepted</code></td><td>A peer CMB passes SVAF evaluation (aligned or guarded)</td><td><code>key</code>, <code>source</code>, <code>fields</code> (CAT7), <code>timestamp</code>, <code>decision</code>, <code>drift</code></td></tr>
+<tr><td><code>message</code></td><td>A direct message frame arrives from a peer (Section 7)</td><td><code>from</code>, <code>content</code>, <code>timestamp</code></td></tr>
+<tr><td><code>peer-joined</code></td><td>A new peer connects (any transport)</td><td><code>peerId</code>, <code>name</code>, <code>source</code> (bonjour/relay)</td></tr>
+<tr><td><code>peer-left</code></td><td>A peer disconnects (all transports closed)</td><td><code>peerId</code>, <code>name</code></td></tr>
+<tr><td><code>mood-delivered</code></td><td>A mood field is delivered from a rejected CMB (Section 9.3, R5)</td><td><code>from</code>, <code>mood</code> (text, valence, arousal)</td></tr>
+</tbody>
+</table>
+
+<h4>13.9.2 Subscriber Field Weights</h4>
+
+<p>A subscriber <span class="rfc">MAY</span> declare its own per-field weights (α<sub>f</sub>) when subscribing. If declared, the node <span class="rfc">SHOULD</span> evaluate incoming CMBs against the subscriber’s weights before delivering the event. This enables domain-specific filtering at the node level:</p>
+
+<ul>
+<li>A coding tool subscribes with <code>focus=2.0, issue=2.0, mood=0.8</code> – receives engineering-relevant signals</li>
+<li>A music app subscribes with <code>mood=2.0, focus=1.0, issue=0.3</code> – receives affective signals</li>
+<li>A dashboard subscribes with uniform weights – receives everything</li>
+</ul>
+
+<p>This is SVAF applied at the local interface – the same per-field evaluation that gates signals between peers also gates signals between a node and its applications. Each application sees a domain-relevant projection of the mesh, curated by its own field weights.</p>
+
+<h4>13.9.3 Design Rationale</h4>
+
+<p>Without a standard local event interface, each application invents its own integration: CLI polling, file watching, HTTP endpoints, custom IPC. This fragments the ecosystem and makes applications non-portable across implementations. The local event interface standardises <strong>what</strong> events are available and <strong>how</strong> subscribers declare their domain perspective – while leaving the transport mechanism to the implementation.</p>
+
+<p>The event interface is the boundary between the protocol stack and the application. Below it: identity, transport, coupling, SVAF, CfC – protocol concerns. Above it: what the application does with the signals – curate music, suggest breaks, visualise the mesh, or reason about code. The interface ensures every application gets real-time, domain-filtered access to collective intelligence.</p>
+
 <hr />
 <h2 id="remix">14. Remix</h2>
 <p>Remix is how collective intelligence emerges. Without remix, agents

@@ -1341,6 +1341,42 @@ Three agents on three different operating systems -- macOS, Linux, iOS -- connec
 
 **Can an agent ignore mesh signals entirely?** -- Yes. Coupling is autonomous. An agent may receive collective insight and decide it's not relevant. That's by design -- the mesh influences, never overrides. An agent that ignores everything is just a lonely node.
 
+**Why does the local event interface require subscriber field weights?** -- For the same reason SVAF uses per-agent field weights between peers: each application has a different domain perspective. A coding tool and a music app on the same node should see different signals from the same mesh. Without subscriber weights, every application receives unfiltered noise -- the local equivalent of scalar evaluation.
+
+### 13.9 Local Event Interface
+
+A node's value to the mesh depends on the applications running on it. A music agent curates playlists. A coding tool suggests breaks. A dashboard visualises collective intelligence. These applications need **real-time access** to mesh events -- not polling, not batch retrieval, but push delivery as events occur.
+
+Implementations MUST provide a **local event interface** that allows applications on the same host to subscribe to mesh events and receive them in real-time. The interface is transport-agnostic -- IPC socket, named pipe, WebSocket, in-process callback, or any mechanism that provides persistent bidirectional communication.
+
+#### 13.9.1 Required Events
+
+A node MUST emit the following events to local subscribers:
+
+| Event | Fires when | Data |
+|-------|-----------|------|
+| `cmb-accepted` | A peer CMB passes SVAF evaluation (aligned or guarded) | `key`, `source`, `fields` (CAT7), `timestamp`, `decision` (aligned/guarded), `drift` |
+| `message` | A direct message frame arrives from a peer (Section 7) | `from`, `content`, `timestamp` |
+| `peer-joined` | A new peer connects (any transport) | `peerId`, `name`, `source` (bonjour/relay) |
+| `peer-left` | A peer disconnects (all transports closed) | `peerId`, `name` |
+| `mood-delivered` | A mood field is delivered from a rejected CMB (Section 9.3, R5) | `from`, `mood` (text, valence, arousal) |
+
+#### 13.9.2 Subscriber Field Weights
+
+A subscriber MAY declare its own per-field weights (α_f) when subscribing. If declared, the node SHOULD evaluate incoming CMBs against the subscriber's weights before delivering the event. This enables domain-specific filtering at the node level:
+
+- A coding tool subscribes with `focus=2.0, issue=2.0, mood=0.8` -- receives engineering-relevant signals
+- A music app subscribes with `mood=2.0, focus=1.0, issue=0.3` -- receives affective signals
+- A dashboard subscribes with uniform weights -- receives everything
+
+This is SVAF applied at the local interface -- the same per-field evaluation that gates signals between peers also gates signals between a node and its applications. Each application sees a domain-relevant projection of the mesh, curated by its own field weights.
+
+#### 13.9.3 Design Rationale
+
+Without a standard local event interface, each application invents its own integration: CLI polling, file watching, HTTP endpoints, custom IPC. This fragments the ecosystem and makes applications non-portable across implementations. The local event interface standardises **what** events are available and **how** subscribers declare their domain perspective -- while leaving the transport mechanism to the implementation.
+
+The event interface is the boundary between the protocol stack and the application. Below it: identity, transport, coupling, SVAF, CfC -- protocol concerns. Above it: what the application does with the signals -- curate music, suggest breaks, visualise the mesh, or reason about code. The interface ensures every application gets real-time, domain-filtered access to collective intelligence.
+
 ---
 
 ## 14. Remix
