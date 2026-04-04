@@ -12,6 +12,38 @@
 | Canonical URL | https://sym.bot/spec/mmp |
 | Licence | CC BY 4.0 (specification text); Apache 2.0 (reference implementations) |
 
+> **Reading this on GitHub?** The formatted spec is at [sym.bot/spec/mmp](https://sym.bot/spec/mmp). Download: [spec.md](spec.md) (Markdown) · [spec.html](spec.html) (single-page HTML).
+
+---
+
+## Table of Contents
+
+**Protocol Infrastructure (Layers 0–3)**
+- [1. Conventions](#1-conventions-and-terminology)
+- [2. Architecture Overview](#2-architecture-overview)
+- [3. Layer 0: Identity](#3-layer-0-identity)
+- [4. Layer 1: Transport](#4-layer-1-transport)
+- [5. Layer 2: Connection](#5-layer-2-connection)
+- [6. Layer 3: Memory](#6-layer-3-memory)
+- [7. Frame Types](#7-frame-types)
+- [8. Cognitive Memory Blocks (CAT7)](#8-cognitive-memory-blocks-cat7)
+
+**Mesh Cognition (Layers 4–7)**
+- [9. Layer 4: Coupling and SVAF](#9-layer-4-coupling-and-svaf-evaluation)
+- [10. State Blending](#10-state-blending)
+- [11. Layer 5: Synthetic Memory](#11-synthetic-memory-layer-5)
+- [12. Layer 6: xMesh (Per-Agent LNN)](#12-xmesh----per-agent-lnn-layer-6)
+- [13. Layer 7: Application](#13-application-layer-7)
+- [14. Remix](#14-remix)
+
+**Protocol Operations**
+- [15. Extension Mechanism](#15-extension-mechanism)
+- [16. Conformance](#16-conformance)
+- [17. Security Considerations](#17-security-considerations)
+- [18. Configuration](#18-configuration)
+- [19. JSON Schema](#19-json-schema)
+- [20. References](#20-references)
+
 ---
 
 ## Introduction
