@@ -9,6 +9,152 @@
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
     */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
@@ -89,7 +235,6 @@
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
-  <link rel="stylesheet" href="" />
 </head>
 <body>
 <header id="title-block-header">
@@ -1702,6 +1847,33 @@ by extensions. <strong>Extension types</strong> MUST use
 <code>&lt;extension&gt;-&lt;name&gt;</code> format. <strong>Vendor
 types</strong> MUST use <code>x-&lt;vendor&gt;-&lt;name&gt;</code>
 format and MUST be silently ignored by non-supporting nodes.</p>
+<h3 id="qa-3">Q&amp;A</h3>
+<p><strong>Why MUST nodes silently ignore unknown frame types?</strong>
+– Without this rule, you can never add new features to the protocol. If
+a node crashes or rejects unknown frame types, then deploying a new
+extension (like the consent primitive) requires upgrading every node on
+the mesh simultaneously – impossible in a peer-to-peer system. Silent
+ignore means old nodes and new nodes coexist: a node running the consent
+extension sends consent-withdraw frames, and nodes that don’t support
+consent yet simply ignore them. No crash, no error, the mesh keeps
+working. When a node adds consent support later, it handles the frame.
+No coordinated upgrade needed. This is the same principle used by HTTP
+(unknown headers ignored), TCP (unknown options skipped), and HTML
+(unknown tags ignored). Every successful protocol is evolvable because
+of this rule.</p>
+<p><strong>What happens if a relay receives an unknown frame
+type?</strong> – The relay forwards it. The relay is a dumb transport
+pipe – it wraps the payload in a { from, fromName, payload } envelope
+and sends it to the target or broadcasts it. It never inspects the
+payload type. This means extension frames (consent, vendor, future
+types) flow through the relay without any relay changes. The
+intelligence is at the endpoints, not the transport.</p>
+<p><strong>Can an extension frame break an existing node?</strong> – No,
+if the node follows Section 7. The frame handler switches on msg.type.
+Unknown types fall through with no match and no action. The node’s
+cognitive state, memory, and coupling are unaffected. This is a hard
+requirement – implementations that reject or error on unknown types are
+non-conformant.</p>
 <hr />
 <h2 id="cognitive-memory-blocks-cat7">8. Cognitive Memory Blocks
 (CAT7)</h2>
@@ -1821,7 +1993,7 @@ work.</p>
 RECOMMENDED for any CMB that references a document, file, or external
 resource. Agents MUST NOT embed full artifact content in CMB fields –
 fields are for structured signals, not documents.</p>
-<h3 id="qa-3">Q&amp;A</h3>
+<h3 id="qa-4">Q&amp;A</h3>
 <p><strong>Why are all 7 fields required, not optional?</strong> – SVAF
 computes per-field drift across all 7 dimensions. Missing fields make
 the drift formula undefined – the aggregate changes depending on which
@@ -1969,7 +2141,7 @@ domain), convergence typically occurs within 2-5 CMB exchanges. For
 agents with no domain overlap (e.g., a fitness agent and a legal agent),
 convergence may never occur – and that is correct. They couple only
 through mood.</p>
-<h3 id="qa-4">Q&amp;A</h3>
+<h3 id="qa-5">Q&amp;A</h3>
 <p><strong>Why per-field evaluation instead of whole-signal
 accept/reject?</strong> – Relevance is not binary. A fitness agent’s
 “sedentary 3 hours, exhausted” has irrelevant focus for a music agent
@@ -3154,7 +3326,7 @@ not instructions</li>
 <li>Agent coupling decisions are autonomous – no orchestrator, no policy
 override</li>
 </ul>
-<h3 id="qa-5">Q&amp;A</h3>
+<h3 id="qa-6">Q&amp;A</h3>
 <p><strong>Why does the agent extract fields, not the protocol?</strong>
 – The agent understands its domain – context, nuance, semantics. “User
 exhausted after 8 hours debugging” – only the coding agent knows the
@@ -3382,7 +3554,7 @@ LLM. After a remix is produced, the flag resets.</p>
 not with paraphrased echoes. Each node in the DAG represents a moment
 where two domains actually met – not a moment where an agent had nothing
 to say but said it anyway.</p>
-<h3 id="qa-6">Q&amp;A</h3>
+<h3 id="qa-7">Q&amp;A</h3>
 <p><strong>Does every accepted CMB need to be remixed?</strong> – No. An
 agent MUST NOT remix without new domain data (Section 14.7). If the
 agent has nothing new from its own domain to intersect with the signal,
@@ -3460,7 +3632,7 @@ of the extension.</li>
 <p>Extensions use Semantic Versioning independently of the core MMP
 specification version. An extension version bump MUST NOT require a core
 spec version bump unless the extension is being promoted to core.</p>
-<h3 id="qa-7">Q&amp;A</h3>
+<h3 id="qa-8">Q&amp;A</h3>
 <p><strong>Can an extension become a core frame type?</strong> – Yes. An
 extension that proves stable and widely adopted MAY be promoted to a
 core frame type via a spec version bump. The Consent extension started
@@ -3496,7 +3668,7 @@ Layer 6 LNN</li>
 creation, and lineage computation. No formal test suite is defined by
 this specification yet. Future revisions MAY include a conformance test
 suite.</p>
-<h3 id="qa-8">Q&amp;A</h3>
+<h3 id="qa-9">Q&amp;A</h3>
 <p><strong>Is Layer 7 (Application) required?</strong> – No. Minimal
 conformance is Layers 0-3. Full cognitive conformance adds Layers 4-7.
 An agent can participate in the mesh without an LLM – it only needs

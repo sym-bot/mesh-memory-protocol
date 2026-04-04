@@ -606,6 +606,14 @@ Codes 1xxx are connection-level (close connection). Codes 2xxx are evaluation-le
 
 Frame types are identified by their `type` string value. **Core types** (this specification) MUST NOT be redefined by extensions. **Extension types** MUST use `<extension>-<name>` format. **Vendor types** MUST use `x-<vendor>-<name>` format and MUST be silently ignored by non-supporting nodes.
 
+### Q&A
+
+**Why MUST nodes silently ignore unknown frame types?** -- Without this rule, you can never add new features to the protocol. If a node crashes or rejects unknown frame types, then deploying a new extension (like the consent primitive) requires upgrading every node on the mesh simultaneously -- impossible in a peer-to-peer system. Silent ignore means old nodes and new nodes coexist: a node running the consent extension sends consent-withdraw frames, and nodes that don't support consent yet simply ignore them. No crash, no error, the mesh keeps working. When a node adds consent support later, it handles the frame. No coordinated upgrade needed. This is the same principle used by HTTP (unknown headers ignored), TCP (unknown options skipped), and HTML (unknown tags ignored). Every successful protocol is evolvable because of this rule.
+
+**What happens if a relay receives an unknown frame type?** -- The relay forwards it. The relay is a dumb transport pipe -- it wraps the payload in a { from, fromName, payload } envelope and sends it to the target or broadcasts it. It never inspects the payload type. This means extension frames (consent, vendor, future types) flow through the relay without any relay changes. The intelligence is at the endpoints, not the transport.
+
+**Can an extension frame break an existing node?** -- No, if the node follows Section 7. The frame handler switches on msg.type. Unknown types fall through with no match and no action. The node's cognitive state, memory, and coupling are unaffected. This is a hard requirement -- implementations that reject or error on unknown types are non-conformant.
+
 ---
 
 ## 8. Cognitive Memory Blocks (CAT7)
