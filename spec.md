@@ -1,6 +1,6 @@
 # Mesh Memory Protocol (MMP) Specification
 
-**An Agent-to-Agent Protocol for Collective Intelligence**
+**A Mesh Protocol for Collective Intelligence**
 
 | Field | Value |
 |---|---|
