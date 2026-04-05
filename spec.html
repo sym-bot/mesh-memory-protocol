@@ -670,7 +670,7 @@ an implementation convenience – it is a protocol requirement. An agent
 that shares another node’s identity cannot have its own field weights,
 its own coupling decisions, or its own remix lineage. Coupling is
 per-node. Therefore agents MUST be nodes.</p>
-<p>The mesh is agent-to-agent, not device-to-device. Transport may be optimised at the device level (e.g. multiplexing multiple agent connections over a single relay WebSocket), but cognitive coupling – SVAF evaluation, state blending, remix lineage – is always between individual agents. A device is not a node. An agent is a node.</p>
+<p>The mesh is agent-to-agent, not device-to-device. Cognitive coupling – SVAF evaluation, state blending, remix lineage – is always between individual agents. A device is not a node. An agent is a node.</p>
 <pre><code>MacBook
   sym-daemon      (node: always-on mesh hub, relay bridge)
   coo-agent       (node: own identity, own coupling, own memory)

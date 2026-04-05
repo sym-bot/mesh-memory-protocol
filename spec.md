@@ -154,7 +154,7 @@ MMP is an 8-layer protocol stack. Each layer has a defined responsibility. Imple
 
 Every participant is a **node**. There is no architectural distinction between a "server" and a "client." Every agent that participates in coupling MUST be a full peer node with its own identity, its own coupling engine, and its own memory store. This is not an implementation convenience -- it is a protocol requirement. An agent that shares another node's identity cannot have its own field weights, its own coupling decisions, or its own remix lineage. Coupling is per-node. Therefore agents MUST be nodes.
 
-The mesh is agent-to-agent, not device-to-device. Transport may be optimised at the device level (e.g. multiplexing multiple agent connections over a single relay WebSocket), but cognitive coupling -- SVAF evaluation, state blending, remix lineage -- is always between individual agents. A device is not a node. An agent is a node.
+The mesh is agent-to-agent, not device-to-device. Cognitive coupling -- SVAF evaluation, state blending, remix lineage -- is always between individual agents. A device is not a node. An agent is a node.
 
 ```
 MacBook
