@@ -227,6 +227,8 @@ On the wire, the nodeId MUST be encoded as a lowercase hexadecimal string with h
 
 The `name` field MUST be valid UTF-8, between 1 and 64 bytes inclusive. The name MUST contain only printable characters (Unicode categories L, M, N, P, S, and Zs). Control characters (U+0000-U+001F, U+007F-U+009F), null bytes, and lone surrogates MUST NOT appear. The name is not required to be unique -- nodeId is the sole unique identifier. The name is for human display only and MUST NOT be used for peer identification or routing.
 
+**Naming convention.** When multiple nodes share the same functional role, implementations SHOULD scope the name to distinguish them. The scoping strategy is implementation-defined. Common patterns include device scope (`coo-mbp1`), platform scope (`coo-mac`), organisational scope (`coo-acme`), or environment scope (`coo-prod`). The protocol does not prescribe a scoping scheme -- only that names are human-distinguishable within the mesh. Nodes with unique roles MAY use bare names (`product`, `marketing`). The name MUST NOT contain `@` -- the `@` character is reserved for future use.
+
 #### 3.1.3 keypair
 
 Each node MUST generate an Ed25519 keypair (RFC 8032) at first launch and persist it alongside the nodeId. The keypair serves three functions:
