@@ -1568,6 +1568,13 @@ Highest anchor weight – validated knowledge shapes future evaluations
 more than unvalidated signals.</td>
 </tr>
 <tr>
+<td>dismissed</td>
+<td>cold</td>
+<td>Human dismisses this CMB (not actionable)</td>
+<td>0.5</td>
+<td>A human reviewed and rejected this signal. Reduced anchor weight. Broadcasts to mesh as feedback – producing agent sees its signal was rejected. MUST NOT resurface as an actionable decision.</td>
+</tr>
+<tr>
 <td>canonical</td>
 <td>cold</td>
 <td>Validated + remixed by 2+ agents</td>
@@ -1588,10 +1595,7 @@ reference it.</td>
 </tr>
 </tbody>
 </table>
-<p>The lifecycle is monotonically upward under activity: observed →
-remixed → validated → canonical. Without activity, a CMB decays toward
-archived. Archived CMBs MAY re-emerge if a future remix references them
-– re-entry resets the archive timer.</p>
+<p>The lifecycle branches at human judgment: observed → remixed → validated → canonical (upward path) or observed → dismissed (downward path). Dismissal is a terminal state – a dismissed CMB does not advance to validated or canonical. Without any activity, a CMB decays toward archived. Archived and dismissed CMBs MAY re-emerge if a future remix references them – re-entry resets the archive timer.</p>
 <p><strong>Validation</strong> is the key transition that connects human
 judgment to the mesh. When a human acts on agent output (approves a
 decision, sends an email, completes a task), the action SHOULD be
@@ -1608,11 +1612,7 @@ collective consensus outweigh raw observations – without overriding
 agent autonomy. Each agent still evaluates incoming signals through its
 own field weights.</p>
 <h3 id="validation-authority">6.5 Validation Authority</h3>
-<p>The transition from <code>remixed</code> to <code>validated</code> is
-the most consequential lifecycle event – it commits human or
-authorised-agent judgment to the mesh and permanently increases anchor
-weight from 1.5 to 2.0. This transition MUST be restricted to nodes with
-appropriate lifecycle roles (Section 3.5).</p>
+<p>The transitions to <code>validated</code> and <code>dismissed</code> are the most consequential lifecycle events – they commit human judgment to the mesh. Validation permanently increases anchor weight to 2.0; dismissal reduces it to 0.5. Both transitions MUST be restricted to nodes with appropriate lifecycle roles (Section 3.5).</p>
 <p>When a receiving node processes a CMB with
 <code>lineage.parents</code> pointing to an existing CMB, it MUST check
 the <code>createdBy</code> field against the known lifecycle roles of
@@ -1620,23 +1620,18 @@ connected peers:</p>
 <ul>
 <li>If <code>createdBy</code> matches a node with
 <code>lifecycleRole: validator</code> or <code>anchor</code>, the parent
-CMB advances to <code>validated</code>.</li>
+CMB advances to <code>validated</code> (if action completed) or <code>dismissed</code> (if not actionable).</li>
 <li>If <code>createdBy</code> matches a node with
 <code>lifecycleRole: observer</code>, the parent CMB advances to
 <code>remixed</code> only. The CMB is stored normally but does not
-confer validation.</li>
+confer validation or dismissal.</li>
 </ul>
 <p>This prevents agent-level spoofing of validation authority. An agent
 cannot self-promote to validator by including “founder” or “validator”
 in its CMB text fields. The authority is bound to the node’s
 cryptographic identity and the <code>role-grant</code> chain from an
 existing validator (Section 3.5.1).</p>
-<p><strong>Dismiss vs. validate:</strong> Both are validation CMBs –
-they advance the parent CMB’s lifecycle and prevent it from resurfacing
-as an actionable decision. The distinction is in the <code>intent</code>
-field: “founder action completed” vs. “founder dismissed – not
-actionable”. Both require validator or anchor role. Both broadcast to
-the mesh so other agents see the founder’s response.</p>
+<p><strong>Dismiss vs. validate:</strong> These are distinct lifecycle transitions with different consequences. <strong>Validate</strong> (Done): parent CMB advances to <code>validated</code> (anchor weight 2.0). The mesh learns what humans value. <strong>Dismiss</strong> (Not actionable): parent CMB advances to <code>dismissed</code> (anchor weight 0.5). The dismissal broadcasts as feedback – the producing agent sees its signal was rejected, and similar future signals score lower in SVAF evaluation. Both require validator or anchor role. Both broadcast to the mesh.</p>
 <h3 id="qa-2">Q&amp;A</h3>
 <p><strong>Why a pluggable storage interface instead of prescribing a
 backend?</strong> – Agents run on different platforms with different

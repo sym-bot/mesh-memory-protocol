@@ -563,11 +563,12 @@ Each CMB progresses through a lifecycle that determines its influence on future 
 |---|---|---|---|---|
 | observed | hot | Agent calls `remember()` | 1.0 | Initial observation. Subject to temporal decay. Active in SVAF fusion. |
 | remixed | warm | Peer remixes this CMB (appears in `lineage.parents`) | 1.5 | Another agent found this signal relevant enough to produce new knowledge from it. Higher anchor weight in future SVAF evaluations. |
-| validated | warm | Human acts on this CMB (marks decision as done) | 2.0 | A human confirmed this signal by acting on it. The validation CMB carries `lineage.parents` pointing to the validated CMB. Highest anchor weight -- validated knowledge shapes future evaluations more than unvalidated signals. |
+| validated | warm | Human acts on this CMB (marks decision as done) | 2.0 | A human confirmed this signal by acting on it. The validation CMB carries `lineage.parents` pointing to the validated CMB. Validated knowledge shapes future evaluations more than unvalidated signals. |
+| dismissed | cold | Human dismisses this CMB (not actionable) | 0.5 | A human reviewed and rejected this signal. Reduced anchor weight. Broadcasts to mesh as feedback -- producing agent sees its signal was rejected. MUST NOT resurface as an actionable decision. |
 | canonical | cold | Validated + remixed by 2+ agents | 3.0 | Collective consensus -- multiple agents and a human agree this knowledge is significant. Protected from retention purge. Highest anchor weight. |
 | archived | whisper | No remix for `archiveAfterSeconds` (default: 30 days) | 0.5 | No agent has found this signal relevant. Reduced anchor weight but preserved for lineage integrity. MAY be purged if no descendants reference it. |
 
-The lifecycle is monotonically upward under activity: observed → remixed → validated → canonical. Without activity, a CMB decays toward archived. Archived CMBs MAY re-emerge if a future remix references them -- re-entry resets the archive timer.
+The lifecycle branches at human judgment: observed → remixed → validated → canonical (upward path) or observed → dismissed (downward path). Dismissal is a terminal state -- a dismissed CMB does not advance to validated or canonical. Without any activity, a CMB decays toward archived. Archived and dismissed CMBs MAY re-emerge if a future remix references them -- re-entry resets the archive timer.
 
 **Validation** is the key transition that connects human judgment to the mesh. When a human acts on agent output (approves a decision, sends an email, completes a task), the action SHOULD be recorded as a new CMB with `lineage.parents` pointing to the CMB that prompted the action. This validation CMB enters the mesh like any other signal -- agents receive it via SVAF and adjust their understanding. The mesh learns from human actions without special API calls or out-of-band configuration updates.
 
@@ -575,16 +576,16 @@ Anchor weight influences SVAF evaluation: when computing per-field drift against
 
 ### 6.5 Validation Authority
 
-The transition from `remixed` to `validated` is the most consequential lifecycle event -- it commits human or authorised-agent judgment to the mesh and permanently increases anchor weight from 1.5 to 2.0. This transition MUST be restricted to nodes with appropriate lifecycle roles (Section 3.5).
+The transitions to `validated` and `dismissed` are the most consequential lifecycle events -- they commit human judgment to the mesh. Validation permanently increases anchor weight to 2.0; dismissal reduces it to 0.5. Both transitions MUST be restricted to nodes with appropriate lifecycle roles (Section 3.5).
 
 When a receiving node processes a CMB with `lineage.parents` pointing to an existing CMB, it MUST check the `createdBy` field against the known lifecycle roles of connected peers:
 
-- If `createdBy` matches a node with `lifecycleRole: validator` or `anchor`, the parent CMB advances to `validated`.
-- If `createdBy` matches a node with `lifecycleRole: observer`, the parent CMB advances to `remixed` only. The CMB is stored normally but does not confer validation.
+- If `createdBy` matches a node with `lifecycleRole: validator` or `anchor`, the parent CMB advances to `validated` (if action completed) or `dismissed` (if not actionable).
+- If `createdBy` matches a node with `lifecycleRole: observer`, the parent CMB advances to `remixed` only. The CMB is stored normally but does not confer validation or dismissal.
 
 This prevents agent-level spoofing of validation authority. An agent cannot self-promote to validator by including "founder" or "validator" in its CMB text fields. The authority is bound to the node's cryptographic identity and the `role-grant` chain from an existing validator (Section 3.5.1).
 
-**Dismiss vs. validate:** Both are validation CMBs -- they advance the parent CMB's lifecycle and prevent it from resurfacing as an actionable decision. The distinction is in the `intent` field: "founder action completed" vs. "founder dismissed -- not actionable". Both require validator or anchor role. Both broadcast to the mesh so other agents see the founder's response.
+**Dismiss vs. validate:** These are distinct lifecycle transitions with different consequences. **Validate** (Done): parent CMB advances to `validated` (anchor weight 2.0). The mesh learns what humans value. **Dismiss** (Not actionable): parent CMB advances to `dismissed` (anchor weight 0.5). The dismissal broadcasts as feedback -- the producing agent sees its signal was rejected, and similar future signals score lower in SVAF evaluation. Both require validator or anchor role. Both broadcast to the mesh.
 
 ### Q&A
 
