@@ -242,7 +242,7 @@
 </header>
 <h1 id="mesh-memory-protocol-mmp-specification">Mesh Memory Protocol
 (MMP) Specification</h1>
-<p><strong>A Peer-to-Peer Protocol for Collective Intelligence Across
+<p><strong>An Agent-to-Agent Protocol for Collective Intelligence Across
 Autonomous AI Agents</strong></p>
 <table>
 <colgroup>
@@ -397,8 +397,8 @@ LNN; relay nodes forward frames without cognitive processing.</td>
 </tr>
 <tr>
 <td>Peer</td>
-<td>Another node that this node has an active transport connection with
-and has completed a handshake.</td>
+<td>A transport-layer relationship: another node that this node has an active connection with
+and has completed a handshake. Cognitive coupling is agent-to-agent, not peer-to-peer – SVAF evaluates content independently of transport state.</td>
 </tr>
 <tr>
 <td>Frame</td>
@@ -418,7 +418,7 @@ a signal and local state. Range [0, 1].</td>
 <tr>
 <td>Coupling</td>
 <td>The process by which a node evaluates incoming signals (SVAF
-per-field evaluation) and blends its local cognitive state with peer
+per-field evaluation) and blends its local cognitive state with other agents'
 state, weighted by drift and confidence.</td>
 </tr>
 <tr>
@@ -548,7 +548,7 @@ gated by SVAF. L2 is exchanged via state-sync.</td>
 <td>2</td>
 <td>CONNECTION</td>
 <td>Handshake · State-Sync · Gossip · Wake · Consent</td>
-<td>Peer lifecycle: discover, connect, handshake, heartbeat, gossip peer
+<td>Connection lifecycle: discover, connect, handshake, heartbeat, gossip node
 metadata, wake sleeping nodes.</td>
 </tr>
 <tr>
@@ -570,7 +570,7 @@ else builds on.</td>
 <h3 id="design-principles">2.2 Design Principles</h3>
 <p><strong>No servers</strong> – There is no mesh without agents. Agents
 are the mesh. No central server, no orchestrator, no master node. Every
-participant is a peer.</p>
+participant is an autonomous agent – a full node with its own identity, coupling engine, and memory.</p>
 <p><strong>Cognitive autonomy</strong> – Each agent evaluates, reasons,
 and acts independently. The mesh influences but never overrides.
 Coupling is a suggestion, not a command.</p>
@@ -643,7 +643,7 @@ understands more than it did before.</p>
 <td>Central broker</td>
 <td>Central store</td>
 <td>Central aggregator</td>
-<td>Peer-to-peer (no centre)</td>
+<td>Agent-to-agent (no centre)</td>
 </tr>
 <tr>
 <td>Memory</td>
@@ -670,6 +670,7 @@ an implementation convenience – it is a protocol requirement. An agent
 that shares another node’s identity cannot have its own field weights,
 its own coupling decisions, or its own remix lineage. Coupling is
 per-node. Therefore agents MUST be nodes.</p>
+<p>The mesh is agent-to-agent, not device-to-device. Transport may be optimised at the device level (e.g. multiplexing multiple agent connections over a single relay WebSocket), but cognitive coupling – SVAF evaluation, state blending, remix lineage – is always between individual agents. A device is not a node. An agent is a node.</p>
 <pre><code>MacBook
   sym-daemon      (node: always-on mesh hub, relay bridge)
   coo-agent       (node: own identity, own coupling, own memory)

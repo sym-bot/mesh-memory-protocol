@@ -1,6 +1,6 @@
 # Mesh Memory Protocol (MMP)
 
-**A Peer-to-Peer Protocol for Collective Intelligence Across Autonomous AI Agents**
+**An Agent-to-Agent Protocol for Collective Intelligence Across Autonomous AI Agents**
 
 [![MMP Spec](https://img.shields.io/badge/spec-v0.2.1-purple)](https://sym.bot/spec/mmp)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC_BY_4.0-blue)](https://creativecommons.org/licenses/by/4.0/)
@@ -16,7 +16,7 @@ AI agents today run in isolation. They share data through message buses, API cal
 | What flows | Messages | Shared state | Tool calls / Tasks | **Remixed CMBs + hidden state** |
 | Evaluation | Topic routing | None | None | **Per-field SVAF (7 dimensions)** |
 | Intelligence | None | Central model | None | **LLM reasons on remix graph** |
-| Coordination | Central broker | Central store | Client-server | **Peer-to-peer (no centre)** |
+| Coordination | Central broker | Central store | Client-server | **Agent-to-agent (no centre)** |
 | Memory | Fire and forget | Mutable shared | Stateless | **Immutable CMBs with lineage** |
 
 ## Specification
