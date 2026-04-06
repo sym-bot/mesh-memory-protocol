@@ -200,8 +200,8 @@ dopaminergic prediction error model with per-field direction and
 τ-modulated adaptation rate. Directive feedback for standalone domain
 knowledge injection. Validator-origin anchor weight 2.0 with role-grant
 verification. CfC state persistence across restarts. ABNF wire format
-grammar. CMB forward compatibility. Multi-relay failover. Message frame
-deprecated for cognitive content.</td>
+grammar. CMB forward compatibility. Multi-relay failover. All cognitive
+content MUST use cmb frames.</td>
 </tr>
 <tr>
 <td>0.2.1</td>
@@ -1718,13 +1718,12 @@ lineage })</td>
 <td><code>message</code></td>
 <td>2</td>
 <td>No</td>
-<td>from, fromName, content, timestamp. <strong>Deprecated for cognitive
-content</strong> — use <code>cmb</code> frames for all signals that
-should enter SVAF evaluation, produce anchor weights, or modulate CfC
-state. The <code>message</code> frame is retained for transport-layer
-coordination only (e.g. “catchup” requests). Implementations MUST NOT
-use <code>message</code> frames to carry observations, decisions, or
-feedback.</td>
+<td>from, fromName, content, timestamp. The <code>message</code> frame
+is for transport-layer coordination only (e.g. “catchup” requests).
+Implementations MUST NOT use <code>message</code> frames to carry
+observations, decisions, or feedback. All cognitive content MUST be sent
+as <code>cmb</code> frames so that it enters SVAF evaluation, produces
+anchor weights, and modulates CfC state.</td>
 </tr>
 <tr>
 <td><code>xmesh-insight</code></td>
@@ -3313,9 +3312,9 @@ Observation:
 {observation_text}
 
 JSON:</code></pre>
-<p>AI coding agents do not need this template – they ARE the LLM. The
-agent skill file teaches them to extract fields directly from what they
-observe.</p>
+<p>AI coding agents do not need this template – the agent is the LLM.
+The agent skill file teaches them to extract fields directly from what
+they observe.</p>
 <h4 id="guidelines">14.3.4 Guidelines</h4>
 <ul>
 <li>Be specific – numbers, timeframes, concrete details in each

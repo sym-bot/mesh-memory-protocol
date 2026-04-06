@@ -32,7 +32,7 @@ Feedback and errata: spec@sym.bot or github.com/sym-bot/sym/issues.
 
 | Version | Date | Changes |
 |---|---|---|
-| 0.2.2 | 2026-04-06 | Section 11 -- Feedback Modulation: how collective intelligence becomes self-correcting. Validator-authority CMBs with per-field reasoning modulate SVAF coupling weights and CfC temporal adaptation through the existing mesh cognition loop. Neuroscience-grounded: dopaminergic prediction error model with per-field direction and τ-modulated adaptation rate. Directive feedback for standalone domain knowledge injection. Validator-origin anchor weight 2.0 with role-grant verification. CfC state persistence across restarts. ABNF wire format grammar. CMB forward compatibility. Multi-relay failover. Message frame deprecated for cognitive content. |
+| 0.2.2 | 2026-04-06 | Section 11 -- Feedback Modulation: how collective intelligence becomes self-correcting. Validator-authority CMBs with per-field reasoning modulate SVAF coupling weights and CfC temporal adaptation through the existing mesh cognition loop. Neuroscience-grounded: dopaminergic prediction error model with per-field direction and τ-modulated adaptation rate. Directive feedback for standalone domain knowledge injection. Validator-origin anchor weight 2.0 with role-grant verification. CfC state persistence across restarts. ABNF wire format grammar. CMB forward compatibility. Multi-relay failover. All cognitive content MUST use cmb frames. |
 | 0.2.1 | 2026-04-02 | Node model: every autonomous agent MUST be a full peer node with own identity, coupling engine, and memory store. SVAF band-pass evaluation: four-class model (redundant/aligned/guarded/rejected) with per-field redundancy detection. CMB lifecycle: observed/remixed/validated/canonical/archived with anchor weight progression. Semantic encoder SHOULD for SVAF drift computation. Handshake adds version and extensions fields. Error frame type. |
 | 0.2.0 | 2026-03-27 | Formal specification published. 8-layer architecture. CAT7 CMB schema with lineage (parents + ancestors). SVAF per-field evaluation. Wire format normatively specified. Error frame. Frame type registry. Extension mechanism. JSON Schema. Connection state machine. Wire examples. |
 | 0.1.0 | 2025-08-01 | Initial protocol design (Consenix Labs Ltd). 4-layer architecture. Scalar drift evaluation. |
@@ -625,7 +625,7 @@ All frames are JSON objects with a `type` field (string). Implementations MUST s
 | `handshake` | 2 | No | nodeId (string), name (string), version (string), extensions (string[]), lifecycleRole (string: observer/validator/anchor) |
 | `state-sync` | 2/3 | No | h1 (float[]), h2 (float[]), confidence (float) |
 | `cmb` | 3/4 | SVAF | timestamp (int), cmb (object: { key, createdBy, createdAt, fields, lineage }) |
-| `message` | 2 | No | from, fromName, content, timestamp. **Deprecated for cognitive content** — use `cmb` frames for all signals that should enter SVAF evaluation, produce anchor weights, or modulate CfC state. The `message` frame is retained for transport-layer coordination only (e.g. "catchup" requests). Implementations MUST NOT use `message` frames to carry observations, decisions, or feedback. |
+| `message` | 2 | No | from, fromName, content, timestamp. The `message` frame is for transport-layer coordination only (e.g. "catchup" requests). Implementations MUST NOT use `message` frames to carry observations, decisions, or feedback. All cognitive content MUST be sent as `cmb` frames so that it enters SVAF evaluation, produces anchor weights, and modulates CfC state. |
 | `xmesh-insight` | 6 | No | from, fromName, trajectory (float[6]), patterns (float[8]), anomaly (float), outcome (string), coherence (float), timestamp |
 | `peer-info` | 2 | No | peers: [{ nodeId, name, wakeChannel?, lastSeen }] |
 | `wake-channel` | 2 | No | platform (string), token (string), environment (string) |
@@ -1352,7 +1352,7 @@ Observation:
 JSON:
 ```
 
-AI coding agents do not need this template -- they ARE the LLM. The agent skill file teaches them to extract fields directly from what they observe.
+AI coding agents do not need this template -- the agent is the LLM. The agent skill file teaches them to extract fields directly from what they observe.
 
 #### 14.3.4 Guidelines
 
