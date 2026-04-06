@@ -4,45 +4,13 @@
 
 | Field | Value |
 |---|---|
-| Version | 0.2.1 |
+| Version | 0.2.2 |
 | Status | Published |
-| Date | 2 April 2026 |
+| Date | 6 April 2026 |
 | Author | Hongwei Xu <hongwei@sym.bot> |
 | Organisation | SYM.BOT Ltd |
 | Canonical URL | https://sym.bot/spec/mmp |
 | Licence | CC BY 4.0 (specification text); Apache 2.0 (reference implementations) |
-
-> **Reading this on GitHub?** The formatted spec is at [sym.bot/spec/mmp](https://sym.bot/spec/mmp). Download: [spec.md](spec.md) (Markdown) · [spec.html](spec.html) (single-page HTML).
-
----
-
-## Table of Contents
-
-**Protocol Infrastructure (Layers 0–3)**
-- [1. Conventions](#1-conventions-and-terminology)
-- [2. Architecture Overview](#2-architecture-overview)
-- [3. Layer 0: Identity](#3-layer-0-identity)
-- [4. Layer 1: Transport](#4-layer-1-transport)
-- [5. Layer 2: Connection](#5-layer-2-connection)
-- [6. Layer 3: Memory](#6-layer-3-memory)
-- [7. Frame Types](#7-frame-types)
-- [8. Cognitive Memory Blocks (CAT7)](#8-cognitive-memory-blocks-cat7)
-
-**Mesh Cognition (Layers 4–7)**
-- [9. Layer 4: Coupling and SVAF](#9-layer-4-coupling-and-svaf-evaluation)
-- [10. State Blending](#10-state-blending)
-- [11. Layer 5: Synthetic Memory](#11-synthetic-memory-layer-5)
-- [12. Layer 6: xMesh (Per-Agent LNN)](#12-xmesh----per-agent-lnn-layer-6)
-- [13. Layer 7: Application](#13-application-layer-7)
-- [14. Remix](#14-remix)
-
-**Protocol Operations**
-- [15. Extension Mechanism](#15-extension-mechanism)
-- [16. Conformance](#16-conformance)
-- [17. Security Considerations](#17-security-considerations)
-- [18. Configuration](#18-configuration)
-- [19. JSON Schema](#19-json-schema)
-- [20. References](#20-references)
 
 ---
 
@@ -64,6 +32,7 @@ Feedback and errata: spec@sym.bot or github.com/sym-bot/sym/issues.
 
 | Version | Date | Changes |
 |---|---|---|
+| 0.2.2 | 2026-04-06 | Feedback Neuromodulation: validator-authority CMBs with per-field reasoning modulate SVAF coupling weights and CfC temporal adaptation -- the mesh learns from human judgment through the same cognition loop, not a separate feedback channel. Normative requirements for feedback CMB content. Directive feedback CMBs for domain knowledge injection without requiring a parent ticket. Neuroscience grounding: dopaminergic prediction error model with per-field direction and τ-modulated adaptation rate. |
 | 0.2.1 | 2026-04-02 | Node model: every autonomous agent MUST be a full peer node with own identity, coupling engine, and memory store. SVAF band-pass evaluation: four-class model (redundant/aligned/guarded/rejected) with per-field redundancy detection. CMB lifecycle: observed/remixed/validated/canonical/archived with anchor weight progression. Semantic encoder SHOULD for SVAF drift computation. Handshake adds version and extensions fields. Error frame type. |
 | 0.2.0 | 2026-03-27 | Formal specification published. 8-layer architecture. CAT7 CMB schema with lineage (parents + ancestors). SVAF per-field evaluation. Wire format normatively specified. Error frame. Frame type registry. Extension mechanism. JSON Schema. Connection state machine. Wire examples. |
 | 0.1.0 | 2025-08-01 | Initial protocol design (Consenix Labs Ltd). 4-layer architecture. Scalar drift evaluation. |
@@ -564,7 +533,7 @@ Each CMB progresses through a lifecycle that determines its influence on future 
 | observed | hot | Agent calls `remember()` | 1.0 | Initial observation. Subject to temporal decay. Active in SVAF fusion. |
 | remixed | warm | Peer remixes this CMB (appears in `lineage.parents`) | 1.5 | Another agent found this signal relevant enough to produce new knowledge from it. Higher anchor weight in future SVAF evaluations. |
 | validated | warm | Human acts on this CMB (marks decision as done) | 2.0 | A human confirmed this signal by acting on it. The validation CMB carries `lineage.parents` pointing to the validated CMB. Validated knowledge shapes future evaluations more than unvalidated signals. |
-| dismissed | cold | Human dismisses this CMB (not actionable) | 0.5 | A human reviewed and rejected this signal. Reduced anchor weight. Broadcasts to mesh as feedback -- producing agent sees its signal was rejected. MUST NOT resurface as an actionable decision. |
+| dismissed | cold | Human dismisses this CMB (marks as not actionable) | 0.5 | A human reviewed this signal and rejected it. The dismissal CMB carries `lineage.parents` pointing to the dismissed CMB. Reduced anchor weight -- the human judged this signal not worth acting on. Treated as archived for SVAF purposes. MUST NOT resurface as an actionable decision. |
 | canonical | cold | Validated + remixed by 2+ agents | 3.0 | Collective consensus -- multiple agents and a human agree this knowledge is significant. Protected from retention purge. Highest anchor weight. |
 | archived | whisper | No remix for `archiveAfterSeconds` (default: 30 days) | 0.5 | No agent has found this signal relevant. Reduced anchor weight but preserved for lineage integrity. MAY be purged if no descendants reference it. |
 
@@ -580,12 +549,24 @@ The transitions to `validated` and `dismissed` are the most consequential lifecy
 
 When a receiving node processes a CMB with `lineage.parents` pointing to an existing CMB, it MUST check the `createdBy` field against the known lifecycle roles of connected peers:
 
-- If `createdBy` matches a node with `lifecycleRole: validator` or `anchor`, the parent CMB advances to `validated` (if action completed) or `dismissed` (if not actionable).
+- If `createdBy` matches a node with `lifecycleRole: validator` or `anchor`, the parent CMB advances to `validated` (if the intent indicates action completed) or `dismissed` (if the intent indicates not actionable).
 - If `createdBy` matches a node with `lifecycleRole: observer`, the parent CMB advances to `remixed` only. The CMB is stored normally but does not confer validation or dismissal.
 
 This prevents agent-level spoofing of validation authority. An agent cannot self-promote to validator by including "founder" or "validator" in its CMB text fields. The authority is bound to the node's cryptographic identity and the `role-grant` chain from an existing validator (Section 3.5.1).
 
-**Dismiss vs. validate:** These are distinct lifecycle transitions with different consequences. **Validate** (Done): parent CMB advances to `validated` (anchor weight 2.0). The mesh learns what humans value. **Dismiss** (Not actionable): parent CMB advances to `dismissed` (anchor weight 0.5). The dismissal broadcasts as feedback -- the producing agent sees its signal was rejected, and similar future signals score lower in SVAF evaluation. Both require validator or anchor role. Both broadcast to the mesh.
+**Dismiss vs. validate:** These are distinct lifecycle transitions with different consequences.
+
+**Validate** (Done): The human confirmed the signal by acting on it. Parent CMB advances to `validated` (anchor weight 2.0). The validation CMB broadcasts to the mesh -- agents see the human acted, and similar future signals from the same domain gain credibility through higher anchor weight.
+
+**Dismiss** (Not actionable): The human reviewed the signal and rejected it. Parent CMB advances to `dismissed` (anchor weight 0.5). The dismissal CMB broadcasts to the mesh as feedback -- the producing agent receives it and sees its signal was rejected. This creates a feedback loop:
+
+1. Dismissal CMB enters the producing agent's memory via SVAF (it has lineage pointing to the agent's original CMB)
+2. The dismissed CMB's reduced anchor weight (0.5) means similar future signals score lower in SVAF evaluation
+3. When the agent's LLM next runs `reason()` or `remix()`, the mesh context includes the dismissal -- the LLM sees the reasoning and can adjust its assessment criteria
+
+The effectiveness of this feedback loop depends on the **content quality** of the dismissal CMB. A dismissal that says "not actionable" provides the anchor weight reduction (step 2) but no directional correction (step 3). Dismissal CMBs SHOULD carry per-field reasoning -- see Section 10.7 (Feedback Neuromodulation) and Section 10.8 (Feedback CMB Requirements) for normative content requirements.
+
+Both transitions require validator or anchor role (Section 3.5). Both broadcast to the mesh. The difference is directional: validation increases influence (the mesh learns what humans value), dismissal decreases influence (the mesh learns what humans ignore).
 
 ### Q&A
 
@@ -864,6 +845,105 @@ State blending is one step in a closed loop. Each cycle, the graph grows and eve
 8. Broadcast to mesh → other agents remix it
 
 ↻ loop -- graph grows, agents learn
+
+### 10.7 Feedback Neuromodulation
+
+The mesh cognition loop (Section 10.6) describes how agents learn from each other. Feedback neuromodulation describes how the mesh learns from **human judgment** -- using the same loop, not a separate channel.
+
+In biological neural networks, learning is not driven by content transmission but by **neuromodulation** -- diffuse chemical signals (dopamine, norepinephrine, serotonin) that modulate how existing circuits process future inputs. A dopaminergic prediction error signal does not carry the correct answer. It carries the **direction and magnitude** of the error, which adjusts synaptic weights across multiple brain regions simultaneously. The signal is cross-cutting -- it is not a layer in the cortical hierarchy, but a modulation of all layers at once.
+
+MMP feedback follows the same principle. When a validator node (Section 6.5) produces a validation or dismissal CMB, it is not issuing a command. It is producing a **neuromodulatory signal** -- a CMB with validator authority, rich per-field content, and lineage pointing to the signal being evaluated. This CMB enters the mesh cognition loop like any other signal, but its effects are amplified by three mechanisms:
+
+1. **Anchor weight** (Section 6.4) -- validated CMBs have weight 2.0, dismissed CMBs have weight 0.5. These weights influence future SVAF evaluations: validated knowledge shapes future anchors more than unvalidated signals; dismissed knowledge shapes them less.
+
+2. **Per-field drift** (Section 9.2) -- when the feedback CMB carries per-field reasoning (which fields were miscalibrated and why), SVAF computes per-field drift between the feedback and the producing agent's future signals. This is the directional component of the prediction error: the mesh learns not just that a signal was wrong, but **which dimension was wrong and in what direction**.
+
+3. **τ-modulated adaptation** (Section 10.3) -- the feedback signal enters the agent's CfC cell (Layer 6) through the Synthetic Memory pipeline. Fast-τ neurons integrate the feedback immediately (affective corrections: "tone down the alarm"). Slow-τ neurons integrate gradually (strategic corrections: "this analytical frame is wrong"). A single dismissal produces a small shift in slow-τ neurons. Repeated similar feedback compounds -- the agent's cognitive baseline shifts until the lesson is encoded in the CfC hidden state itself, not recalled as a stored rule.
+
+This is how the mesh becomes self-correcting. The human does not retrain the agent, reconfigure its weights, or edit its prompt. The human produces a CMB. The mesh cognition loop does the rest.
+
+**Neuroscience grounding.** The three mechanisms above map to known neuromodulatory dynamics:
+
+| Biological mechanism | MMP mechanism | Effect |
+|---|---|---|
+| Dopaminergic prediction error -- direction + magnitude | Per-field drift in feedback CMB vs. producing agent's anchors | Agent learns WHICH fields were miscalibrated, not just "error" |
+| Fast-adapting circuits (amygdala, ~100ms) | Fast-τ CfC neurons (< 5s) | Affect corrections land immediately |
+| Slow-adapting circuits (prefrontal cortex, hours-days) | Slow-τ CfC neurons (> 30s) | Strategic corrections compound over repeated feedback |
+| Hebbian plasticity gated by neuromodulators | Anchor weight modulating SVAF evaluation | Validated knowledge strengthens future coupling; dismissed knowledge weakens it |
+| Prefrontal top-down control | Validator authority (Section 6.5) | Human modulates agent processing without replacing agent function |
+
+The key insight: biological neuromodulation is not a separate processing layer. It is a cross-cutting modulation of existing processing. MMP feedback is identical -- it flows through the existing SVAF → Synthetic Memory → CfC → Blending pipeline. No new frame types, no new layers. The machinery already exists. What changes is the **content quality** of the feedback signal (Section 10.8) and the **authority** of the producing node (Section 6.5).
+
+### 10.8 Feedback CMB Requirements
+
+The effectiveness of feedback neuromodulation depends entirely on the content quality of the feedback CMB. A dismissal that says "not actionable" in every field produces a neuromodulatory signal with no direction -- the equivalent of a dopamine signal with zero magnitude. The mesh cannot learn from it.
+
+Validator nodes producing validation or dismissal CMBs SHOULD populate CAT7 fields with reasoning, not boilerplate. The following normative requirements apply to feedback CMBs (CMBs with `lineage.parents` pointing to a CMB being evaluated, produced by a node with validator or anchor lifecycle role):
+
+| Field | MUST/SHOULD | Content requirement |
+|---|---|---|
+| focus | MUST | State what was evaluated and the judgment (validated/dismissed) |
+| issue | SHOULD | Identify what the producing agent got wrong -- which aspect of its analysis was miscalibrated. If the signal was correct, state what made it correct. |
+| intent | SHOULD | State what the producing agent should learn -- the analytical correction, not a command. "Single-agent dev tools are a different layer from multi-agent coordination" teaches; "don't send these signals" commands. |
+| motivation | SHOULD | Explain why this judgment matters -- the strategic context the producing agent lacked |
+| commitment | MAY | Record any action taken (for validation) or explicitly state no action taken (for dismissal) |
+| perspective | SHOULD | Identify the vantage point of the judgment -- "founder evaluating strategic relevance" vs. "user evaluating factual accuracy" |
+| mood | SHOULD | Carry genuine affect, not neutral. Affect modulates fast-τ neurons: "alert -- this misread is concerning" produces different adaptation than "noted -- low priority noise" |
+
+**Why SHOULD, not MUST?** Quick dismissals with minimal reasoning are valid -- the anchor weight reduction (0.5) alone provides a learning signal. But the per-field reasoning is what enables directional correction. Implementations SHOULD provide a mechanism for validators to add reasoning (e.g. a text input on dismissal) without requiring it for every action.
+
+**Feedback is a remix.** Per Section 14, the founder processes the agent's signal through their own domain lens and produces new understanding. A dismissal with reasoning is a remix: the founder's strategic expertise intersected with the agent's feed analysis and produced knowledge that neither had alone ("GStack is single-agent scaffolding, SYM agents use LLM APIs directly -- different layer"). The feedback CMB carries this new understanding via lineage, and the mesh propagates it.
+
+### 10.9 Directive Feedback
+
+Sections 10.7-10.8 describe feedback tied to a specific CMB via lineage. Directive feedback is a standalone teaching CMB -- a signal that injects domain knowledge into the mesh **without requiring a parent ticket**.
+
+A directive feedback CMB is produced by a validator or anchor node with:
+
+- No `lineage.parents` (it is not a response to a specific signal)
+- Rich CAT7 fields encoding the knowledge to be injected
+- Validator authority (Section 6.5) -- confers anchor weight 2.0
+
+Example: a founder observes that agents repeatedly misclassify single-agent developer tools as competitive threats to a multi-agent protocol. Rather than dismissing each ticket individually, the founder produces a directive:
+
+```
+focus:       "Mesh agents use direct LLM API calls for reasoning.
+              Single-agent developer tools are a separate category."
+issue:       "Feed signals about single-agent scaffolding tools are
+              different-layer noise -- not competitive threats to a
+              multi-agent coordination protocol."
+intent:      "Analytical frame: distinguish single-agent scaffolding
+              (human-to-agent) from multi-agent coordination
+              (agent-to-agent). Only the latter is relevant."
+motivation:  "Prevents wasted analysis cycles on signals that cannot
+              produce actionable competitive intelligence."
+perspective: "Founder, protocol architect"
+mood:        { text: "clarifying", valence: 0.1, arousal: 0.2 }
+```
+
+This CMB enters the mesh with anchor weight 2.0, no lineage (original observation from a validator). It does not advance any existing CMB's lifecycle. Instead, it becomes a **high-weight anchor** in every receiving agent's SVAF evaluation. Future incoming CMBs about single-agent dev tools will be evaluated against this anchor -- the per-field drift will be low on focus ("dev tools") but high on intent ("not competitive threat"), producing a guarded or rejected classification.
+
+The directive compounds through the same CfC dynamics as dismissal feedback:
+
+1. SVAF accepts the directive (validator authority, novel content)
+2. Synthetic Memory encodes the reasoning into CfC hidden state
+3. Slow-τ neurons integrate the analytical frame gradually
+4. After multiple inference cycles, the agent's cognitive baseline reflects the directive
+5. Future signals about single-agent tools score higher drift -- the agent has learned
+
+Directive feedback is the protocol equivalent of **prefrontal top-down control** in neuroscience: the prefrontal cortex does not do the sensory processing, but it sends signals that modulate how sensory cortex interprets future input. The founder does not process the feed, but the founder's directive modulates how the research agent evaluates future feed signals.
+
+### Q&A
+
+**How is feedback neuromodulation different from just sending a message?** -- A message (Section 7, `message` frame type) is a transport-layer event. It does not enter SVAF evaluation, does not produce anchor weights, and does not modulate CfC state. A feedback CMB is a cognitive-layer event: it enters the mesh cognition loop, affects SVAF anchor computation, and modulates the agent's neural state through τ-dependent adaptation. The distinction is between communication (messages) and cognition (CMBs).
+
+**Can an agent ignore feedback?** -- Yes. SVAF evaluation is receiver-autonomous (Section 9.2). If the feedback CMB's per-field drift is too high (the feedback is about a domain the agent doesn't operate in), SVAF will reject it. But feedback from a validator about the agent's own CMB (linked via lineage) will typically score low drift on focus and issue fields, making rejection unlikely. The agent processes the feedback through its own coupling decisions -- it is not forced to accept it.
+
+**Does directive feedback override agent autonomy?** -- No. The directive becomes a high-weight anchor, not a rule. The agent's SVAF still evaluates each incoming signal independently. If the agent receives a signal that genuinely warrants attention despite the directive (e.g., a single-agent tool that adds an A2A coordination layer), SVAF can accept it because the per-field content will differ from the directive's anchors. The directive shifts the baseline, not the ceiling.
+
+**How many dismissals before an agent "learns"?** -- This depends on the CfC time constants. For fast-τ neurons (mood, affect), a single feedback CMB produces measurable adaptation. For slow-τ neurons (domain expertise, analytical frame), the adaptation is proportional to `1/τ` per cycle. With slow-τ > 30s and typical inference intervals of 10-60s, 3-5 similar feedback signals produce a meaningful baseline shift. This mirrors biological learning: one correction is a signal; repeated corrections become a habit.
+
+**Why not just update the agent's prompt or configuration?** -- Prompt updates are out-of-band: they bypass the mesh, leave no lineage, produce no CMBs, and cannot be traced by other agents. Feedback through the mesh is auditable (lineage), composable (other agents can remix the feedback), and self-documenting (the reasoning is in the CMB fields). It also respects the protocol's design principle: no out-of-band configuration changes. The mesh learns through the mesh.
 
 ---
 
@@ -1377,42 +1457,6 @@ Three agents on three different operating systems -- macOS, Linux, iOS -- connec
 **Why observations, not commands?** -- Commands create coupling between agents -- the sender must know what the receiver can do. Observations are decoupled. A coding agent shares "user is tired." It doesn't know MeloTune exists. MeloTune hears the mood and autonomously curates calm music. Neither agent knows the other. The mesh connects them.
 
 **Can an agent ignore mesh signals entirely?** -- Yes. Coupling is autonomous. An agent may receive collective insight and decide it's not relevant. That's by design -- the mesh influences, never overrides. An agent that ignores everything is just a lonely node.
-
-**Why does the local event interface require subscriber field weights?** -- For the same reason SVAF uses per-agent field weights between peers: each application has a different domain perspective. A coding tool and a music app on the same node should see different signals from the same mesh. Without subscriber weights, every application receives unfiltered noise -- the local equivalent of scalar evaluation.
-
-### 13.9 Local Event Interface
-
-A node's value to the mesh depends on the applications running on it. A music agent curates playlists. A coding tool suggests breaks. A dashboard visualises collective intelligence. These applications need **real-time access** to mesh events -- not polling, not batch retrieval, but push delivery as events occur.
-
-Implementations MUST provide a **local event interface** that allows applications on the same host to subscribe to mesh events and receive them in real-time. The interface is transport-agnostic -- IPC socket, named pipe, WebSocket, in-process callback, or any mechanism that provides persistent bidirectional communication.
-
-#### 13.9.1 Required Events
-
-A node MUST emit the following events to local subscribers:
-
-| Event | Fires when | Data |
-|-------|-----------|------|
-| `cmb-accepted` | A peer CMB passes SVAF evaluation (aligned or guarded) | `key`, `source`, `fields` (CAT7), `timestamp`, `decision` (aligned/guarded), `drift` |
-| `message` | A direct message frame arrives from a peer (Section 7) | `from`, `content`, `timestamp` |
-| `peer-joined` | A new peer connects (any transport) | `peerId`, `name`, `source` (bonjour/relay) |
-| `peer-left` | A peer disconnects (all transports closed) | `peerId`, `name` |
-| `mood-delivered` | A mood field is delivered from a rejected CMB (Section 9.3, R5) | `from`, `mood` (text, valence, arousal) |
-
-#### 13.9.2 Subscriber Field Weights
-
-A subscriber MAY declare its own per-field weights (α_f) when subscribing. If declared, the node SHOULD evaluate incoming CMBs against the subscriber's weights before delivering the event. This enables domain-specific filtering at the node level:
-
-- A coding tool subscribes with `focus=2.0, issue=2.0, mood=0.8` -- receives engineering-relevant signals
-- A music app subscribes with `mood=2.0, focus=1.0, issue=0.3` -- receives affective signals
-- A dashboard subscribes with uniform weights -- receives everything
-
-This is SVAF applied at the local interface -- the same per-field evaluation that gates signals between peers also gates signals between a node and its applications. Each application sees a domain-relevant projection of the mesh, curated by its own field weights.
-
-#### 13.9.3 Design Rationale
-
-Without a standard local event interface, each application invents its own integration: CLI polling, file watching, HTTP endpoints, custom IPC. This fragments the ecosystem and makes applications non-portable across implementations. The local event interface standardises **what** events are available and **how** subscribers declare their domain perspective -- while leaving the transport mechanism to the implementation.
-
-The event interface is the boundary between the protocol stack and the application. Below it: identity, transport, coupling, SVAF, CfC -- protocol concerns. Above it: what the application does with the signals -- curate music, suggest breaks, visualise the mesh, or reason about code. The interface ensures every application gets real-time, domain-filtered access to collective intelligence.
 
 ---
 

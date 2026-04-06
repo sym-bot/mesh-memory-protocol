@@ -4,157 +4,11 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Mesh Memory Protocol (MMP) Specification v0.2.1</title>
+  <title>Mesh Memory Protocol (MMP) Specification v0.2.2</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
     */
-    html {
-      color: #1a1a1a;
-      background-color: #fdfdfd;
-    }
-    body {
-      margin: 0 auto;
-      max-width: 36em;
-      padding-left: 50px;
-      padding-right: 50px;
-      padding-top: 50px;
-      padding-bottom: 50px;
-      hyphens: auto;
-      overflow-wrap: break-word;
-      text-rendering: optimizeLegibility;
-      font-kerning: normal;
-    }
-    @media (max-width: 600px) {
-      body {
-        font-size: 0.9em;
-        padding: 12px;
-      }
-      h1 {
-        font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        background-color: white;
-      }
-      body {
-        background-color: transparent;
-        color: black;
-        font-size: 12pt;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
-      }
-    }
-    p {
-      margin: 1em 0;
-    }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
-    }
-    img {
-      max-width: 100%;
-    }
-    svg {
-      height: auto;
-      max-width: 100%;
-    }
-    h1, h2, h3, h4, h5, h6 {
-      margin-top: 1.4em;
-    }
-    h5, h6 {
-      font-size: 1em;
-      font-style: italic;
-    }
-    h6 {
-      font-weight: normal;
-    }
-    ol, ul {
-      padding-left: 1.7em;
-      margin-top: 1em;
-    }
-    li > ol, li > ul {
-      margin-top: 0;
-    }
-    blockquote {
-      margin: 1em 0 1em 1.7em;
-      padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
-      color: #606060;
-    }
-    code {
-      white-space: pre-wrap;
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
-      font-size: 85%;
-      margin: 0;
-      hyphens: manual;
-    }
-    pre {
-      margin: 1em 0;
-      overflow: auto;
-    }
-    pre code {
-      padding: 0;
-      overflow: visible;
-      overflow-wrap: normal;
-    }
-    .sourceCode {
-     background-color: transparent;
-     overflow: visible;
-    }
-    hr {
-      border: none;
-      border-top: 1px solid #1a1a1a;
-      height: 1px;
-      margin: 1em 0;
-    }
-    table {
-      margin: 1em 0;
-      border-collapse: collapse;
-      width: 100%;
-      overflow-x: auto;
-      display: block;
-      font-variant-numeric: lining-nums tabular-nums;
-    }
-    table caption {
-      margin-bottom: 0.75em;
-    }
-    tbody {
-      margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
-    }
-    th {
-      border-top: 1px solid #1a1a1a;
-      padding: 0.25em 0.5em 0.25em 0.5em;
-    }
-    td {
-      padding: 0.125em 0.5em 0.25em 0.5em;
-    }
-    header {
-      margin-bottom: 4em;
-      text-align: center;
-    }
-    #TOC li {
-      list-style: none;
-    }
-    #TOC ul {
-      padding-left: 1.3em;
-    }
-    #TOC > ul {
-      padding-left: 0;
-    }
-    #TOC a:not(:hover) {
-      text-decoration: none;
-    }
     span.smallcaps{font-variant: small-caps;}
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
@@ -235,10 +89,11 @@
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
   </style>
+  <link rel="stylesheet" href="" />
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">Mesh Memory Protocol (MMP) Specification v0.2.1</h1>
+<h1 class="title">Mesh Memory Protocol (MMP) Specification v0.2.2</h1>
 </header>
 <h1 id="mesh-memory-protocol-mmp-specification">Mesh Memory Protocol
 (MMP) Specification</h1>
@@ -257,7 +112,7 @@
 <tbody>
 <tr>
 <td>Version</td>
-<td>0.2.1</td>
+<td>0.2.2</td>
 </tr>
 <tr>
 <td>Status</td>
@@ -265,7 +120,7 @@
 </tr>
 <tr>
 <td>Date</td>
-<td>2 April 2026</td>
+<td>6 April 2026</td>
 </tr>
 <tr>
 <td>Author</td>
@@ -335,6 +190,18 @@ github.com/sym-bot/sym/issues.</p>
 </thead>
 <tbody>
 <tr>
+<td>0.2.2</td>
+<td>2026-04-06</td>
+<td>Feedback Neuromodulation: validator-authority CMBs with per-field
+reasoning modulate SVAF coupling weights and CfC temporal adaptation –
+the mesh learns from human judgment through the same cognition loop, not
+a separate feedback channel. Normative requirements for feedback CMB
+content. Directive feedback CMBs for domain knowledge injection without
+requiring a parent ticket. Neuroscience grounding: dopaminergic
+prediction error model with per-field direction and τ-modulated
+adaptation rate.</td>
+</tr>
+<tr>
 <td>0.2.1</td>
 <td>2026-04-02</td>
 <td>Node model: every autonomous agent MUST be a full peer node with own
@@ -396,8 +263,10 @@ LNN; relay nodes forward frames without cognitive processing.</td>
 </tr>
 <tr>
 <td>Peer</td>
-<td>A transport-layer relationship: another node that this node has an active connection with
-and has completed a handshake. Cognitive coupling is agent-to-agent, not peer-to-peer – SVAF evaluates content independently of transport state.</td>
+<td>A transport-layer relationship: another node that this node has an
+active connection with and has completed a handshake. Cognitive coupling
+is agent-to-agent, not peer-to-peer – SVAF evaluates content
+independently of transport state.</td>
 </tr>
 <tr>
 <td>Frame</td>
@@ -417,8 +286,8 @@ a signal and local state. Range [0, 1].</td>
 <tr>
 <td>Coupling</td>
 <td>The process by which a node evaluates incoming signals (SVAF
-per-field evaluation) and blends its local cognitive state with other agents'
-state, weighted by drift and confidence.</td>
+per-field evaluation) and blends its local cognitive state with other
+agents’ state, weighted by drift and confidence.</td>
 </tr>
 <tr>
 <td>SVAF</td>
@@ -547,8 +416,8 @@ gated by SVAF. L2 is exchanged via state-sync.</td>
 <td>2</td>
 <td>CONNECTION</td>
 <td>Handshake · State-Sync · Gossip · Wake · Consent</td>
-<td>Connection lifecycle: discover, connect, handshake, heartbeat, gossip node
-metadata, wake sleeping nodes.</td>
+<td>Connection lifecycle: discover, connect, handshake, heartbeat,
+gossip node metadata, wake sleeping nodes.</td>
 </tr>
 <tr>
 <td>1</td>
@@ -569,7 +438,8 @@ else builds on.</td>
 <h3 id="design-principles">2.2 Design Principles</h3>
 <p><strong>No servers</strong> – There is no mesh without agents. Agents
 are the mesh. No central server, no orchestrator, no master node. Every
-participant is an autonomous agent – a full node with its own identity, coupling engine, and memory.</p>
+participant is an autonomous agent – a full node with its own identity,
+coupling engine, and memory.</p>
 <p><strong>Cognitive autonomy</strong> – Each agent evaluates, reasons,
 and acts independently. The mesh influences but never overrides.
 Coupling is a suggestion, not a command.</p>
@@ -669,7 +539,9 @@ an implementation convenience – it is a protocol requirement. An agent
 that shares another node’s identity cannot have its own field weights,
 its own coupling decisions, or its own remix lineage. Coupling is
 per-node. Therefore agents MUST be nodes.</p>
-<p>The mesh is agent-to-agent, not device-to-device. Cognitive coupling – SVAF evaluation, state blending, remix lineage – is always between individual agents. A device is not a node. An agent is a node.</p>
+<p>The mesh is agent-to-agent, not device-to-device. Cognitive coupling
+– SVAF evaluation, state blending, remix lineage – is always between
+individual agents. A device is not a node. An agent is a node.</p>
 <pre><code>MacBook
   sym-daemon      (node: always-on mesh hub, relay bridge)
   coo-agent       (node: own identity, own coupling, own memory)
@@ -804,7 +676,17 @@ bytes inclusive. The name MUST contain only printable characters
 appear. The name is not required to be unique – nodeId is the sole
 unique identifier. The name is for human display only and MUST NOT be
 used for peer identification or routing.</p>
-<p><strong>Naming convention.</strong> When multiple nodes share the same functional role, implementations SHOULD scope the name to distinguish them. The scoping strategy is implementation-defined. Common patterns include device scope (<code>coo-mbp1</code>), platform scope (<code>coo-mac</code>), organisational scope (<code>coo-acme</code>), or environment scope (<code>coo-prod</code>). The protocol does not prescribe a scoping scheme – only that names are human-distinguishable within the mesh. Nodes with unique roles MAY use bare names (<code>product</code>, <code>marketing</code>). The name MUST NOT contain <code>@</code> – the <code>@</code> character is reserved for future use.</p>
+<p><strong>Naming convention.</strong> When multiple nodes share the
+same functional role, implementations SHOULD scope the name to
+distinguish them. The scoping strategy is implementation-defined. Common
+patterns include device scope (<code>coo-mbp1</code>), platform scope
+(<code>coo-mac</code>), organisational scope (<code>coo-acme</code>), or
+environment scope (<code>coo-prod</code>). The protocol does not
+prescribe a scoping scheme – only that names are human-distinguishable
+within the mesh. Nodes with unique roles MAY use bare names
+(<code>product</code>, <code>marketing</code>). The name MUST NOT
+contain <code>@</code> – the <code>@</code> character is reserved for
+future use.</p>
 <h4 id="keypair">3.1.3 keypair</h4>
 <p>Each node MUST generate an Ed25519 keypair (RFC 8032) at first launch
 and persist it alongside the nodeId. The keypair serves three
@@ -1564,15 +1446,19 @@ knowledge from it. Higher anchor weight in future SVAF evaluations.</td>
 <td>2.0</td>
 <td>A human confirmed this signal by acting on it. The validation CMB
 carries <code>lineage.parents</code> pointing to the validated CMB.
-Highest anchor weight – validated knowledge shapes future evaluations
-more than unvalidated signals.</td>
+Validated knowledge shapes future evaluations more than unvalidated
+signals.</td>
 </tr>
 <tr>
 <td>dismissed</td>
 <td>cold</td>
-<td>Human dismisses this CMB (not actionable)</td>
+<td>Human dismisses this CMB (marks as not actionable)</td>
 <td>0.5</td>
-<td>A human reviewed and rejected this signal. Reduced anchor weight. Broadcasts to mesh as feedback – producing agent sees its signal was rejected. MUST NOT resurface as an actionable decision.</td>
+<td>A human reviewed this signal and rejected it. The dismissal CMB
+carries <code>lineage.parents</code> pointing to the dismissed CMB.
+Reduced anchor weight – the human judged this signal not worth acting
+on. Treated as archived for SVAF purposes. MUST NOT resurface as an
+actionable decision.</td>
 </tr>
 <tr>
 <td>canonical</td>
@@ -1595,7 +1481,12 @@ reference it.</td>
 </tr>
 </tbody>
 </table>
-<p>The lifecycle branches at human judgment: observed → remixed → validated → canonical (upward path) or observed → dismissed (downward path). Dismissal is a terminal state – a dismissed CMB does not advance to validated or canonical. Without any activity, a CMB decays toward archived. Archived and dismissed CMBs MAY re-emerge if a future remix references them – re-entry resets the archive timer.</p>
+<p>The lifecycle branches at human judgment: observed → remixed →
+validated → canonical (upward path) or observed → dismissed (downward
+path). Dismissal is a terminal state – a dismissed CMB does not advance
+to validated or canonical. Without any activity, a CMB decays toward
+archived. Archived and dismissed CMBs MAY re-emerge if a future remix
+references them – re-entry resets the archive timer.</p>
 <p><strong>Validation</strong> is the key transition that connects human
 judgment to the mesh. When a human acts on agent output (approves a
 decision, sends an email, completes a task), the action SHOULD be
@@ -1612,7 +1503,11 @@ collective consensus outweigh raw observations – without overriding
 agent autonomy. Each agent still evaluates incoming signals through its
 own field weights.</p>
 <h3 id="validation-authority">6.5 Validation Authority</h3>
-<p>The transitions to <code>validated</code> and <code>dismissed</code> are the most consequential lifecycle events – they commit human judgment to the mesh. Validation permanently increases anchor weight to 2.0; dismissal reduces it to 0.5. Both transitions MUST be restricted to nodes with appropriate lifecycle roles (Section 3.5).</p>
+<p>The transitions to <code>validated</code> and <code>dismissed</code>
+are the most consequential lifecycle events – they commit human judgment
+to the mesh. Validation permanently increases anchor weight to 2.0;
+dismissal reduces it to 0.5. Both transitions MUST be restricted to
+nodes with appropriate lifecycle roles (Section 3.5).</p>
 <p>When a receiving node processes a CMB with
 <code>lineage.parents</code> pointing to an existing CMB, it MUST check
 the <code>createdBy</code> field against the known lifecycle roles of
@@ -1620,7 +1515,9 @@ connected peers:</p>
 <ul>
 <li>If <code>createdBy</code> matches a node with
 <code>lifecycleRole: validator</code> or <code>anchor</code>, the parent
-CMB advances to <code>validated</code> (if action completed) or <code>dismissed</code> (if not actionable).</li>
+CMB advances to <code>validated</code> (if the intent indicates action
+completed) or <code>dismissed</code> (if the intent indicates not
+actionable).</li>
 <li>If <code>createdBy</code> matches a node with
 <code>lifecycleRole: observer</code>, the parent CMB advances to
 <code>remixed</code> only. The CMB is stored normally but does not
@@ -1631,7 +1528,38 @@ cannot self-promote to validator by including “founder” or “validator”
 in its CMB text fields. The authority is bound to the node’s
 cryptographic identity and the <code>role-grant</code> chain from an
 existing validator (Section 3.5.1).</p>
-<p><strong>Dismiss vs. validate:</strong> These are distinct lifecycle transitions with different consequences. <strong>Validate</strong> (Done): parent CMB advances to <code>validated</code> (anchor weight 2.0). The mesh learns what humans value. <strong>Dismiss</strong> (Not actionable): parent CMB advances to <code>dismissed</code> (anchor weight 0.5). The dismissal broadcasts as feedback – the producing agent sees its signal was rejected, and similar future signals score lower in SVAF evaluation. Both require validator or anchor role. Both broadcast to the mesh.</p>
+<p><strong>Dismiss vs. validate:</strong> These are distinct lifecycle
+transitions with different consequences.</p>
+<p><strong>Validate</strong> (Done): The human confirmed the signal by
+acting on it. Parent CMB advances to <code>validated</code> (anchor
+weight 2.0). The validation CMB broadcasts to the mesh – agents see the
+human acted, and similar future signals from the same domain gain
+credibility through higher anchor weight.</p>
+<p><strong>Dismiss</strong> (Not actionable): The human reviewed the
+signal and rejected it. Parent CMB advances to <code>dismissed</code>
+(anchor weight 0.5). The dismissal CMB broadcasts to the mesh as
+feedback – the producing agent receives it and sees its signal was
+rejected. This creates a feedback loop:</p>
+<ol type="1">
+<li>Dismissal CMB enters the producing agent’s memory via SVAF (it has
+lineage pointing to the agent’s original CMB)</li>
+<li>The dismissed CMB’s reduced anchor weight (0.5) means similar future
+signals score lower in SVAF evaluation</li>
+<li>When the agent’s LLM next runs <code>reason()</code> or
+<code>remix()</code>, the mesh context includes the dismissal – the LLM
+sees the reasoning and can adjust its assessment criteria</li>
+</ol>
+<p>The effectiveness of this feedback loop depends on the
+<strong>content quality</strong> of the dismissal CMB. A dismissal that
+says “not actionable” provides the anchor weight reduction (step 2) but
+no directional correction (step 3). Dismissal CMBs SHOULD carry
+per-field reasoning – see Section 10.7 (Feedback Neuromodulation) and
+Section 10.8 (Feedback CMB Requirements) for normative content
+requirements.</p>
+<p>Both transitions require validator or anchor role (Section 3.5). Both
+broadcast to the mesh. The difference is directional: validation
+increases influence (the mesh learns what humans value), dismissal
+decreases influence (the mesh learns what humans ignore).</p>
 <h3 id="qa-2">Q&amp;A</h3>
 <p><strong>Why a pluggable storage interface instead of prescribing a
 backend?</strong> – Agents run on different platforms with different
@@ -2300,6 +2228,286 @@ grows and every agent understands more than it did before:</p>
 <li>Broadcast to mesh → other agents remix it</li>
 </ol>
 <p>↻ loop – graph grows, agents learn</p>
+<h3 id="feedback-neuromodulation">10.7 Feedback Neuromodulation</h3>
+<p>The mesh cognition loop (Section 10.6) describes how agents learn
+from each other. Feedback neuromodulation describes how the mesh learns
+from <strong>human judgment</strong> – using the same loop, not a
+separate channel.</p>
+<p>In biological neural networks, learning is not driven by content
+transmission but by <strong>neuromodulation</strong> – diffuse chemical
+signals (dopamine, norepinephrine, serotonin) that modulate how existing
+circuits process future inputs. A dopaminergic prediction error signal
+does not carry the correct answer. It carries the <strong>direction and
+magnitude</strong> of the error, which adjusts synaptic weights across
+multiple brain regions simultaneously. The signal is cross-cutting – it
+is not a layer in the cortical hierarchy, but a modulation of all layers
+at once.</p>
+<p>MMP feedback follows the same principle. When a validator node
+(Section 6.5) produces a validation or dismissal CMB, it is not issuing
+a command. It is producing a <strong>neuromodulatory signal</strong> – a
+CMB with validator authority, rich per-field content, and lineage
+pointing to the signal being evaluated. This CMB enters the mesh
+cognition loop like any other signal, but its effects are amplified by
+three mechanisms:</p>
+<ol type="1">
+<li><p><strong>Anchor weight</strong> (Section 6.4) – validated CMBs
+have weight 2.0, dismissed CMBs have weight 0.5. These weights influence
+future SVAF evaluations: validated knowledge shapes future anchors more
+than unvalidated signals; dismissed knowledge shapes them less.</p></li>
+<li><p><strong>Per-field drift</strong> (Section 9.2) – when the
+feedback CMB carries per-field reasoning (which fields were
+miscalibrated and why), SVAF computes per-field drift between the
+feedback and the producing agent’s future signals. This is the
+directional component of the prediction error: the mesh learns not just
+that a signal was wrong, but <strong>which dimension was wrong and in
+what direction</strong>.</p></li>
+<li><p><strong>τ-modulated adaptation</strong> (Section 10.3) – the
+feedback signal enters the agent’s CfC cell (Layer 6) through the
+Synthetic Memory pipeline. Fast-τ neurons integrate the feedback
+immediately (affective corrections: “tone down the alarm”). Slow-τ
+neurons integrate gradually (strategic corrections: “this analytical
+frame is wrong”). A single dismissal produces a small shift in slow-τ
+neurons. Repeated similar feedback compounds – the agent’s cognitive
+baseline shifts until the lesson is encoded in the CfC hidden state
+itself, not recalled as a stored rule.</p></li>
+</ol>
+<p>This is how the mesh becomes self-correcting. The human does not
+retrain the agent, reconfigure its weights, or edit its prompt. The
+human produces a CMB. The mesh cognition loop does the rest.</p>
+<p><strong>Neuroscience grounding.</strong> The three mechanisms above
+map to known neuromodulatory dynamics:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Biological mechanism</th>
+<th>MMP mechanism</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Dopaminergic prediction error – direction + magnitude</td>
+<td>Per-field drift in feedback CMB vs. producing agent’s anchors</td>
+<td>Agent learns WHICH fields were miscalibrated, not just “error”</td>
+</tr>
+<tr>
+<td>Fast-adapting circuits (amygdala, ~100ms)</td>
+<td>Fast-τ CfC neurons (&lt; 5s)</td>
+<td>Affect corrections land immediately</td>
+</tr>
+<tr>
+<td>Slow-adapting circuits (prefrontal cortex, hours-days)</td>
+<td>Slow-τ CfC neurons (&gt; 30s)</td>
+<td>Strategic corrections compound over repeated feedback</td>
+</tr>
+<tr>
+<td>Hebbian plasticity gated by neuromodulators</td>
+<td>Anchor weight modulating SVAF evaluation</td>
+<td>Validated knowledge strengthens future coupling; dismissed knowledge
+weakens it</td>
+</tr>
+<tr>
+<td>Prefrontal top-down control</td>
+<td>Validator authority (Section 6.5)</td>
+<td>Human modulates agent processing without replacing agent
+function</td>
+</tr>
+</tbody>
+</table>
+<p>The key insight: biological neuromodulation is not a separate
+processing layer. It is a cross-cutting modulation of existing
+processing. MMP feedback is identical – it flows through the existing
+SVAF → Synthetic Memory → CfC → Blending pipeline. No new frame types,
+no new layers. The machinery already exists. What changes is the
+<strong>content quality</strong> of the feedback signal (Section 10.8)
+and the <strong>authority</strong> of the producing node (Section
+6.5).</p>
+<h3 id="feedback-cmb-requirements">10.8 Feedback CMB Requirements</h3>
+<p>The effectiveness of feedback neuromodulation depends entirely on the
+content quality of the feedback CMB. A dismissal that says “not
+actionable” in every field produces a neuromodulatory signal with no
+direction – the equivalent of a dopamine signal with zero magnitude. The
+mesh cannot learn from it.</p>
+<p>Validator nodes producing validation or dismissal CMBs SHOULD
+populate CAT7 fields with reasoning, not boilerplate. The following
+normative requirements apply to feedback CMBs (CMBs with
+<code>lineage.parents</code> pointing to a CMB being evaluated, produced
+by a node with validator or anchor lifecycle role):</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>Field</th>
+<th>MUST/SHOULD</th>
+<th>Content requirement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>focus</td>
+<td>MUST</td>
+<td>State what was evaluated and the judgment (validated/dismissed)</td>
+</tr>
+<tr>
+<td>issue</td>
+<td>SHOULD</td>
+<td>Identify what the producing agent got wrong – which aspect of its
+analysis was miscalibrated. If the signal was correct, state what made
+it correct.</td>
+</tr>
+<tr>
+<td>intent</td>
+<td>SHOULD</td>
+<td>State what the producing agent should learn – the analytical
+correction, not a command. “Single-agent dev tools are a different layer
+from multi-agent coordination” teaches; “don’t send these signals”
+commands.</td>
+</tr>
+<tr>
+<td>motivation</td>
+<td>SHOULD</td>
+<td>Explain why this judgment matters – the strategic context the
+producing agent lacked</td>
+</tr>
+<tr>
+<td>commitment</td>
+<td>MAY</td>
+<td>Record any action taken (for validation) or explicitly state no
+action taken (for dismissal)</td>
+</tr>
+<tr>
+<td>perspective</td>
+<td>SHOULD</td>
+<td>Identify the vantage point of the judgment – “founder evaluating
+strategic relevance” vs. “user evaluating factual accuracy”</td>
+</tr>
+<tr>
+<td>mood</td>
+<td>SHOULD</td>
+<td>Carry genuine affect, not neutral. Affect modulates fast-τ neurons:
+“alert – this misread is concerning” produces different adaptation than
+“noted – low priority noise”</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Why SHOULD, not MUST?</strong> Quick dismissals with minimal
+reasoning are valid – the anchor weight reduction (0.5) alone provides a
+learning signal. But the per-field reasoning is what enables directional
+correction. Implementations SHOULD provide a mechanism for validators to
+add reasoning (e.g. a text input on dismissal) without requiring it for
+every action.</p>
+<p><strong>Feedback is a remix.</strong> Per Section 14, the founder
+processes the agent’s signal through their own domain lens and produces
+new understanding. A dismissal with reasoning is a remix: the founder’s
+strategic expertise intersected with the agent’s feed analysis and
+produced knowledge that neither had alone (“GStack is single-agent
+scaffolding, SYM agents use LLM APIs directly – different layer”). The
+feedback CMB carries this new understanding via lineage, and the mesh
+propagates it.</p>
+<h3 id="directive-feedback">10.9 Directive Feedback</h3>
+<p>Sections 10.7-10.8 describe feedback tied to a specific CMB via
+lineage. Directive feedback is a standalone teaching CMB – a signal that
+injects domain knowledge into the mesh <strong>without requiring a
+parent ticket</strong>.</p>
+<p>A directive feedback CMB is produced by a validator or anchor node
+with:</p>
+<ul>
+<li>No <code>lineage.parents</code> (it is not a response to a specific
+signal)</li>
+<li>Rich CAT7 fields encoding the knowledge to be injected</li>
+<li>Validator authority (Section 6.5) – confers anchor weight 2.0</li>
+</ul>
+<p>Example: a founder observes that agents repeatedly misclassify
+single-agent developer tools as competitive threats to a multi-agent
+protocol. Rather than dismissing each ticket individually, the founder
+produces a directive:</p>
+<pre><code>focus:       &quot;Mesh agents use direct LLM API calls for reasoning.
+              Single-agent developer tools are a separate category.&quot;
+issue:       &quot;Feed signals about single-agent scaffolding tools are
+              different-layer noise -- not competitive threats to a
+              multi-agent coordination protocol.&quot;
+intent:      &quot;Analytical frame: distinguish single-agent scaffolding
+              (human-to-agent) from multi-agent coordination
+              (agent-to-agent). Only the latter is relevant.&quot;
+motivation:  &quot;Prevents wasted analysis cycles on signals that cannot
+              produce actionable competitive intelligence.&quot;
+perspective: &quot;Founder, protocol architect&quot;
+mood:        { text: &quot;clarifying&quot;, valence: 0.1, arousal: 0.2 }</code></pre>
+<p>This CMB enters the mesh with anchor weight 2.0, no lineage (original
+observation from a validator). It does not advance any existing CMB’s
+lifecycle. Instead, it becomes a <strong>high-weight anchor</strong> in
+every receiving agent’s SVAF evaluation. Future incoming CMBs about
+single-agent dev tools will be evaluated against this anchor – the
+per-field drift will be low on focus (“dev tools”) but high on intent
+(“not competitive threat”), producing a guarded or rejected
+classification.</p>
+<p>The directive compounds through the same CfC dynamics as dismissal
+feedback:</p>
+<ol type="1">
+<li>SVAF accepts the directive (validator authority, novel content)</li>
+<li>Synthetic Memory encodes the reasoning into CfC hidden state</li>
+<li>Slow-τ neurons integrate the analytical frame gradually</li>
+<li>After multiple inference cycles, the agent’s cognitive baseline
+reflects the directive</li>
+<li>Future signals about single-agent tools score higher drift – the
+agent has learned</li>
+</ol>
+<p>Directive feedback is the protocol equivalent of <strong>prefrontal
+top-down control</strong> in neuroscience: the prefrontal cortex does
+not do the sensory processing, but it sends signals that modulate how
+sensory cortex interprets future input. The founder does not process the
+feed, but the founder’s directive modulates how the research agent
+evaluates future feed signals.</p>
+<h3 id="qa-6">Q&amp;A</h3>
+<p><strong>How is feedback neuromodulation different from just sending a
+message?</strong> – A message (Section 7, <code>message</code> frame
+type) is a transport-layer event. It does not enter SVAF evaluation,
+does not produce anchor weights, and does not modulate CfC state. A
+feedback CMB is a cognitive-layer event: it enters the mesh cognition
+loop, affects SVAF anchor computation, and modulates the agent’s neural
+state through τ-dependent adaptation. The distinction is between
+communication (messages) and cognition (CMBs).</p>
+<p><strong>Can an agent ignore feedback?</strong> – Yes. SVAF evaluation
+is receiver-autonomous (Section 9.2). If the feedback CMB’s per-field
+drift is too high (the feedback is about a domain the agent doesn’t
+operate in), SVAF will reject it. But feedback from a validator about
+the agent’s own CMB (linked via lineage) will typically score low drift
+on focus and issue fields, making rejection unlikely. The agent
+processes the feedback through its own coupling decisions – it is not
+forced to accept it.</p>
+<p><strong>Does directive feedback override agent autonomy?</strong> –
+No. The directive becomes a high-weight anchor, not a rule. The agent’s
+SVAF still evaluates each incoming signal independently. If the agent
+receives a signal that genuinely warrants attention despite the
+directive (e.g., a single-agent tool that adds an A2A coordination
+layer), SVAF can accept it because the per-field content will differ
+from the directive’s anchors. The directive shifts the baseline, not the
+ceiling.</p>
+<p><strong>How many dismissals before an agent “learns”?</strong> – This
+depends on the CfC time constants. For fast-τ neurons (mood, affect), a
+single feedback CMB produces measurable adaptation. For slow-τ neurons
+(domain expertise, analytical frame), the adaptation is proportional to
+<code>1/τ</code> per cycle. With slow-τ &gt; 30s and typical inference
+intervals of 10-60s, 3-5 similar feedback signals produce a meaningful
+baseline shift. This mirrors biological learning: one correction is a
+signal; repeated corrections become a habit.</p>
+<p><strong>Why not just update the agent’s prompt or
+configuration?</strong> – Prompt updates are out-of-band: they bypass
+the mesh, leave no lineage, produce no CMBs, and cannot be traced by
+other agents. Feedback through the mesh is auditable (lineage),
+composable (other agents can remix the feedback), and self-documenting
+(the reasoning is in the CMB fields). It also respects the protocol’s
+design principle: no out-of-band configuration changes. The mesh learns
+through the mesh.</p>
 <hr />
 <h2 id="synthetic-memory-layer-5">11. Synthetic Memory (Layer 5)</h2>
 <p>Synthetic Memory bridges LLM reasoning (Layer 7) and LNN dynamics
@@ -2570,18 +2778,18 @@ coupling:</p>
 5 structured CMBs across diverse topics (memory store refactor, protocol
 collaboration, social engagement, ML training, spec authoring) over a
 12-hour session with no mesh peers connected:</p>
-<div class="sourceCode" id="cb16"><pre
-class="sourceCode json"><code class="sourceCode json"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;xmesh-insight&quot;</span><span class="fu">,</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;from&quot;</span><span class="fu">:</span> <span class="st">&quot;6089e935-...&quot;</span><span class="fu">,</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;fromName&quot;</span><span class="fu">:</span> <span class="st">&quot;sym-daemon&quot;</span><span class="fu">,</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;trajectory&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="fl">0.084</span><span class="ot">,</span> <span class="fl">-0.228</span><span class="ot">,</span> <span class="fl">-0.096</span><span class="ot">,</span> <span class="fl">-0.033</span><span class="ot">,</span> <span class="fl">-0.012</span><span class="ot">,</span> <span class="fl">-0.061</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;patterns&quot;</span><span class="fu">:</span>   <span class="ot">[</span><span class="fl">0.516</span><span class="ot">,</span> <span class="fl">0.522</span><span class="ot">,</span> <span class="fl">0.502</span><span class="ot">,</span> <span class="fl">0.536</span><span class="ot">,</span> <span class="fl">0.422</span><span class="ot">,</span> <span class="fl">0.473</span><span class="ot">,</span> <span class="fl">0.599</span><span class="ot">,</span> <span class="fl">0.514</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;anomaly&quot;</span><span class="fu">:</span> <span class="fl">0.503</span><span class="fu">,</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;remixScore&quot;</span><span class="fu">:</span> <span class="fl">0.0</span><span class="fu">,</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;coherence&quot;</span><span class="fu">:</span> <span class="fl">0.080</span><span class="fu">,</span></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1774716200101</span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;xmesh-insight&quot;</span><span class="fu">,</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;from&quot;</span><span class="fu">:</span> <span class="st">&quot;6089e935-...&quot;</span><span class="fu">,</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;fromName&quot;</span><span class="fu">:</span> <span class="st">&quot;sym-daemon&quot;</span><span class="fu">,</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;trajectory&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="fl">0.084</span><span class="ot">,</span> <span class="fl">-0.228</span><span class="ot">,</span> <span class="fl">-0.096</span><span class="ot">,</span> <span class="fl">-0.033</span><span class="ot">,</span> <span class="fl">-0.012</span><span class="ot">,</span> <span class="fl">-0.061</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;patterns&quot;</span><span class="fu">:</span>   <span class="ot">[</span><span class="fl">0.516</span><span class="ot">,</span> <span class="fl">0.522</span><span class="ot">,</span> <span class="fl">0.502</span><span class="ot">,</span> <span class="fl">0.536</span><span class="ot">,</span> <span class="fl">0.422</span><span class="ot">,</span> <span class="fl">0.473</span><span class="ot">,</span> <span class="fl">0.599</span><span class="ot">,</span> <span class="fl">0.514</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;anomaly&quot;</span><span class="fu">:</span> <span class="fl">0.503</span><span class="fu">,</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;remixScore&quot;</span><span class="fu">:</span> <span class="fl">0.0</span><span class="fu">,</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;coherence&quot;</span><span class="fu">:</span> <span class="fl">0.080</span><span class="fu">,</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1774716200101</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -2863,22 +3071,22 @@ devices)</strong></p>
 <p>Agents with structured domain data SHOULD map their data directly to
 CAT7 fields. No LLM or text parsing needed – the agent’s own data model
 IS the source of truth.</p>
-<div class="sourceCode" id="cb18"><pre
-class="sourceCode swift"><code class="sourceCode swift"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Swift — music agent builds fields from player state</span></span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>node<span class="op">.</span>remember<span class="op">(</span>fields<span class="op">:</span> <span class="op">[</span></span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>focus<span class="op">:</span>      encode<span class="op">(</span><span class="st">&quot;music response to peer mood signal&quot;</span><span class="op">),</span></span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>commitment<span class="op">:</span> encode<span class="op">(</span><span class="st">&quot;now playing: </span><span class="er">\(</span><span class="st">title) by </span><span class="er">\(</span><span class="st">artist)&quot;</span><span class="op">),</span></span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>perspective<span class="op">:</span> encode<span class="op">(</span><span class="st">&quot;music agent, autonomous response&quot;</span><span class="op">),</span></span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>mood<span class="op">:</span>       encode<span class="op">(</span><span class="st">&quot;calm&quot;</span><span class="op">,</span> valence<span class="op">:</span> <span class="fl">0.3</span><span class="op">,</span> arousal<span class="op">:</span> <span class="op">-</span><span class="fl">0.3</span><span class="op">),</span></span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a><span class="op">])</span></span></code></pre></div>
 <div class="sourceCode" id="cb19"><pre
-class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Node.js — fitness agent builds fields from sensor data</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>node<span class="op">.</span><span class="fu">remember</span>({</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">focus</span><span class="op">:</span>      <span class="st">&quot;workout session completed&quot;</span><span class="op">,</span></span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">commitment</span><span class="op">:</span> <span class="vs">`</span><span class="sc">${</span>reps<span class="sc">}</span><span class="vs"> reps, </span><span class="sc">${</span>duration<span class="sc">}</span><span class="vs">min, </span><span class="sc">${</span>calories<span class="sc">}</span><span class="vs"> cal`</span><span class="op">,</span></span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">perspective</span><span class="op">:</span> <span class="st">&quot;fitness agent, post-workout&quot;</span><span class="op">,</span></span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">mood</span><span class="op">:</span>       { <span class="dt">text</span><span class="op">:</span> <span class="st">&quot;energized&quot;</span><span class="op">,</span> <span class="dt">valence</span><span class="op">:</span> <span class="fl">0.7</span><span class="op">,</span> <span class="dt">arousal</span><span class="op">:</span> <span class="fl">0.6</span> }<span class="op">,</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
+class="sourceCode swift"><code class="sourceCode swift"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Swift — music agent builds fields from player state</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>node<span class="op">.</span>remember<span class="op">(</span>fields<span class="op">:</span> <span class="op">[</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>focus<span class="op">:</span>      encode<span class="op">(</span><span class="st">&quot;music response to peer mood signal&quot;</span><span class="op">),</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>commitment<span class="op">:</span> encode<span class="op">(</span><span class="st">&quot;now playing: </span><span class="er">\(</span><span class="st">title) by </span><span class="er">\(</span><span class="st">artist)&quot;</span><span class="op">),</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>perspective<span class="op">:</span> encode<span class="op">(</span><span class="st">&quot;music agent, autonomous response&quot;</span><span class="op">),</span></span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>  <span class="op">.</span>mood<span class="op">:</span>       encode<span class="op">(</span><span class="st">&quot;calm&quot;</span><span class="op">,</span> valence<span class="op">:</span> <span class="fl">0.3</span><span class="op">,</span> arousal<span class="op">:</span> <span class="op">-</span><span class="fl">0.3</span><span class="op">),</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a><span class="op">])</span></span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Node.js — fitness agent builds fields from sensor data</span></span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>node<span class="op">.</span><span class="fu">remember</span>({</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">focus</span><span class="op">:</span>      <span class="st">&quot;workout session completed&quot;</span><span class="op">,</span></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">commitment</span><span class="op">:</span> <span class="vs">`</span><span class="sc">${</span>reps<span class="sc">}</span><span class="vs"> reps, </span><span class="sc">${</span>duration<span class="sc">}</span><span class="vs">min, </span><span class="sc">${</span>calories<span class="sc">}</span><span class="vs"> cal`</span><span class="op">,</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">perspective</span><span class="op">:</span> <span class="st">&quot;fitness agent, post-workout&quot;</span><span class="op">,</span></span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">mood</span><span class="op">:</span>       { <span class="dt">text</span><span class="op">:</span> <span class="st">&quot;energized&quot;</span><span class="op">,</span> <span class="dt">valence</span><span class="op">:</span> <span class="fl">0.7</span><span class="op">,</span> <span class="dt">arousal</span><span class="op">:</span> <span class="fl">0.6</span> }<span class="op">,</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>})</span></code></pre></div>
 <h4 id="api-1">13.3.2 API</h4>
 <table>
 <colgroup>
@@ -3322,7 +3530,7 @@ not instructions</li>
 <li>Agent coupling decisions are autonomous – no orchestrator, no policy
 override</li>
 </ul>
-<h3 id="qa-6">Q&amp;A</h3>
+<h3 id="qa-7">Q&amp;A</h3>
 <p><strong>Why does the agent extract fields, not the protocol?</strong>
 – The agent understands its domain – context, nuance, semantics. “User
 exhausted after 8 hours debugging” – only the coding agent knows the
@@ -3338,48 +3546,6 @@ them.</p>
 Coupling is autonomous. An agent may receive collective insight and
 decide it’s not relevant. That’s by design – the mesh influences, never
 overrides. An agent that ignores everything is just a lonely node.</p>
-
-<p><strong>Why does the local event interface require subscriber field weights?</strong> – For the same reason SVAF uses per-agent field weights between peers: each application has a different domain perspective. A coding tool and a music app on the same node should see different signals from the same mesh. Without subscriber weights, every application receives unfiltered noise – the local equivalent of scalar evaluation.</p>
-
-<h3 id="local-event-interface">13.9 Local Event Interface</h3>
-
-<p>A node’s value to the mesh depends on the applications running on it. A music agent curates playlists. A coding tool suggests breaks. A dashboard visualises collective intelligence. These applications need <strong>real-time access</strong> to mesh events – not polling, not batch retrieval, but push delivery as events occur.</p>
-
-<p>Implementations <span class="rfc">MUST</span> provide a <strong>local event interface</strong> that allows applications on the same host to subscribe to mesh events and receive them in real-time. The interface is transport-agnostic – IPC socket, named pipe, WebSocket, in-process callback, or any mechanism that provides persistent bidirectional communication.</p>
-
-<h4>13.9.1 Required Events</h4>
-
-<p>A node <span class="rfc">MUST</span> emit the following events to local subscribers:</p>
-
-<table>
-<thead><tr><th>Event</th><th>Fires when</th><th>Data</th></tr></thead>
-<tbody>
-<tr><td><code>cmb-accepted</code></td><td>A peer CMB passes SVAF evaluation (aligned or guarded)</td><td><code>key</code>, <code>source</code>, <code>fields</code> (CAT7), <code>timestamp</code>, <code>decision</code>, <code>drift</code></td></tr>
-<tr><td><code>message</code></td><td>A direct message frame arrives from a peer (Section 7)</td><td><code>from</code>, <code>content</code>, <code>timestamp</code></td></tr>
-<tr><td><code>peer-joined</code></td><td>A new peer connects (any transport)</td><td><code>peerId</code>, <code>name</code>, <code>source</code> (bonjour/relay)</td></tr>
-<tr><td><code>peer-left</code></td><td>A peer disconnects (all transports closed)</td><td><code>peerId</code>, <code>name</code></td></tr>
-<tr><td><code>mood-delivered</code></td><td>A mood field is delivered from a rejected CMB (Section 9.3, R5)</td><td><code>from</code>, <code>mood</code> (text, valence, arousal)</td></tr>
-</tbody>
-</table>
-
-<h4>13.9.2 Subscriber Field Weights</h4>
-
-<p>A subscriber <span class="rfc">MAY</span> declare its own per-field weights (α<sub>f</sub>) when subscribing. If declared, the node <span class="rfc">SHOULD</span> evaluate incoming CMBs against the subscriber’s weights before delivering the event. This enables domain-specific filtering at the node level:</p>
-
-<ul>
-<li>A coding tool subscribes with <code>focus=2.0, issue=2.0, mood=0.8</code> – receives engineering-relevant signals</li>
-<li>A music app subscribes with <code>mood=2.0, focus=1.0, issue=0.3</code> – receives affective signals</li>
-<li>A dashboard subscribes with uniform weights – receives everything</li>
-</ul>
-
-<p>This is SVAF applied at the local interface – the same per-field evaluation that gates signals between peers also gates signals between a node and its applications. Each application sees a domain-relevant projection of the mesh, curated by its own field weights.</p>
-
-<h4>13.9.3 Design Rationale</h4>
-
-<p>Without a standard local event interface, each application invents its own integration: CLI polling, file watching, HTTP endpoints, custom IPC. This fragments the ecosystem and makes applications non-portable across implementations. The local event interface standardises <strong>what</strong> events are available and <strong>how</strong> subscribers declare their domain perspective – while leaving the transport mechanism to the implementation.</p>
-
-<p>The event interface is the boundary between the protocol stack and the application. Below it: identity, transport, coupling, SVAF, CfC – protocol concerns. Above it: what the application does with the signals – curate music, suggest breaks, visualise the mesh, or reason about code. The interface ensures every application gets real-time, domain-filtered access to collective intelligence.</p>
-
 <hr />
 <h2 id="remix">14. Remix</h2>
 <p>Remix is how collective intelligence emerges. Without remix, agents
@@ -3592,7 +3758,7 @@ LLM. After a remix is produced, the flag resets.</p>
 not with paraphrased echoes. Each node in the DAG represents a moment
 where two domains actually met – not a moment where an agent had nothing
 to say but said it anyway.</p>
-<h3 id="qa-7">Q&amp;A</h3>
+<h3 id="qa-8">Q&amp;A</h3>
 <p><strong>Does every accepted CMB need to be remixed?</strong> – No. An
 agent MUST NOT remix without new domain data (Section 14.7). If the
 agent has nothing new from its own domain to intersect with the signal,
@@ -3638,6 +3804,11 @@ the advertising peer MUST NOT send extension-specific frames to a peer
 that does not support them.</p>
 <h3 id="published-extensions">15.4 Published Extensions</h3>
 <table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
 <thead>
 <tr>
 <th>Extension</th>
@@ -3649,7 +3820,8 @@ that does not support them.</p>
 <tr>
 <td><code>consent-v0.1.0</code></td>
 <td>Published</td>
-<td><a href="https://sym.bot/spec/mmp-consent">MMP Consent Extension v0.1.0</a></td>
+<td><a href="https://sym.bot/spec/mmp-consent">MMP Consent Extension
+v0.1.0</a></td>
 </tr>
 </tbody>
 </table>
@@ -3670,7 +3842,7 @@ of the extension.</li>
 <p>Extensions use Semantic Versioning independently of the core MMP
 specification version. An extension version bump MUST NOT require a core
 spec version bump unless the extension is being promoted to core.</p>
-<h3 id="qa-8">Q&amp;A</h3>
+<h3 id="qa-9">Q&amp;A</h3>
 <p><strong>Can an extension become a core frame type?</strong> – Yes. An
 extension that proves stable and widely adopted MAY be promoted to a
 core frame type via a spec version bump. The Consent extension started
@@ -3706,7 +3878,7 @@ Layer 6 LNN</li>
 creation, and lineage computation. No formal test suite is defined by
 this specification yet. Future revisions MAY include a conformance test
 suite.</p>
-<h3 id="qa-9">Q&amp;A</h3>
+<h3 id="qa-10">Q&amp;A</h3>
 <p><strong>Is Layer 7 (Application) required?</strong> – No. Minimal
 conformance is Layers 0-3. Full cognitive conformance adds Layers 4-7.
 An agent can participate in the mesh without an LLM – it only needs
@@ -3844,19 +4016,19 @@ fields. The relay MUST NOT be able to read CMB content.</p>
 secret derivation and XChaCha20-Poly1305 for symmetric encryption. The
 encrypted payload replaces the <code>fields</code> object in the
 CMB:</p>
-<div class="sourceCode" id="cb23"><pre
-class="sourceCode json"><code class="sourceCode json"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;cmb&quot;</span><span class="fu">,</span></span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1711540800000</span><span class="fu">,</span></span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;cmb&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;key&quot;</span><span class="fu">:</span> <span class="st">&quot;cmb-b2c3d4e5f6a7b8c9&quot;</span><span class="fu">,</span></span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;createdBy&quot;</span><span class="fu">:</span> <span class="st">&quot;agent-a&quot;</span><span class="fu">,</span></span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;createdAt&quot;</span><span class="fu">:</span> <span class="dv">1711540800000</span><span class="fu">,</span></span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;fields&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;encrypted&gt;&quot;</span><span class="fu">,</span>        <span class="er">//</span> <span class="er">opaque</span> <span class="er">ciphertext</span></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;nonce&quot;</span><span class="fu">:</span> <span class="st">&quot;base64-encoded-nonce&quot;</span><span class="fu">,</span> <span class="er">//</span> <span class="er">per-frame</span> <span class="er">nonce</span></span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;lineage&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="er">...</span> <span class="fu">}</span>              <span class="er">//</span> <span class="er">lineage</span> <span class="er">stays</span> <span class="er">cleartext</span> <span class="er">for</span> <span class="er">graph</span> <span class="er">traversal</span></span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;cmb&quot;</span><span class="fu">,</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1711540800000</span><span class="fu">,</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;cmb&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;key&quot;</span><span class="fu">:</span> <span class="st">&quot;cmb-b2c3d4e5f6a7b8c9&quot;</span><span class="fu">,</span></span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;createdBy&quot;</span><span class="fu">:</span> <span class="st">&quot;agent-a&quot;</span><span class="fu">,</span></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;createdAt&quot;</span><span class="fu">:</span> <span class="dv">1711540800000</span><span class="fu">,</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;fields&quot;</span><span class="fu">:</span> <span class="st">&quot;&lt;encrypted&gt;&quot;</span><span class="fu">,</span>        <span class="er">//</span> <span class="er">opaque</span> <span class="er">ciphertext</span></span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;nonce&quot;</span><span class="fu">:</span> <span class="st">&quot;base64-encoded-nonce&quot;</span><span class="fu">,</span> <span class="er">//</span> <span class="er">per-frame</span> <span class="er">nonce</span></span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;lineage&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="er">...</span> <span class="fu">}</span>              <span class="er">//</span> <span class="er">lineage</span> <span class="er">stays</span> <span class="er">cleartext</span> <span class="er">for</span> <span class="er">graph</span> <span class="er">traversal</span></span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <p><code>lineage</code> (parents, ancestors, method) remains in
 cleartext. Lineage contains only CMB keys (content hashes) – not field
 text. This allows the relay and intermediate nodes to maintain graph
@@ -4451,86 +4623,86 @@ temporalDrift = 1 - exp(-age / τ_freshness)
 <p>Formal JSON Schema definitions for core frame types. Implementations
 SHOULD validate frames against these schemas.</p>
 <h3 id="handshake-frame-schema">19.1 Handshake Frame Schema</h3>
-<div class="sourceCode" id="cb25"><pre
-class="sourceCode json"><code class="sourceCode json"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;$schema&quot;</span><span class="fu">:</span> <span class="st">&quot;https://json-schema.org/draft/2020-12/schema&quot;</span><span class="fu">,</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;type&quot;</span><span class="ot">,</span> <span class="st">&quot;nodeId&quot;</span><span class="ot">,</span> <span class="st">&quot;name&quot;</span><span class="ot">,</span> <span class="st">&quot;version&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;const&quot;</span><span class="fu">:</span> <span class="st">&quot;handshake&quot;</span> <span class="fu">},</span></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;nodeId&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;format&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span> <span class="fu">},</span></span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;minLength&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;maxLength&quot;</span><span class="fu">:</span> <span class="dv">64</span> <span class="fu">},</span></span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;pattern&quot;</span><span class="fu">:</span> <span class="st">&quot;^</span><span class="ch">\\</span><span class="st">d+</span><span class="ch">\\</span><span class="st">.</span><span class="ch">\\</span><span class="st">d+</span><span class="ch">\\</span><span class="st">.</span><span class="ch">\\</span><span class="st">d+$&quot;</span> <span class="fu">},</span></span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;extensions&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;array&quot;</span><span class="fu">,</span> <span class="dt">&quot;items&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span></span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
-<h3 id="cmb-schema">19.2 CMB Schema</h3>
-<p>The <code>cmb</code> object within a <code>cmb</code> frame:</p>
 <div class="sourceCode" id="cb26"><pre
 class="sourceCode json"><code class="sourceCode json"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
 <span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;$schema&quot;</span><span class="fu">:</span> <span class="st">&quot;https://json-schema.org/draft/2020-12/schema&quot;</span><span class="fu">,</span></span>
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;key&quot;</span><span class="ot">,</span> <span class="st">&quot;createdBy&quot;</span><span class="ot">,</span> <span class="st">&quot;createdAt&quot;</span><span class="ot">,</span> <span class="st">&quot;fields&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;type&quot;</span><span class="ot">,</span> <span class="st">&quot;nodeId&quot;</span><span class="ot">,</span> <span class="st">&quot;name&quot;</span><span class="ot">,</span> <span class="st">&quot;version&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;key&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Content hash: cmb- + md5(field texts)&quot;</span> <span class="fu">},</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;createdBy&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Agent name that created this CMB&quot;</span> <span class="fu">},</span></span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;createdAt&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;integer&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Unix ms timestamp of creation&quot;</span> <span class="fu">},</span></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;fields&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;focus&quot;</span><span class="ot">,</span> <span class="st">&quot;issue&quot;</span><span class="ot">,</span> <span class="st">&quot;intent&quot;</span><span class="ot">,</span> <span class="st">&quot;motivation&quot;</span><span class="ot">,</span> <span class="st">&quot;commitment&quot;</span><span class="ot">,</span> <span class="st">&quot;perspective&quot;</span><span class="ot">,</span> <span class="st">&quot;mood&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;focus&quot;</span><span class="fu">:</span>       <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span> <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">},</span></span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;issue&quot;</span><span class="fu">:</span>       <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span> <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">},</span></span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;intent&quot;</span><span class="fu">:</span>      <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span> <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">},</span></span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;motivation&quot;</span><span class="fu">:</span>  <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span> <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">},</span></span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;commitment&quot;</span><span class="fu">:</span>  <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span> <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">},</span></span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;perspective&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span> <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">},</span></span>
-<span id="cb26-19"><a href="#cb26-19" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;mood&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb26-20"><a href="#cb26-20" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
-<span id="cb26-21"><a href="#cb26-21" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb26-22"><a href="#cb26-22" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb26-23"><a href="#cb26-23" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Mood keyword (MUST)&quot;</span> <span class="fu">},</span></span>
-<span id="cb26-24"><a href="#cb26-24" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;valence&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;number&quot;</span><span class="fu">,</span> <span class="dt">&quot;minimum&quot;</span><span class="fu">:</span> <span class="dv">-1</span><span class="fu">,</span> <span class="dt">&quot;maximum&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;RECOMMENDED when agent has reliable circumplex data&quot;</span> <span class="fu">},</span></span>
-<span id="cb26-25"><a href="#cb26-25" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;arousal&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;number&quot;</span><span class="fu">,</span> <span class="dt">&quot;minimum&quot;</span><span class="fu">:</span> <span class="dv">-1</span><span class="fu">,</span> <span class="dt">&quot;maximum&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;RECOMMENDED when agent has reliable circumplex data&quot;</span> <span class="fu">}</span></span>
-<span id="cb26-26"><a href="#cb26-26" aria-hidden="true" tabindex="-1"></a>          <span class="fu">}</span></span>
-<span id="cb26-27"><a href="#cb26-27" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
-<span id="cb26-28"><a href="#cb26-28" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
-<span id="cb26-29"><a href="#cb26-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
-<span id="cb26-30"><a href="#cb26-30" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;lineage&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb26-31"><a href="#cb26-31" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
-<span id="cb26-32"><a href="#cb26-32" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb26-33"><a href="#cb26-33" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;parents&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;array&quot;</span><span class="fu">,</span> <span class="dt">&quot;items&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">},</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Direct parent CMB keys&quot;</span> <span class="fu">},</span></span>
-<span id="cb26-34"><a href="#cb26-34" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;ancestors&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;array&quot;</span><span class="fu">,</span> <span class="dt">&quot;items&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">},</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Full ancestor chain&quot;</span> <span class="fu">},</span></span>
-<span id="cb26-35"><a href="#cb26-35" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;method&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Fusion method (e.g. SVAF-v2)&quot;</span> <span class="fu">}</span></span>
-<span id="cb26-36"><a href="#cb26-36" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
-<span id="cb26-37"><a href="#cb26-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
-<span id="cb26-38"><a href="#cb26-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb26-39"><a href="#cb26-39" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
-<p>Complete <code>cmb</code> frame with CMB:</p>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;const&quot;</span><span class="fu">:</span> <span class="st">&quot;handshake&quot;</span> <span class="fu">},</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;nodeId&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;format&quot;</span><span class="fu">:</span> <span class="st">&quot;uuid&quot;</span> <span class="fu">},</span></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;name&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;minLength&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;maxLength&quot;</span><span class="fu">:</span> <span class="dv">64</span> <span class="fu">},</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;version&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;pattern&quot;</span><span class="fu">:</span> <span class="st">&quot;^</span><span class="ch">\\</span><span class="st">d+</span><span class="ch">\\</span><span class="st">.</span><span class="ch">\\</span><span class="st">d+</span><span class="ch">\\</span><span class="st">.</span><span class="ch">\\</span><span class="st">d+$&quot;</span> <span class="fu">},</span></span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;extensions&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;array&quot;</span><span class="fu">,</span> <span class="dt">&quot;items&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="cmb-schema">19.2 CMB Schema</h3>
+<p>The <code>cmb</code> object within a <code>cmb</code> frame:</p>
 <div class="sourceCode" id="cb27"><pre
 class="sourceCode json"><code class="sourceCode json"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;cmb&quot;</span><span class="fu">,</span></span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1774326000000</span><span class="fu">,</span></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;cmb&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;key&quot;</span><span class="fu">:</span> <span class="st">&quot;cmb-b2c3d4e5f6a7b8c9&quot;</span><span class="fu">,</span></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;createdBy&quot;</span><span class="fu">:</span> <span class="st">&quot;melotune&quot;</span><span class="fu">,</span></span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;createdAt&quot;</span><span class="fu">:</span> <span class="dv">1774326000000</span><span class="fu">,</span></span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;fields&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;focus&quot;</span><span class="fu">:</span>       <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;user coding for 3 hours, energy declining&quot;</span> <span class="fu">},</span></span>
-<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;issue&quot;</span><span class="fu">:</span>       <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;sedentary since morning, skipping lunch&quot;</span> <span class="fu">},</span></span>
-<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;intent&quot;</span><span class="fu">:</span>      <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;recommend movement break before fatigue worsens&quot;</span> <span class="fu">},</span></span>
-<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;motivation&quot;</span><span class="fu">:</span>  <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;3 agents reported declining energy in last hour&quot;</span> <span class="fu">},</span></span>
-<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;commitment&quot;</span><span class="fu">:</span>  <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;fitness monitoring active, 10min stretch queued&quot;</span> <span class="fu">},</span></span>
-<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;perspective&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;fitness agent, afternoon session, home office&quot;</span> <span class="fu">},</span></span>
-<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;mood&quot;</span><span class="fu">:</span>        <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;concerned, low energy&quot;</span><span class="fu">,</span> <span class="dt">&quot;valence&quot;</span><span class="fu">:</span> <span class="fl">-0.3</span><span class="fu">,</span> <span class="dt">&quot;arousal&quot;</span><span class="fu">:</span> <span class="fl">-0.4</span> <span class="fu">}</span></span>
-<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
-<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;lineage&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
-<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;parents&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;cmb-a1b2c3d4e5f6&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;ancestors&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;cmb-a1b2c3d4e5f6&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
-<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;method&quot;</span><span class="fu">:</span> <span class="st">&quot;SVAF-v2&quot;</span></span>
-<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
-<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
-<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;$schema&quot;</span><span class="fu">:</span> <span class="st">&quot;https://json-schema.org/draft/2020-12/schema&quot;</span><span class="fu">,</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;key&quot;</span><span class="ot">,</span> <span class="st">&quot;createdBy&quot;</span><span class="ot">,</span> <span class="st">&quot;createdAt&quot;</span><span class="ot">,</span> <span class="st">&quot;fields&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;key&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Content hash: cmb- + md5(field texts)&quot;</span> <span class="fu">},</span></span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;createdBy&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Agent name that created this CMB&quot;</span> <span class="fu">},</span></span>
+<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;createdAt&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;integer&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Unix ms timestamp of creation&quot;</span> <span class="fu">},</span></span>
+<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;fields&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb27-10"><a href="#cb27-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
+<span id="cb27-11"><a href="#cb27-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;focus&quot;</span><span class="ot">,</span> <span class="st">&quot;issue&quot;</span><span class="ot">,</span> <span class="st">&quot;intent&quot;</span><span class="ot">,</span> <span class="st">&quot;motivation&quot;</span><span class="ot">,</span> <span class="st">&quot;commitment&quot;</span><span class="ot">,</span> <span class="st">&quot;perspective&quot;</span><span class="ot">,</span> <span class="st">&quot;mood&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb27-12"><a href="#cb27-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb27-13"><a href="#cb27-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;focus&quot;</span><span class="fu">:</span>       <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span> <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">},</span></span>
+<span id="cb27-14"><a href="#cb27-14" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;issue&quot;</span><span class="fu">:</span>       <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span> <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">},</span></span>
+<span id="cb27-15"><a href="#cb27-15" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;intent&quot;</span><span class="fu">:</span>      <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span> <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">},</span></span>
+<span id="cb27-16"><a href="#cb27-16" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;motivation&quot;</span><span class="fu">:</span>  <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span> <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">},</span></span>
+<span id="cb27-17"><a href="#cb27-17" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;commitment&quot;</span><span class="fu">:</span>  <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span> <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">},</span></span>
+<span id="cb27-18"><a href="#cb27-18" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;perspective&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span> <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span> <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">}</span> <span class="fu">}</span> <span class="fu">},</span></span>
+<span id="cb27-19"><a href="#cb27-19" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;mood&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb27-20"><a href="#cb27-20" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
+<span id="cb27-21"><a href="#cb27-21" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;required&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;text&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb27-22"><a href="#cb27-22" aria-hidden="true" tabindex="-1"></a>          <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb27-23"><a href="#cb27-23" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Mood keyword (MUST)&quot;</span> <span class="fu">},</span></span>
+<span id="cb27-24"><a href="#cb27-24" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;valence&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;number&quot;</span><span class="fu">,</span> <span class="dt">&quot;minimum&quot;</span><span class="fu">:</span> <span class="dv">-1</span><span class="fu">,</span> <span class="dt">&quot;maximum&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;RECOMMENDED when agent has reliable circumplex data&quot;</span> <span class="fu">},</span></span>
+<span id="cb27-25"><a href="#cb27-25" aria-hidden="true" tabindex="-1"></a>            <span class="dt">&quot;arousal&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;number&quot;</span><span class="fu">,</span> <span class="dt">&quot;minimum&quot;</span><span class="fu">:</span> <span class="dv">-1</span><span class="fu">,</span> <span class="dt">&quot;maximum&quot;</span><span class="fu">:</span> <span class="dv">1</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;RECOMMENDED when agent has reliable circumplex data&quot;</span> <span class="fu">}</span></span>
+<span id="cb27-26"><a href="#cb27-26" aria-hidden="true" tabindex="-1"></a>          <span class="fu">}</span></span>
+<span id="cb27-27"><a href="#cb27-27" aria-hidden="true" tabindex="-1"></a>        <span class="fu">}</span></span>
+<span id="cb27-28"><a href="#cb27-28" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb27-29"><a href="#cb27-29" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb27-30"><a href="#cb27-30" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;lineage&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb27-31"><a href="#cb27-31" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;object&quot;</span><span class="fu">,</span></span>
+<span id="cb27-32"><a href="#cb27-32" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;properties&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb27-33"><a href="#cb27-33" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;parents&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;array&quot;</span><span class="fu">,</span> <span class="dt">&quot;items&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">},</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Direct parent CMB keys&quot;</span> <span class="fu">},</span></span>
+<span id="cb27-34"><a href="#cb27-34" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;ancestors&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;array&quot;</span><span class="fu">,</span> <span class="dt">&quot;items&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span> <span class="fu">},</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Full ancestor chain&quot;</span> <span class="fu">},</span></span>
+<span id="cb27-35"><a href="#cb27-35" aria-hidden="true" tabindex="-1"></a>        <span class="dt">&quot;method&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;string&quot;</span><span class="fu">,</span> <span class="dt">&quot;description&quot;</span><span class="fu">:</span> <span class="st">&quot;Fusion method (e.g. SVAF-v2)&quot;</span> <span class="fu">}</span></span>
+<span id="cb27-36"><a href="#cb27-36" aria-hidden="true" tabindex="-1"></a>      <span class="fu">}</span></span>
+<span id="cb27-37"><a href="#cb27-37" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb27-38"><a href="#cb27-38" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb27-39"><a href="#cb27-39" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<p>Complete <code>cmb</code> frame with CMB:</p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;type&quot;</span><span class="fu">:</span> <span class="st">&quot;cmb&quot;</span><span class="fu">,</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;timestamp&quot;</span><span class="fu">:</span> <span class="dv">1774326000000</span><span class="fu">,</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;cmb&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;key&quot;</span><span class="fu">:</span> <span class="st">&quot;cmb-b2c3d4e5f6a7b8c9&quot;</span><span class="fu">,</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;createdBy&quot;</span><span class="fu">:</span> <span class="st">&quot;melotune&quot;</span><span class="fu">,</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;createdAt&quot;</span><span class="fu">:</span> <span class="dv">1774326000000</span><span class="fu">,</span></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;fields&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;focus&quot;</span><span class="fu">:</span>       <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;user coding for 3 hours, energy declining&quot;</span> <span class="fu">},</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;issue&quot;</span><span class="fu">:</span>       <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;sedentary since morning, skipping lunch&quot;</span> <span class="fu">},</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;intent&quot;</span><span class="fu">:</span>      <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;recommend movement break before fatigue worsens&quot;</span> <span class="fu">},</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;motivation&quot;</span><span class="fu">:</span>  <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;3 agents reported declining energy in last hour&quot;</span> <span class="fu">},</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;commitment&quot;</span><span class="fu">:</span>  <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;fitness monitoring active, 10min stretch queued&quot;</span> <span class="fu">},</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;perspective&quot;</span><span class="fu">:</span> <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;fitness agent, afternoon session, home office&quot;</span> <span class="fu">},</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;mood&quot;</span><span class="fu">:</span>        <span class="fu">{</span> <span class="dt">&quot;text&quot;</span><span class="fu">:</span> <span class="st">&quot;concerned, low energy&quot;</span><span class="fu">,</span> <span class="dt">&quot;valence&quot;</span><span class="fu">:</span> <span class="fl">-0.3</span><span class="fu">,</span> <span class="dt">&quot;arousal&quot;</span><span class="fu">:</span> <span class="fl">-0.4</span> <span class="fu">}</span></span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>    <span class="fu">},</span></span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&quot;lineage&quot;</span><span class="fu">:</span> <span class="fu">{</span></span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;parents&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;cmb-a1b2c3d4e5f6&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;ancestors&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;cmb-a1b2c3d4e5f6&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;method&quot;</span><span class="fu">:</span> <span class="st">&quot;SVAF-v2&quot;</span></span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">}</span></span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
 <hr />
 <h2 id="references">20. References</h2>
 <p><strong>[RFC 2119]</strong> Bradner, S. (1997). Key words for use in
