@@ -625,7 +625,9 @@ All frames are JSON objects with a `type` field (string). Implementations MUST s
 | `handshake` | 2 | No | nodeId (string), name (string), version (string), extensions (string[]), lifecycleRole (string: observer/validator/anchor) |
 | `state-sync` | 2/3 | No | h1 (float[]), h2 (float[]), confidence (float) |
 | `cmb` | 3/4 | SVAF | timestamp (int), cmb (object: { key, createdBy, createdAt, fields, lineage }) |
-| `message` | 2 | No | from, fromName, content, timestamp. The `message` frame is for transport-layer coordination only (e.g. "catchup" requests). Implementations MUST NOT use `message` frames to carry observations, decisions, or feedback. All cognitive content MUST be sent as `cmb` frames so that it enters SVAF evaluation, produces anchor weights, and modulates CfC state. |
+| `message` | 2 | No | from, fromName, content, timestamp |
+
+All cognitive content -- observations, decisions, feedback, directives -- MUST be sent as `cmb` frames. Only `cmb` frames enter SVAF evaluation, produce anchor weights, and modulate CfC state.
 | `xmesh-insight` | 6 | No | from, fromName, trajectory (float[6]), patterns (float[8]), anomaly (float), outcome (string), coherence (float), timestamp |
 | `peer-info` | 2 | No | peers: [{ nodeId, name, wakeChannel?, lastSeen }] |
 | `wake-channel` | 2 | No | platform (string), token (string), environment (string) |

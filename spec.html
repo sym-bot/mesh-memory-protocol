@@ -1718,59 +1718,24 @@ lineage })</td>
 <td><code>message</code></td>
 <td>2</td>
 <td>No</td>
-<td>from, fromName, content, timestamp. The <code>message</code> frame
-is for transport-layer coordination only (e.g. “catchup” requests).
-Implementations MUST NOT use <code>message</code> frames to carry
-observations, decisions, or feedback. All cognitive content MUST be sent
-as <code>cmb</code> frames so that it enters SVAF evaluation, produces
-anchor weights, and modulates CfC state.</td>
-</tr>
-<tr>
-<td><code>xmesh-insight</code></td>
-<td>6</td>
-<td>No</td>
-<td>from, fromName, trajectory (float[6]), patterns (float[8]), anomaly
-(float), outcome (string), coherence (float), timestamp</td>
-</tr>
-<tr>
-<td><code>peer-info</code></td>
-<td>2</td>
-<td>No</td>
-<td>peers: [{ nodeId, name, wakeChannel?, lastSeen }]</td>
-</tr>
-<tr>
-<td><code>wake-channel</code></td>
-<td>2</td>
-<td>No</td>
-<td>platform (string), token (string), environment (string)</td>
-</tr>
-<tr>
-<td><code>error</code></td>
-<td>2</td>
-<td>No</td>
-<td>code (int), message (string), detail? (string)</td>
-</tr>
-<tr>
-<td><code>role-grant</code></td>
-<td>0</td>
-<td>No</td>
-<td>targetNodeId (string), role (string: validator/anchor), grantedBy
-(string), signature (string)</td>
-</tr>
-<tr>
-<td><code>ping</code></td>
-<td>2</td>
-<td>No</td>
-<td>(no additional fields)</td>
-</tr>
-<tr>
-<td><code>pong</code></td>
-<td>2</td>
-<td>No</td>
-<td>(no additional fields)</td>
+<td>from, fromName, content, timestamp</td>
 </tr>
 </tbody>
 </table>
+<p>All cognitive content – observations, decisions, feedback, directives
+– MUST be sent as <code>cmb</code> frames. Only <code>cmb</code> frames
+enter SVAF evaluation, produce anchor weights, and modulate CfC state. |
+<code>xmesh-insight</code> | 6 | No | from, fromName, trajectory
+(float[6]), patterns (float[8]), anomaly (float), outcome (string),
+coherence (float), timestamp | | <code>peer-info</code> | 2 | No |
+peers: [{ nodeId, name, wakeChannel?, lastSeen }] | |
+<code>wake-channel</code> | 2 | No | platform (string), token (string),
+environment (string) | | <code>error</code> | 2 | No | code (int),
+message (string), detail? (string) | | <code>role-grant</code> | 0 | No
+| targetNodeId (string), role (string: validator/anchor), grantedBy
+(string), signature (string) | | <code>ping</code> | 2 | No | (no
+additional fields) | | <code>pong</code> | 2 | No | (no additional
+fields) |</p>
 <h3 id="error-frame">7.2 Error Frame</h3>
 <p>When a node encounters a protocol-level error, it SHOULD send an
 <code>error</code> frame before closing the connection (if applicable).
