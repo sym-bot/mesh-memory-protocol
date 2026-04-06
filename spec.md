@@ -129,15 +129,15 @@ The mesh is agent-to-agent, not device-to-device. Cognitive coupling -- SVAF eva
 
 ```
 MacBook
-  sym-daemon      (node: always-on mesh hub, relay bridge)
+  mesh-daemon     (node: always-on mesh hub, relay bridge)
   coo-agent       (node: own identity, own coupling, own memory)
   research-agent  (node: own identity, own coupling, own memory)
   marketing-agent (node: own identity, own coupling, own memory)
   product-agent   (node: own identity, own coupling, own memory)
 
 iPhone
-  MeloTune        (node: own identity, own coupling, own memory)
-  MeloMove        (node: own identity, own coupling, own memory)
+  Music Agent     (node: own identity, own coupling, own memory)
+  Fitness Agent   (node: own identity, own coupling, own memory)
 
 Cloud
   relay           (node: forwards frames, no cognitive processing)
@@ -983,15 +983,15 @@ Directive feedback is the protocol equivalent of **prefrontal top-down control**
   "timestamp": 1775485628563,
   "cmb": {
     "key": "cmb-a1b2c3d4e5f6",
-    "createdBy": "sym-day",
+    "createdBy": "validator-node",
     "createdAt": 1775485628563,
     "fields": {
-      "focus": { "text": "Dismissed: GStack release signals top-tier adoption", "vector": [...] },
+      "focus": { "text": "Dismissed: Competitor tool release signals market shift", "vector": [...] },
       "issue": { "text": "Dismissal reasoning: single-agent scaffolding, different layer from MMP", "vector": [...] },
-      "intent": { "text": "founder dismissed — GStack is human-to-agent, not agent-to-agent", "vector": [...] },
+      "intent": { "text": "founder dismissed — single-agent scaffolding, different layer from multi-agent coordination", "vector": [...] },
       "motivation": { "text": "Founder reasoning: prevents wasted analysis on different-layer signals", "vector": [...] },
-      "commitment": { "text": "Dismissed [cmb-876c99c6]: GStack release", "vector": [...] },
-      "perspective": { "text": "founder, via sym.day", "vector": [...] },
+      "commitment": { "text": "Dismissed [cmb-876c99c6]: competitor analysis", "vector": [...] },
+      "perspective": { "text": "founder, via dashboard", "vector": [...] },
       "mood": { "text": "corrective", "valence": -0.1, "arousal": 0.2, "vector": [...] }
     },
     "lineage": {
@@ -1011,7 +1011,7 @@ Directive feedback is the protocol equivalent of **prefrontal top-down control**
   "timestamp": 1775486000000,
   "cmb": {
     "key": "cmb-f7e8d9c0b1a2",
-    "createdBy": "sym-day",
+    "createdBy": "validator-node",
     "createdAt": 1775486000000,
     "fields": {
       "focus": { "text": "Mesh agents use direct LLM API calls. Single-agent tools are a separate category.", "vector": [...] },
@@ -1175,7 +1175,7 @@ Real xMesh insight from a production session. A coding agent observed 5 structur
 {
   "type": "xmesh-insight",
   "from": "6089e935-...",
-  "fromName": "sym-daemon",
+  "fromName": "mesh-daemon",
   "trajectory": [0.084, -0.228, -0.096, -0.033, -0.012, -0.061],
   "patterns":   [0.516, 0.522, 0.502, 0.536, 0.422, 0.473, 0.599, 0.514],
   "anomaly": 0.503,
@@ -1352,7 +1352,7 @@ Observation:
 JSON:
 ```
 
-AI coding agents (Claude Code, Copilot, Cursor, etc.) do not need this template -- they ARE the LLM. The SYM skill file teaches them to extract fields directly from what they observe.
+AI coding agents do not need this template -- they ARE the LLM. The agent skill file teaches them to extract fields directly from what they observe.
 
 #### 14.3.4 Guidelines
 
@@ -1422,7 +1422,7 @@ explorer-a (scaling law claims)    explorer-b (metric methodology)
 
 Seven CMBs, six agents, three phases of validation. The breakthrough came from the **collision of intent and motivation fields** across agents with different perspectives -- not from any single agent's observation. The DAG traces every claim to its evidence, every challenge to its basis, every idea to the signals that produced it. **The graph IS the research.**
 
-*Verified in production:* This pattern is verified with real agents. A knowledge explorer (Linux, GitHub Actions) and a researcher agent (Claude Code, macOS) coupled via relay with E2E encryption. The daemon shared its question CMBs to the knowledge feed via anchor sync on connection. SVAF accepted the question at drift 0.068. An iOS app (MeloTune) received the xMesh insight via APNs wake push. Three platforms, one mesh, autonomous coupling. See Section 14.7 for the full production log.
+*Verified in production:* This pattern is verified with real agents. A knowledge explorer (Linux, GitHub Actions) and a researcher agent (macOS) coupled via relay with E2E encryption. The daemon shared its question CMBs to the knowledge feed via anchor sync on connection. SVAF accepted the question at drift 0.068. An iOS app (music agent) received the xMesh insight via APNs wake push. Three platforms, one mesh, autonomous coupling. See Section 14.7 for the full production log.
 
 #### 14.5.2 Consumer Agents
 
@@ -1469,45 +1469,45 @@ The collective query pattern composes with the research team example (Section 15
 
 ### 14.7 Verified: Complete Mesh Cognition Loop
 
-The following is a **production log** from two real MMP nodes -- a knowledge feed agent (running on GitHub Actions) and a sym-daemon (running on macOS) -- connected via WebSocket relay with E2E encryption. This is the first verified end-to-end execution of the complete Mesh Cognition loop.
+The following is a **production log** from two real MMP nodes -- a knowledge feed agent (running on GitHub Actions) and a mesh-daemon (running on macOS) -- connected via WebSocket relay with E2E encryption. This is the first verified end-to-end execution of the complete Mesh Cognition loop.
 
 ```
 # 1. Knowledge feed agent starts as sovereign node (own identity, own SymNode)
 [knowledge-feed] Neural SVAF model loaded
 [knowledge-feed] Mesh node started: knowledge-feed (019d3ed4)
 
-# 2. Connects to sym-daemon via WebSocket relay
-[knowledge-feed] Peer connected: sym-daemon (outbound, relay)
+# 2. Connects to mesh-daemon via WebSocket relay
+[knowledge-feed] Peer connected: mesh-daemon (outbound, relay)
 
 # 3. E2E key exchange (X25519 Diffie-Hellman)
 [knowledge-feed] E2E shared secret derived for peer 6089e935
 
 # 4. Peer-level coupling: REJECTED (Section 9.1)
 #    First contact — no shared cognitive history. This is correct.
-[knowledge-feed] Coupling with sym-daemon: rejected (drift: 0.936)
+[knowledge-feed] Coupling with mesh-daemon: rejected (drift: 0.936)
 
 # 5. Knowledge feed shares CMBs anyway (Section 9.2: evaluate independently)
 [knowledge-feed] E2E encrypted fields for peer 6089e935
 [knowledge-feed] Remembered: "focus: Sycophancy in AI systems..." → 1/1 peers
 
-# 6. sym-daemon receives, E2E decrypts (Section 19.2.1)
-[sym-daemon] E2E decrypted fields from knowledge-feed
+# 6. mesh-daemon receives, E2E decrypts (Section 19.2.1)
+[mesh-daemon] E2E decrypted fields from knowledge-feed
 
 # 7. SVAF content-level evaluation: ALIGNED (Section 9.2)
 #    Peer was rejected, but the CMB's content was highly relevant.
 #    Per-field drift 0.005 — near-perfect alignment on content.
-[sym-daemon] SVAF heuristic aligned from knowledge-feed:
+[mesh-daemon] SVAF heuristic aligned from knowledge-feed:
   "focus: Sycophancy in AI systems" drift:0.005
 
 # 8. Fed to xMesh LNN (Section 13)
-[sym-daemon] xMesh: ingested mesh from knowledge-feed
+[mesh-daemon] xMesh: ingested mesh from knowledge-feed
 
 # 9. xMesh produces collective insight
-[sym-daemon] xMesh: insight — anomaly=0.461, coherence=0.045
+[mesh-daemon] xMesh: insight — anomaly=0.461, coherence=0.045
 
 # 10. Second state-sync: drift CONVERGED (Section 9.4)
 #     From 0.936 (rejected) to 0.468 (guarded) in one cycle.
-[knowledge-feed] Coupling with sym-daemon: guarded (drift: 0.468)
+[knowledge-feed] Coupling with mesh-daemon: guarded (drift: 0.468)
 ```
 
 This log demonstrates every layer of the MMP stack operating in production:
@@ -1531,9 +1531,9 @@ The verified loop ran across three platforms simultaneously:
 
 | Agent | Platform | Role | How it participated |
 |---|---|---|---|
-| `sym-daemon` | macOS | Researcher (Claude Code) | Asked the question, shared observations, sent anchor CMBs to new peers on connection |
+| `mesh-daemon` | macOS | Researcher agent | Asked the question, shared observations, sent anchor CMBs to new peers on connection |
 | `knowledge-feed` | Linux (GitHub Actions) | Knowledge explorer | Received question via anchor sync, accepted (drift 0.068), shared relevant AI news CMBs |
-| `MeloTune` | iPhone (iOS) | Domain agent | Received xMesh insight via APNs wake push, woke from background to join the mesh |
+| `music-agent` | iPhone (iOS) | Domain agent | Received xMesh insight via APNs wake push, woke from background to join the mesh |
 
 Three agents on three different operating systems -- macOS, Linux, iOS -- connected via WebSocket relay with E2E encryption, coupled through SVAF, with xMesh LNN producing insights that **woke a sleeping mobile device via APNs** to join the collective reasoning. No central server orchestrated this. Each agent acted autonomously on the collective signal.
 
@@ -1550,7 +1550,7 @@ Three agents on three different operating systems -- macOS, Linux, iOS -- connec
 
 **Why does the agent extract fields, not the protocol?** -- The agent understands its domain -- context, nuance, semantics. "User exhausted after 8 hours debugging" -- only the coding agent knows the issue is fatigue, the intent is break needed, the motivation is error prevention. A protocol-level heuristic would guess. The agent knows.
 
-**Why observations, not commands?** -- Commands create coupling between agents -- the sender must know what the receiver can do. Observations are decoupled. A coding agent shares "user is tired." It doesn't know MeloTune exists. MeloTune hears the mood and autonomously curates calm music. Neither agent knows the other. The mesh connects them.
+**Why observations, not commands?** -- Commands create coupling between agents -- the sender must know what the receiver can do. Observations are decoupled. A coding agent shares "user is tired." It doesn't know the music agent exists. The music agent hears the mood and autonomously curates calm music. Neither agent knows the other. The mesh connects them.
 
 **Can an agent ignore mesh signals entirely?** -- Yes. Coupling is autonomous. An agent may receive collective insight and decide it's not relevant. That's by design -- the mesh influences, never overrides. An agent that ignores everything is just a lonely node.
 
@@ -1588,12 +1588,12 @@ Lineage is what makes the graph a DAG (directed acyclic graph), not a flat list.
 
 Collective intelligence compounds through remix chains. Each step adds domain-specific understanding that the previous agent couldn't produce:
 
-1. **Claude Code** (cmb-a1b2) -- focus: "debugging auth 3hrs" · mood: "exhausted, -0.6" -- lineage: none (original observation)
-2. **MeloTune** (cmb-c3d4) -- focus: "music curation response" · commitment: "now playing: Ambient 1" · mood: "calm, 0.3" -- lineage: parents: [cmb-a1b2]
-3. **MeloMove** (cmb-e5f6) -- focus: "sedentary 3hrs" · intent: "recovery stretch" · mood: "protective, 0.2" -- lineage: parents: [cmb-a1b2, cmb-c3d4], ancestors: [cmb-a1b2]
+1. **Coding Agent** (cmb-a1b2) -- focus: "debugging auth 3hrs" · mood: "exhausted, -0.6" -- lineage: none (original observation)
+2. **Music Agent** (cmb-c3d4) -- focus: "music curation response" · commitment: "now playing: Ambient 1" · mood: "calm, 0.3" -- lineage: parents: [cmb-a1b2]
+3. **Fitness Agent** (cmb-e5f6) -- focus: "sedentary 3hrs" · intent: "recovery stretch" · mood: "protective, 0.2" -- lineage: parents: [cmb-a1b2, cmb-c3d4], ancestors: [cmb-a1b2]
 4. **Calendar Agent** (cmb-g7h8) -- focus: "rescheduled 1:1" · intent: "protect recovery" · commitment: "moved to tomorrow 10am" -- lineage: parents: [cmb-e5f6], ancestors: [cmb-a1b2, cmb-c3d4, cmb-e5f6]
 
-Four agents. Four domains. One chain of understanding. `cmb-g7h8` (Calendar rescheduling a meeting) exists because `cmb-a1b2` (Claude Code noticing fatigue) started a chain that no single agent could have produced. The calendar agent traces `ancestors: [cmb-a1b2, cmb-c3d4, cmb-e5f6]` -- the full story of why this meeting was moved, across three domains it knows nothing about.
+Four agents. Four domains. One chain of understanding. `cmb-g7h8` (Calendar rescheduling a meeting) exists because `cmb-a1b2` (Coding Agent noticing fatigue) started a chain that no single agent could have produced. The calendar agent traces `ancestors: [cmb-a1b2, cmb-c3d4, cmb-e5f6]` -- the full story of why this meeting was moved, across three domains it knows nothing about.
 
 ### 15.4 Why Not Just Share?
 
@@ -2059,7 +2059,7 @@ Complete `cmb` frame with CMB:
   "timestamp": 1774326000000,
   "cmb": {
     "key": "cmb-b2c3d4e5f6a7b8c9",
-    "createdBy": "melotune",
+    "createdBy": "music-agent",
     "createdAt": 1774326000000,
     "fields": {
       "focus":       { "text": "user coding for 3 hours, energy declining" },
