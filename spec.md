@@ -4,7 +4,7 @@
 
 | Field | Value |
 |---|---|
-| Version | 0.2.2 |
+| Version | 0.2.3 |
 | Status | Published |
 | Date | 6 April 2026 |
 | Author | Hongwei Xu <hongwei@sym.bot> |
@@ -32,6 +32,7 @@ Feedback and errata: spec@sym.bot or github.com/sym-bot/sym/issues.
 
 | Version | Date | Changes |
 |---|---|---|
+| 0.2.3 | 2026-04-06 | Protocol review fixes (12 issues): lifecycleRole added to handshake (Section 5.2). Validator role verification via role-grant chain required (Section 6.4). Wire examples for feedback and directive CMBs (Section 11). Message frame deprecated for cognitive content (Section 7). CMB forward compatibility: implementations MUST ignore unrecognised fields (Section 8). Multi-relay failover SHOULD (Section 4.4). Ancestors depth RECOMMENDED cap at 50 (Section 15). Sender frame size MUST NOT exceed MAX_FRAME_SIZE (Section 4.1). Synthetic Memory conformance requirement (Section 17). Metadata privacy trade-off documented (Section 18). ABNF wire format grammar (Section 4.1). Relay-based discovery as mDNS alternative (Section 5.1). CfC state persistence requirement (Section 13). |
 | 0.2.2 | 2026-04-06 | Section 11 -- Feedback Modulation: how collective intelligence becomes self-correcting. Validator-authority CMBs with per-field reasoning modulate SVAF coupling weights and CfC temporal adaptation through the existing mesh cognition loop. Feedback CMB content requirements (11.2). Directive feedback for standalone domain knowledge injection (11.3). Validator-origin CMBs enter at anchor weight 2.0 regardless of lifecycle state (6.4). Feedback recognition: agents check lineage.parents against own CMB keys (11.1). Formal definitions: Feedback CMB, Directive CMB added to terminology (Section 1). Neuroscience grounding: dopaminergic prediction error model with per-field direction and τ-modulated adaptation rate. Sections 12-21 renumbered from 11-20. |
 | 0.2.1 | 2026-04-02 | Node model: every autonomous agent MUST be a full peer node with own identity, coupling engine, and memory store. SVAF band-pass evaluation: four-class model (redundant/aligned/guarded/rejected) with per-field redundancy detection. CMB lifecycle: observed/remixed/validated/canonical/archived with anchor weight progression. Semantic encoder SHOULD for SVAF drift computation. Handshake adds version and extensions fields. Error frame type. |
 | 0.2.0 | 2026-03-27 | Formal specification published. 8-layer architecture. CAT7 CMB schema with lineage (parents + ancestors). SVAF per-field evaluation. Wire format normatively specified. Error frame. Frame type registry. Extension mechanism. JSON Schema. Connection state machine. Wire examples. |
@@ -303,6 +304,21 @@ Frames are length-prefixed JSON over TCP. Each frame consists of:
 - Implementations MUST handle partial reads (TCP stream reassembly).
 - Implementations MUST silently ignore frames with unrecognised `type` values (forward compatibility).
 
+**Frame size.** Senders MUST NOT produce frames exceeding `MAX_FRAME_SIZE` bytes (default: 1,048,576). Receivers MUST close the connection with error code 1003 (FRAME_TOO_LARGE) if a received frame exceeds this limit.
+
+
+**ABNF grammar** (RFC 5234):
+
+```
+frame       = frame-length LF json-object LF
+frame-length = 1*DIGIT                    ; decimal byte count of json-object
+json-object  = "{" *( json-member ) "}"   ; RFC 8259 JSON object
+LF           = %x0A                       ; newline delimiter
+```
+
+Each frame is a single JSON object preceded by its byte length as a decimal string, delimited by newline characters. The length prefix enables receivers to allocate buffers before reading the payload.
+
+
 ### 4.2 Wire Examples
 
 Handshake frame:
@@ -362,6 +378,9 @@ The primary LAN transport. Nodes MUST listen on a TCP port and advertise it via 
 
 For nodes not on the same LAN, a relay node forwards frames. Relay frames are JSON envelopes over WebSocket: `{ "to": "<nodeId>", "payload": <frame> }`. The relay MUST NOT inspect or modify the payload. The relay is a peer, not a server -- any always-on node MAY serve as a relay.
 
+**Multi-relay failover.** Implementations SHOULD support configuring multiple relay URLs. If the primary relay is unavailable (connection refused, timeout, or heartbeat failure), the node SHOULD attempt connection to the next configured relay. Relay selection order is implementation-defined. When a failed relay recovers, the node MAY reconnect to restore the preferred relay. This mitigates single-point-of-failure risk for WAN connectivity.
+
+
 ### 4.5 IPC Transport (Local)
 
 Local tools MAY connect to a node via IPC (Unix domain socket, named pipe, or localhost TCP) to query mesh state. The framing is identical to TCP transport. IPC is an implementation convenience for local tooling (dashboards, CLI, monitoring) -- it is not a substitute for peer-to-peer transport. Agents that participate in coupling MUST connect as full peer nodes via TCP or WebSocket.
@@ -411,6 +430,9 @@ TXT record fields:
 
 To prevent duplicate connections, the node with the lexicographically smaller nodeId MUST initiate the outbound TCP connection. The other node MUST NOT initiate.
 
+**Relay-based discovery.** On platforms where mDNS is unavailable (cloud VMs, Windows without Bonjour SDK, containerised environments), nodes SHOULD use the relay's `relay-peers` response as the discovery mechanism. When a node connects to a relay and authenticates (Section 4.4), the relay responds with a list of currently connected peers. This serves as a WAN-compatible alternative to DNS-SD. Implementations SHOULD support both discovery modes and use whichever is available: DNS-SD for LAN, relay-peers for WAN.
+
+
 ### 5.2 Handshake
 
 Upon connection, both sides MUST exchange the following frames in order:
@@ -427,6 +449,9 @@ Upon connection, both sides MUST exchange the following frames in order:
 - The `extensions` field SHOULD list supported protocol extensions (e.g., `["consent-v0.1"]`). Nodes MUST ignore unrecognised extensions.
 - The inbound node MUST wait for a `handshake` frame as the first frame. If any other frame type arrives first, or no handshake arrives within 10,000 ms, the connection MUST be closed.
 - If a node receives a handshake with a nodeId that is already connected via the **same transport type**, the new connection MUST be closed (duplicate guard). If the existing connection uses a **different transport type** (e.g. peer connected via relay, new connection via LAN TCP), the new connection MUST be accepted as a secondary transport per Section 4.6.
+
+**lifecycleRole.** The handshake frame MUST include a `lifecycleRole` field with value `observer` (default), `validator`, or `anchor`. Receiving nodes use this to apply validator-origin anchor weight (Section 6.4) and identify feedback CMBs (Section 11). Implementations MUST default to `observer` if the field is absent (backward compatibility with pre-0.2.3 nodes).
+
 
 ### 5.3 Connection State Machine
 
@@ -547,6 +572,8 @@ Anchor weight influences SVAF evaluation: when computing per-field drift against
 
 **Validator-origin CMBs.** CMBs produced by nodes with validator or anchor lifecycle role (Section 3.5) enter the mesh at anchor weight 2.0 regardless of lifecycle state. This applies to both feedback CMBs (with `lineage.parents`, Section 12.1) and directive CMBs (without parents, Section 12.3). The elevated weight reflects the authority of the producing node, not a lifecycle transition -- the CMB is created with weight 2.0, not promoted to it. Receiving nodes MUST check `createdBy` against known lifecycle roles to apply the correct initial weight.
 
+**Role verification.** Nodes MUST NOT accept `lifecycleRole: validator` or `lifecycleRole: anchor` from a peer unless one of the following is true: (a) the peer has presented a valid `role-grant` frame signed by an existing anchor node (Section 3.5.1), or (b) the peer's nodeId is pre-configured as a trusted validator in the implementation's local configuration. Without verification, a malicious node could self-promote to validator and produce CMBs with elevated anchor weight. Implementations that do not support role-grant verification MUST treat all peers as `observer` regardless of their handshake claim.
+
 ### 6.5 Validation Authority
 
 The transitions to `validated` and `dismissed` are the most consequential lifecycle events -- they commit human judgment to the mesh. Validation permanently increases anchor weight to 2.0; dismissal reduces it to 0.5. Both transitions MUST be restricted to nodes with appropriate lifecycle roles (Section 3.5).
@@ -599,7 +626,7 @@ All frames are JSON objects with a `type` field (string). Implementations MUST s
 | `handshake` | 2 | No | nodeId (string), name (string), version (string), extensions (string[]), lifecycleRole (string: observer/validator/anchor) |
 | `state-sync` | 2/3 | No | h1 (float[]), h2 (float[]), confidence (float) |
 | `cmb` | 3/4 | SVAF | timestamp (int), cmb (object: { key, createdBy, createdAt, fields, lineage }) |
-| `message` | 2 | No | from, fromName, content, timestamp |
+| `message` | 2 | No | from, fromName, content, timestamp. **Deprecated for cognitive content** — use `cmb` frames for all signals that should enter SVAF evaluation, produce anchor weights, or modulate CfC state. The `message` frame is retained for transport-layer coordination only (e.g. "catchup" requests). Implementations MUST NOT use `message` frames to carry observations, decisions, or feedback. |
 | `xmesh-insight` | 6 | No | from, fromName, trajectory (float[6]), patterns (float[8]), anomaly (float), outcome (string), coherence (float), timestamp |
 | `peer-info` | 2 | No | peers: [{ nodeId, name, wakeChannel?, lastSeen }] |
 | `wake-channel` | 2 | No | platform (string), token (string), environment (string) |
@@ -641,6 +668,8 @@ Frame types are identified by their `type` string value. **Core types** (this sp
 ## 8. Cognitive Memory Blocks (CAT7)
 
 A Cognitive Memory Block (CMB) is an immutable structured memory unit. Each CMB decomposes an observation into 7 typed semantic fields (the CAT7 schema). CMBs are the data structure that flows between agents via `cmb` frames.
+
+**Forward compatibility.** Implementations MUST silently ignore unrecognised CMB fields. A node running v0.2.3 that receives a CMB with additional fields from a future version MUST process the 7 known CAT7 fields and discard any others without error. This allows schema evolution without breaking existing deployments.
 
 ### 8.1 Why 7 Fields
 
@@ -944,6 +973,62 @@ The directive compounds through the same CfC dynamics as dismissal feedback:
 5. Future signals about single-agent tools score higher drift -- the agent has learned
 
 Directive feedback is the protocol equivalent of **prefrontal top-down control** in neuroscience: the prefrontal cortex does not do the sensory processing, but it sends signals that modulate how sensory cortex interprets future input. The founder does not process the feed, but the founder's directive modulates how the research agent evaluates future feed signals.
+
+### 11.4 Wire Examples
+
+**Feedback CMB (dismissal with reasoning):**
+
+```json
+{
+  "type": "cmb",
+  "timestamp": 1775485628563,
+  "cmb": {
+    "key": "cmb-a1b2c3d4e5f6",
+    "createdBy": "sym-day",
+    "createdAt": 1775485628563,
+    "fields": {
+      "focus": { "text": "Dismissed: GStack release signals top-tier adoption", "vector": [...] },
+      "issue": { "text": "Dismissal reasoning: single-agent scaffolding, different layer from MMP", "vector": [...] },
+      "intent": { "text": "founder dismissed — GStack is human-to-agent, not agent-to-agent", "vector": [...] },
+      "motivation": { "text": "Founder reasoning: prevents wasted analysis on different-layer signals", "vector": [...] },
+      "commitment": { "text": "Dismissed [cmb-876c99c6]: GStack release", "vector": [...] },
+      "perspective": { "text": "founder, via sym.day", "vector": [...] },
+      "mood": { "text": "corrective", "valence": -0.1, "arousal": 0.2, "vector": [...] }
+    },
+    "lineage": {
+      "parents": ["cmb-876c99c6"],
+      "ancestors": ["cmb-876c99c6"],
+      "method": "SVAF-v2"
+    }
+  }
+}
+```
+
+**Directive CMB (standalone teaching, no parents):**
+
+```json
+{
+  "type": "cmb",
+  "timestamp": 1775486000000,
+  "cmb": {
+    "key": "cmb-f7e8d9c0b1a2",
+    "createdBy": "sym-day",
+    "createdAt": 1775486000000,
+    "fields": {
+      "focus": { "text": "Mesh agents use direct LLM API calls. Single-agent tools are a separate category.", "vector": [...] },
+      "issue": { "text": "none", "vector": [...] },
+      "intent": { "text": "Founder directive: distinguish single-agent scaffolding from multi-agent coordination", "vector": [...] },
+      "motivation": { "text": "Direct founder guidance to the mesh", "vector": [...] },
+      "commitment": { "text": "Distinguish human-to-agent from agent-to-agent. Only the latter is relevant.", "vector": [...] },
+      "perspective": { "text": "founder directive, via sym.day", "vector": [...] },
+      "mood": { "text": "directive", "valence": 0.2, "arousal": 0.3, "vector": [...] }
+    },
+    "lineage": null
+  }
+}
+```
+
+Note: `createdBy` identifies a validator node. Receiving nodes check this against peer lifecycle roles from the handshake (Section 5.2) to apply anchor weight 2.0. Directive CMBs have no `lineage` — they are standalone anchors per Section 11.3.
 
 ### Q&A
 
@@ -1496,6 +1581,8 @@ Every remixed CMB carries lineage -- the provenance chain that traces how this k
 
 `ancestors` enables O(1) detection: any agent can check if its own CMB was remixed anywhere in the chain, even if it was offline during intermediate steps. No graph traversal needed.
 
+**Ancestors depth.** Implementations SHOULD cap the `ancestors` array at 50 entries. When a remix would produce ancestors exceeding this limit, the implementation SHOULD truncate from the oldest (earliest in the chain), preserving the most recent 50 ancestors. This bounds memory and wire overhead for long-lived remix chains while preserving recent provenance. The cap is RECOMMENDED, not REQUIRED — implementations in regulated domains MAY retain full ancestor chains for audit purposes.
+
 Lineage is what makes the graph a DAG (directed acyclic graph), not a flat list. Each remix points backward to its sources. The LLM traces forward through descendants to see impact; backward through ancestors to understand origin.
 
 ### 15.3 The Remix Chain
@@ -1627,11 +1714,13 @@ A node claiming full MMP conformance MUST additionally implement: Layer 3 memory
 
 ### 17.3 Cognitive Conformance
 
-Agents that implement Layers 5-7 (Synthetic Memory, xMesh, Application) SHOULD support:
+Agents that implement Layers 5-7 (Synthetic Memory, xMesh, Application) MUST support:
 
 - `remember(fields, parents?)` API -- creating CMBs with optional lineage
 - `CMBStore` protocol -- persistent storage and retrieval of Cognitive Memory Blocks
 - xMesh insight consumption -- processing insight outputs from the Layer 6 LNN
+- Synthetic Memory encode pipeline (Section 12.2) -- LLM reasoning output MUST be encoded into CfC-compatible vectors
+- CfC state persistence -- hidden state vectors (h₁, h₂) MUST be persisted across restarts to preserve feedback modulation learning (Section 11)
 
 ### 17.4 Testing
 
@@ -1728,6 +1817,9 @@ MITIGATION: SVAF per-field evaluation (Layer 4) operates on content, not just dr
 
 **Sybil attack** -- An attacker creates multiple fake nodes to amplify influence in mesh state aggregation.
 MITIGATION: Mesh state aggregation (Section 10.1) weights by drift and recency, not by node count. Many aligned Sybil nodes produce the same aggregate as one. Cryptographic identity (Section 3) limits Sybil creation when implemented.
+
+
+**Metadata exposure.** Even with E2E field encryption (Section 18.2.1), the following metadata travels in cleartext: `createdBy`, `lineage.parents`, `lineage.ancestors`, and mood `valence`/`arousal` values. Mood is intentionally unencrypted because it is always delivered even from rejected CMBs (Section 9.3) — this is the fast-coupling channel that enables cross-domain emotional synchronisation. Deployments where mood leakage is unacceptable MUST disable mood delivery by setting all mood field weights to 0. The `createdBy` and lineage fields are unencrypted because they are required for lifecycle role verification (Section 6.4) and remix graph traversal. This is a deliberate privacy trade-off: the protocol prioritises collective intelligence over metadata confidentiality.
 
 ### 18.5 Privacy & Deployment Recommendations
 
