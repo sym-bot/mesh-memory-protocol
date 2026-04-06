@@ -1539,7 +1539,7 @@ If both peers advertise the same extension in handshake, it is active. If only o
 
 | Extension | Status | Specification |
 |---|---|---|
-| `consent-v0.1` | Draft | MMP Consent Extension |
+| `consent-v0.1.0` | Published | [MMP Consent Extension v0.1.0](https://sym.bot/spec/mmp-consent) |
 
 ### 15.5 Extension Lifecycle
 
