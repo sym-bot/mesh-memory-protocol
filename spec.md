@@ -4,7 +4,7 @@
 
 | Field | Value |
 |---|---|
-| Version | 0.2.3 |
+| Version | 0.2.2 |
 | Status | Published |
 | Date | 6 April 2026 |
 | Author | Hongwei Xu <hongwei@sym.bot> |
@@ -32,8 +32,7 @@ Feedback and errata: spec@sym.bot or github.com/sym-bot/sym/issues.
 
 | Version | Date | Changes |
 |---|---|---|
-| 0.2.3 | 2026-04-06 | Protocol review fixes (12 issues): lifecycleRole added to handshake (Section 5.2). Validator role verification via role-grant chain required (Section 6.4). Wire examples for feedback and directive CMBs (Section 11). Message frame deprecated for cognitive content (Section 7). CMB forward compatibility: implementations MUST ignore unrecognised fields (Section 8). Multi-relay failover SHOULD (Section 4.4). Ancestors depth RECOMMENDED cap at 50 (Section 15). Sender frame size MUST NOT exceed MAX_FRAME_SIZE (Section 4.1). Synthetic Memory conformance requirement (Section 17). Metadata privacy trade-off documented (Section 18). ABNF wire format grammar (Section 4.1). Relay-based discovery as mDNS alternative (Section 5.1). CfC state persistence requirement (Section 13). |
-| 0.2.2 | 2026-04-06 | Section 11 -- Feedback Modulation: how collective intelligence becomes self-correcting. Validator-authority CMBs with per-field reasoning modulate SVAF coupling weights and CfC temporal adaptation through the existing mesh cognition loop. Feedback CMB content requirements (11.2). Directive feedback for standalone domain knowledge injection (11.3). Validator-origin CMBs enter at anchor weight 2.0 regardless of lifecycle state (6.4). Feedback recognition: agents check lineage.parents against own CMB keys (11.1). Formal definitions: Feedback CMB, Directive CMB added to terminology (Section 1). Neuroscience grounding: dopaminergic prediction error model with per-field direction and τ-modulated adaptation rate. Sections 12-21 renumbered from 11-20. |
+| 0.2.2 | 2026-04-06 | Protocol review fixes (12 issues): lifecycleRole added to handshake (Section 5.2). Validator role verification via role-grant chain required (Section 6.4). Wire examples for feedback and directive CMBs (Section 11). Message frame deprecated for cognitive content (Section 7). CMB forward compatibility: implementations MUST ignore unrecognised fields (Section 8). Multi-relay failover SHOULD (Section 4.4). Ancestors depth RECOMMENDED cap at 50 (Section 15). Sender frame size MUST NOT exceed MAX_FRAME_SIZE (Section 4.1). Synthetic Memory conformance requirement (Section 17). Metadata privacy trade-off documented (Section 18). ABNF wire format grammar (Section 4.1). Relay-based discovery as mDNS alternative (Section 5.1). CfC state persistence requirement (Section 13). |
 | 0.2.1 | 2026-04-02 | Node model: every autonomous agent MUST be a full peer node with own identity, coupling engine, and memory store. SVAF band-pass evaluation: four-class model (redundant/aligned/guarded/rejected) with per-field redundancy detection. CMB lifecycle: observed/remixed/validated/canonical/archived with anchor weight progression. Semantic encoder SHOULD for SVAF drift computation. Handshake adds version and extensions fields. Error frame type. |
 | 0.2.0 | 2026-03-27 | Formal specification published. 8-layer architecture. CAT7 CMB schema with lineage (parents + ancestors). SVAF per-field evaluation. Wire format normatively specified. Error frame. Frame type registry. Extension mechanism. JSON Schema. Connection state machine. Wire examples. |
 | 0.1.0 | 2025-08-01 | Initial protocol design (Consenix Labs Ltd). 4-layer architecture. Scalar drift evaluation. |

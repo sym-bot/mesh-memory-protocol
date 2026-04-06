@@ -2,7 +2,7 @@
 
 **A Mesh Protocol for Collective Intelligence**
 
-[![MMP Spec](https://img.shields.io/badge/spec-v0.2.3-purple)](https://sym.bot/spec/mmp)
+[![MMP Spec](https://img.shields.io/badge/spec-v0.2.2-purple)](https://sym.bot/spec/mmp)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC_BY_4.0-blue)](https://creativecommons.org/licenses/by/4.0/)
 
 ---
@@ -23,7 +23,7 @@ AI agents today run in isolation. They share data through message buses, API cal
 
 The full specification is published at **[sym.bot/spec/mmp](https://sym.bot/spec/mmp)** and mirrored in this repository:
 
-- **[spec.md](spec.md)** — MMP v0.2.3 (current)
+- **[spec.md](spec.md)** — MMP v0.2.2 (current)
 - **[extensions/consent-v0.1.0.md](extensions/consent-v0.1.0.md)** — Consent Extension
 
 ### 8-Layer Architecture
