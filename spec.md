@@ -66,6 +66,8 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHOULD", "SHOULD NOT", "
 | Mesh Cognition | The agent's LLM reasoning on the remix subgraph of CMBs -- traced via lineage ancestors -- to generate understanding that the agent's previous state of mind didn't have. Spans Layers 4-7. See Section 2.5. |
 | xMesh | Layer 6 -- each agent's own Liquid Neural Network (LNN). Evolves continuous-time cognitive state from Synthetic Memory input. Fast τ neurons track mood; slow τ neurons preserve domain expertise. |
 | CfC | Closed-form Continuous-time neural network (Hasani et al., 2022). The LNN architecture used in xMesh. Hidden state evolves through learned time-dependent interpolation gates. |
+| Feedback CMB | A CMB produced by a node with validator or anchor lifecycle role (Section 3.5) that carries `lineage.parents` pointing to a CMB being evaluated. Feedback CMBs modulate future SVAF evaluation and CfC adaptation for the producing agent. See Section 11.1. |
+| Directive CMB | A CMB produced by a validator or anchor node with no `lineage.parents` -- a standalone teaching signal that injects domain knowledge into the mesh as a high-weight anchor. See Section 11.3. |
 
 ---
 
@@ -203,7 +205,7 @@ The `name` field MUST be valid UTF-8, between 1 and 64 bytes inclusive. The name
 Each node MUST generate an Ed25519 keypair (RFC 8032) at first launch and persist it alongside the nodeId. The keypair serves three functions:
 
 - **Peer verification** -- the public key MUST be included in the handshake frame. Peers SHOULD challenge the node to sign a nonce to prove possession of the private key.
-- **Key exchange** -- Ed25519 keys are converted to X25519 for Diffie-Hellman shared secret derivation, used for end-to-end CMB encryption (Section 17.2.1).
+- **Key exchange** -- Ed25519 keys are converted to X25519 for Diffie-Hellman shared secret derivation, used for end-to-end CMB encryption (Section 19.2.1).
 - **Message signing** -- implementations MAY sign CMBs and other frames for tamper detection.
 
 The public key MUST be encoded as base64url (RFC 4648 Section 5) in all wire formats (handshake frames, DNS-SD TXT records). The private key MUST NOT leave the node.
@@ -518,7 +520,7 @@ The protocol does not prescribe a storage backend. Agents choose based on their 
 
 ### 6.3 Retention
 
-Implementations MUST support configurable retention via `retentionSeconds`. CMBs older than the retention period SHOULD be purged automatically. See Section 18 (Configuration) for per-profile retention defaults.
+Implementations MUST support configurable retention via `retentionSeconds`. CMBs older than the retention period SHOULD be purged automatically. See Section 19 (Configuration) for per-profile retention defaults.
 
 Purge MUST preserve graph integrity: a CMB referenced by any newer entry's `lineage.ancestors` MUST NOT be deleted, even if past retention age. The remix chain is the audit trail -- breaking it breaks provenance.
 
@@ -543,6 +545,8 @@ The lifecycle branches at human judgment: observed → remixed → validated →
 
 Anchor weight influences SVAF evaluation: when computing per-field drift against local anchors, canonical and validated CMBs contribute more to the fused anchor vector than observed or archived CMBs. This creates a natural hierarchy where human-confirmed knowledge and collective consensus outweigh raw observations -- without overriding agent autonomy. Each agent still evaluates incoming signals through its own field weights.
 
+**Validator-origin CMBs.** CMBs produced by nodes with validator or anchor lifecycle role (Section 3.5) enter the mesh at anchor weight 2.0 regardless of lifecycle state. This applies to both feedback CMBs (with `lineage.parents`, Section 12.1) and directive CMBs (without parents, Section 12.3). The elevated weight reflects the authority of the producing node, not a lifecycle transition -- the CMB is created with weight 2.0, not promoted to it. Receiving nodes MUST check `createdBy` against known lifecycle roles to apply the correct initial weight.
+
 ### 6.5 Validation Authority
 
 The transitions to `validated` and `dismissed` are the most consequential lifecycle events -- they commit human judgment to the mesh. Validation permanently increases anchor weight to 2.0; dismissal reduces it to 0.5. Both transitions MUST be restricted to nodes with appropriate lifecycle roles (Section 3.5).
@@ -564,7 +568,7 @@ This prevents agent-level spoofing of validation authority. An agent cannot self
 2. The dismissed CMB's reduced anchor weight (0.5) means similar future signals score lower in SVAF evaluation
 3. When the agent's LLM next runs `reason()` or `remix()`, the mesh context includes the dismissal -- the LLM sees the reasoning and can adjust its assessment criteria
 
-The effectiveness of this feedback loop depends on the **content quality** of the dismissal CMB. A dismissal that says "not actionable" provides the anchor weight reduction (step 2) but no directional correction (step 3). Dismissal CMBs SHOULD carry per-field reasoning -- see Section 10.7 (Feedback Neuromodulation) and Section 10.8 (Feedback CMB Requirements) for normative content requirements.
+The effectiveness of this feedback loop depends on the **content quality** of the dismissal CMB. A dismissal that says "not actionable" provides the anchor weight reduction (step 2) but no directional correction (step 3). Dismissal CMBs SHOULD carry per-field reasoning -- see Section 11.1 (Feedback Neuromodulation) and Section 11.2 (Feedback CMB Requirements) for normative content requirements.
 
 Both transitions require validator or anchor role (Section 3.5). Both broadcast to the mesh. The difference is directional: validation increases influence (the mesh learns what humans value), dismissal decreases influence (the mesh learns what humans ignore).
 
@@ -710,7 +714,7 @@ Coupling decision based on drift:
 
 ### 9.2 Content-Level Evaluation (SVAF)
 
-When a node receives a `cmb` frame, it MUST evaluate the signal independently of peer coupling state. Implementations MUST support at least the non-neural evaluation path (cosine-distance SVAF). Neural evaluation is RECOMMENDED. The encoder that maps field text to vectors SHOULD use semantic embeddings (e.g. sentence-transformers) rather than lexical hashing -- per-field evaluation quality is bounded by encoder quality (see Section 17.7).
+When a node receives a `cmb` frame, it MUST evaluate the signal independently of peer coupling state. Implementations MUST support at least the non-neural evaluation path (cosine-distance SVAF). Neural evaluation is RECOMMENDED. The encoder that maps field text to vectors SHOULD use semantic embeddings (e.g. sentence-transformers) rather than lexical hashing -- per-field evaluation quality is bounded by encoder quality (see Section 18.7).
 
 The SVAF evaluation computes per-field drift between the incoming CMB and local anchor CMBs, applies per-agent field weights (α_f), combines with temporal drift, and produces a four-class decision using a **band-pass** model:
 
@@ -846,7 +850,13 @@ State blending is one step in a closed loop. Each cycle, the graph grows and eve
 
 ↻ loop -- graph grows, agents learn
 
-### 10.7 Feedback Neuromodulation
+---
+
+## 11. Feedback Modulation
+
+Feedback modulation is the mechanism by which collective intelligence becomes self-correcting. It is not a separate system -- it is the mesh cognition loop (Section 10.6) processing a specific class of signals: human judgment expressed as CMBs with validator authority and per-field reasoning. Teaching is as fundamental to collective intelligence as coupling. Without it, the mesh can think together but cannot learn together.
+
+### 11.1 Feedback Neuromodulation
 
 The mesh cognition loop (Section 10.6) describes how agents learn from each other. Feedback neuromodulation describes how the mesh learns from **human judgment** -- using the same loop, not a separate channel.
 
@@ -856,11 +866,13 @@ MMP feedback follows the same principle. When a validator node (Section 6.5) pro
 
 1. **Anchor weight** (Section 6.4) -- validated CMBs have weight 2.0, dismissed CMBs have weight 0.5. These weights influence future SVAF evaluations: validated knowledge shapes future anchors more than unvalidated signals; dismissed knowledge shapes them less.
 
-2. **Per-field drift** (Section 9.2) -- when the feedback CMB carries per-field reasoning (which fields were miscalibrated and why), SVAF computes per-field drift between the feedback and the producing agent's future signals. This is the directional component of the prediction error: the mesh learns not just that a signal was wrong, but **which dimension was wrong and in what direction**.
+2. **Per-field content** (Section 9.2) -- SVAF already computes per-field drift for every incoming CMB. No new computation is needed. What changes is the input quality: when the feedback CMB carries rich per-field reasoning (which fields were miscalibrated and why), the resulting anchor vectors encode directional information. Future signals from the producing agent are evaluated against these richer anchors. The mesh learns not just that a signal was wrong, but **which dimension was wrong and in what direction** -- through the same SVAF evaluation path that processes all CMBs.
 
 3. **τ-modulated adaptation** (Section 10.3) -- the feedback signal enters the agent's CfC cell (Layer 6) through the Synthetic Memory pipeline. Fast-τ neurons integrate the feedback immediately (affective corrections: "tone down the alarm"). Slow-τ neurons integrate gradually (strategic corrections: "this analytical frame is wrong"). A single dismissal produces a small shift in slow-τ neurons. Repeated similar feedback compounds -- the agent's cognitive baseline shifts until the lesson is encoded in the CfC hidden state itself, not recalled as a stored rule.
 
 This is how the mesh becomes self-correcting. The human does not retrain the agent, reconfigure its weights, or edit its prompt. The human produces a CMB. The mesh cognition loop does the rest.
+
+**Feedback recognition.** When a node receives a feedback CMB (a CMB with `lineage.parents` from a validator/anchor node), the receiving node SHOULD check whether any of the parent keys match CMBs it produced. If a match is found, the feedback is about the receiving agent's own prior output. Implementations SHOULD surface this in the LLM reasoning context (e.g. "your CMB cmb-xyz was dismissed by the founder with reasoning: ...") so the LLM can adjust its analytical approach. This check is O(1) against the node's local memory index.
 
 **Neuroscience grounding.** The three mechanisms above map to known neuromodulatory dynamics:
 
@@ -872,9 +884,9 @@ This is how the mesh becomes self-correcting. The human does not retrain the age
 | Hebbian plasticity gated by neuromodulators | Anchor weight modulating SVAF evaluation | Validated knowledge strengthens future coupling; dismissed knowledge weakens it |
 | Prefrontal top-down control | Validator authority (Section 6.5) | Human modulates agent processing without replacing agent function |
 
-The key insight: biological neuromodulation is not a separate processing layer. It is a cross-cutting modulation of existing processing. MMP feedback is identical -- it flows through the existing SVAF → Synthetic Memory → CfC → Blending pipeline. No new frame types, no new layers. The machinery already exists. What changes is the **content quality** of the feedback signal (Section 10.8) and the **authority** of the producing node (Section 6.5).
+The key insight: biological neuromodulation is not a separate processing layer. It is a cross-cutting modulation of existing processing. MMP feedback is identical -- it flows through the existing SVAF → Synthetic Memory → CfC → Blending pipeline. No new frame types, no new layers. The machinery already exists. What changes is the **content quality** of the feedback signal (Section 12.2) and the **authority** of the producing node (Section 6.5).
 
-### 10.8 Feedback CMB Requirements
+### 11.2 Feedback CMB Requirements
 
 The effectiveness of feedback neuromodulation depends entirely on the content quality of the feedback CMB. A dismissal that says "not actionable" in every field produces a neuromodulatory signal with no direction -- the equivalent of a dopamine signal with zero magnitude. The mesh cannot learn from it.
 
@@ -892,11 +904,11 @@ Validator nodes producing validation or dismissal CMBs SHOULD populate CAT7 fiel
 
 **Why SHOULD, not MUST?** Quick dismissals with minimal reasoning are valid -- the anchor weight reduction (0.5) alone provides a learning signal. But the per-field reasoning is what enables directional correction. Implementations SHOULD provide a mechanism for validators to add reasoning (e.g. a text input on dismissal) without requiring it for every action.
 
-**Feedback is a remix.** Per Section 14, the founder processes the agent's signal through their own domain lens and produces new understanding. A dismissal with reasoning is a remix: the founder's strategic expertise intersected with the agent's feed analysis and produced knowledge that neither had alone ("GStack is single-agent scaffolding, SYM agents use LLM APIs directly -- different layer"). The feedback CMB carries this new understanding via lineage, and the mesh propagates it.
+**Feedback is a remix.** Per Section 15, the founder processes the agent's signal through their own domain lens and produces new understanding. A dismissal with reasoning is a remix: the founder's strategic expertise intersected with the agent's feed analysis and produced knowledge that neither had alone. The feedback CMB carries this new understanding via lineage, and the mesh propagates it. The founder's reasoning constitutes new domain data per Section 15.7 -- the founder's strategic context, architectural knowledge, and judgment are observations from the founder's domain that did not exist in the agent's signal. This satisfies all three remix conditions: new domain data exists (founder's reasoning), the peer signal is relevant (the agent's CMB prompted the action), and the intersection produces new knowledge (why this signal was wrong and what the agent should learn).
 
-### 10.9 Directive Feedback
+### 11.3 Directive Feedback
 
-Sections 10.7-10.8 describe feedback tied to a specific CMB via lineage. Directive feedback is a standalone teaching CMB -- a signal that injects domain knowledge into the mesh **without requiring a parent ticket**.
+Sections 11.1-11.2 describe feedback tied to a specific CMB via lineage. Directive feedback is a standalone teaching CMB -- a signal that injects domain knowledge into the mesh **without requiring a parent ticket**.
 
 A directive feedback CMB is produced by a validator or anchor node with:
 
@@ -941,17 +953,17 @@ Directive feedback is the protocol equivalent of **prefrontal top-down control**
 
 **Does directive feedback override agent autonomy?** -- No. The directive becomes a high-weight anchor, not a rule. The agent's SVAF still evaluates each incoming signal independently. If the agent receives a signal that genuinely warrants attention despite the directive (e.g., a single-agent tool that adds an A2A coordination layer), SVAF can accept it because the per-field content will differ from the directive's anchors. The directive shifts the baseline, not the ceiling.
 
-**How many dismissals before an agent "learns"?** -- This depends on the CfC time constants. For fast-τ neurons (mood, affect), a single feedback CMB produces measurable adaptation. For slow-τ neurons (domain expertise, analytical frame), the adaptation is proportional to `1/τ` per cycle. With slow-τ > 30s and typical inference intervals of 10-60s, 3-5 similar feedback signals produce a meaningful baseline shift. This mirrors biological learning: one correction is a signal; repeated corrections become a habit.
+**How many dismissals before an agent "learns"?** -- This depends on the CfC time constants and is implementation-specific. For fast-τ neurons (mood, affect), a single feedback CMB produces measurable adaptation. For slow-τ neurons (domain expertise, analytical frame), the adaptation is proportional to `1/τ` per cycle. As an illustrative example with the reference implementation defaults (slow-τ > 30s, inference intervals 10-60s), approximately 3-5 similar feedback signals produce a meaningful baseline shift. Implementations with different τ configurations will see different convergence rates. The protocol does not prescribe a specific number -- the dynamics emerge from each agent's CfC configuration.
 
 **Why not just update the agent's prompt or configuration?** -- Prompt updates are out-of-band: they bypass the mesh, leave no lineage, produce no CMBs, and cannot be traced by other agents. Feedback through the mesh is auditable (lineage), composable (other agents can remix the feedback), and self-documenting (the reasoning is in the CMB fields). It also respects the protocol's design principle: no out-of-band configuration changes. The mesh learns through the mesh.
 
 ---
 
-## 11. Synthetic Memory (Layer 5)
+## 12. Synthetic Memory (Layer 5)
 
 Synthetic Memory bridges LLM reasoning (Layer 7) and LNN dynamics (Layer 6). It encodes **derived knowledge** -- the output of an agent's LLM reasoning on the remix subgraph -- into CfC-compatible hidden state vectors (h₁, h₂).
 
-### 11.1 Purpose
+### 12.1 Purpose
 
 Synthetic Memory is **not** remixed CMBs. It is understanding derived via reasoning.
 
@@ -960,7 +972,7 @@ Synthetic Memory is **not** remixed CMBs. It is understanding derived via reason
 | Input | Text output from the agent's LLM after tracing lineage ancestors and reasoning on the remix subgraph |
 | Output | (h₁, h₂) vector pair compatible with the agent's CfC cell (Layer 6) |
 
-### 11.2 Encode Pipeline
+### 12.2 Encode Pipeline
 
 The pipeline has four stages. Each stage MUST complete before the next begins:
 
@@ -969,14 +981,14 @@ The pipeline has four stages. Each stage MUST complete before the next begins:
 3. **ENCODE** -- transform reasoning text into (h₁, h₂) vectors
 4. **EVOLVE** -- feed vectors to the agent's LNN (Layer 6)
 
-### 11.3 Encoder Requirements
+### 12.3 Encoder Requirements
 
 - Encoder MUST produce vectors matching the agent's CfC hidden dimension.
 - Encoder MUST be deterministic -- same input MUST produce the same output.
 - Encoder SHOULD preserve semantic similarity (similar reasoning → similar vectors).
 - If reasoning produces no understanding, output MUST be zero vectors (h₁ = 0, h₂ = 0).
 
-### 11.4 Context Curation
+### 12.4 Context Curation
 
 The LLM does **not** receive all ancestor CMBs with all fields. Context is curated by three filters:
 
@@ -990,11 +1002,11 @@ Result: a **projected subgraph** -- ~500 tokens instead of 1M. The LLM reasons o
 
 ---
 
-## 12. xMesh -- Per-Agent LNN (Layer 6)
+## 13. xMesh -- Per-Agent LNN (Layer 6)
 
 Each agent runs its own Liquid Neural Network (LNN) implementing Closed-form Continuous-time (CfC) dynamics. The LNN evolves cognitive state from Synthetic Memory input (Layer 5) and direct CMB processing. Hidden state (h₁, h₂) is exchanged via `state-sync` frames.
 
-### 12.1 CfC Cell
+### 13.1 CfC Cell
 
 Hidden state evolves via closed-form continuous-time dynamics with bimodal time constants:
 
@@ -1012,7 +1024,7 @@ Per-neuron time constant:  τ ≈ 1 / |time_a|
 | τ initialisation (slow half) | > 30s | Domain expertise, identity -- resists coupling, stays sovereign |
 | Hidden dimension | 128 RECOMMENDED | Reference implementations use 64. Implementations SHOULD use 64-256; 128 is RECOMMENDED for production. |
 
-### 12.2 Insight Output Schema
+### 13.2 Insight Output Schema
 
 The LNN produces insight outputs that Layer 7 applications consume:
 
@@ -1024,7 +1036,7 @@ The LNN produces insight outputs that Layer 7 applications consume:
 | anomaly | float 0-1 | MUST | How unusual the current signal sequence is |
 | coherence | float 0-1 | SHOULD | Phase alignment in coupled state |
 
-### 12.3 What Each Output Means
+### 13.3 What Each Output Means
 
 #### remix_score
 
@@ -1056,7 +1068,7 @@ The LNN produces insight outputs that Layer 7 applications consume:
 - MAY encode mood dimensions + domain-specific patterns
 - Available to Layer 7 as prior information for next reasoning cycle
 
-### 12.4 Temporal Dynamics
+### 13.4 Temporal Dynamics
 
 Time constants create a natural temporal hierarchy for mesh coupling:
 
@@ -1071,7 +1083,7 @@ Blending is τ-modulated:
 α_i = min(α_effective × K × sim_i / τ_i, 1.0)
 ```
 
-### 12.5 Wire Example
+### 13.5 Wire Example
 
 Real xMesh insight from a production session. A coding agent observed 5 structured CMBs across diverse topics (memory store refactor, protocol collaboration, social engagement, ML training, spec authoring) over a 12-hour session with no mesh peers connected:
 
@@ -1099,7 +1111,7 @@ Real xMesh insight from a production session. A coding agent observed 5 structur
 
 This is a single-agent baseline. With peers connected, remixScore rises as the agent's CMBs are remixed by others. Coherence rises as agents converge on shared understanding. Anomaly spikes when cross-domain signals reveal something no single agent could see.
 
-### 12.6 API
+### 13.6 API
 
 Implementations MUST expose the following operations. Method names are normative -- implementations across languages MUST use these names for cross-platform consistency.
 
@@ -1131,7 +1143,7 @@ The input to `ingestSignal`. Each signal represents one CMB observation (own or 
 - Inference MAY be triggered immediately when a high-priority signal arrives (e.g., anomaly from peer)
 - Inference MUST NOT block the main event loop -- run as subprocess or background task
 
-### 12.7 Implementation Requirements
+### 13.7 Implementation Requirements
 
 - Model SHOULD be trained per-agent domain
 - Inference latency SHOULD be < 50ms per CMB step
@@ -1140,18 +1152,18 @@ The input to `ingestSignal`. Each signal represents one CMB observation (own or 
 
 ---
 
-## 13. Application (Layer 7)
+## 14. Application (Layer 7)
 
 Layer 7 is where agents live and their LLMs reason on the remix subgraph. Mesh Cognition happens here. The protocol delivers curated context; the agent decides what to do with it.
 
-### 13.1 The Agent's Role
+### 14.1 The Agent's Role
 
 - Each agent observes its own domain (coding, music, fitness, health, legal, etc.)
 - Each agent contributes what only it can see
 - Each agent reasons on what the mesh sees collectively
 - Each agent acts autonomously -- the mesh influences but never overrides
 
-### 13.2 Consuming xMesh Insights
+### 14.2 Consuming xMesh Insights
 
 How agents SHOULD respond to Layer 6 outputs:
 
@@ -1164,18 +1176,18 @@ How agents SHOULD respond to Layer 6 outputs:
 | coherence high (>0.7) | Mesh is aligned | Confidence in collective insight is high |
 | coherence low (<0.3) | Mesh is fragmented | MAY indicate context transition -- observe more before acting |
 
-### 13.3 Producing CMBs
+### 14.3 Producing CMBs
 
 When an agent observes something significant in its domain, it MUST:
 
-1. Extract CAT7 fields from the observation (see Section 13.3.1)
+1. Extract CAT7 fields from the observation (see Section 15.3.1)
 2. Create a CMB from the structured fields
 3. Store via `remember(fields, parents)` -- persists locally, computes lineage, broadcasts to mesh
 4. Include lineage if this CMB is a response to mesh signals
 
 The protocol MUST NOT extract fields from raw text. The agent IS the intelligence -- field extraction is the agent's responsibility. The protocol transports, evaluates, and stores structured CMBs. It does not interpret them.
 
-#### 13.3.1 Field Extraction Methods
+#### 14.3.1 Field Extraction Methods
 
 How an agent extracts CAT7 fields depends on its architecture. Two approaches are valid:
 
@@ -1219,17 +1231,17 @@ node.remember({
 })
 ```
 
-#### 13.3.2 API
+#### 14.3.2 API
 
 | Method | Input | Behaviour |
 |---|---|---|
-| remember(fields, parents?) | CAT7 fields + optional parent CMBs | Creates CMB, computes lineage from parents automatically, stores locally, broadcasts `cmb` to all peers. Pass parent CMBs when remixing (Section 14). |
+| remember(fields, parents?) | CAT7 fields + optional parent CMBs | Creates CMB, computes lineage from parents automatically, stores locally, broadcasts `cmb` to all peers. Pass parent CMBs when remixing (Section 15). |
 | recall(query) | Search string | Returns matching CMBs from local memory store |
 | insight() | None | Returns latest xMesh collective intelligence (Layer 6) |
 
 The `fields` parameter MUST be a structured object with CAT7 field keys. Each field contains `text` (human-readable, MUST) and is encoded into a vector by the SDK. The `mood` field MAY additionally carry `valence` (-1 to 1) and `arousal` (-1 to 1) -- RECOMMENDED when the agent has reliable circumplex data (e.g. mood wheels, physiological sensors), omit when it would be a guess. Omitted fields default to `"neutral"`.
 
-#### 13.3.3 LLM Prompt Template
+#### 14.3.3 LLM Prompt Template
 
 For agents that process natural language but are not themselves LLMs (e.g. a chat app, a note-taking tool), the following prompt template can be used to call any LLM API (Claude, GPT, Gemini, etc.) for field extraction. Copy and paste into your LLM API call:
 
@@ -1258,7 +1270,7 @@ JSON:
 
 AI coding agents (Claude Code, Copilot, Cursor, etc.) do not need this template -- they ARE the LLM. The SYM skill file teaches them to extract fields directly from what they observe.
 
-#### 13.3.4 Guidelines
+#### 14.3.4 Guidelines
 
 - Be specific -- numbers, timeframes, concrete details in each field
 - Share observations, not commands -- the agent observes, other agents decide
@@ -1266,7 +1278,7 @@ AI coding agents (Claude Code, Copilot, Cursor, etc.) do not need this template 
 - Close the loop -- when acting on collective insight, share what was done
 - Only include fields the agent can meaningfully extract -- omit rather than guess
 
-### 13.4 The Mesh Cognition Loop
+### 14.4 The Mesh Cognition Loop
 
 The complete closed loop connecting all Mesh Cognition layers:
 
@@ -1283,9 +1295,9 @@ The complete closed loop connecting all Mesh Cognition layers:
 
 ↻ each cycle, the graph grows -- each agent understands more than it did before
 
-### 13.5 Domain Examples
+### 14.5 Domain Examples
 
-#### 13.5.1 AI Research Team -- Collective Reasoning
+#### 14.5.1 AI Research Team -- Collective Reasoning
 
 Six agents investigate: "Are emergent capabilities in LLMs real phase transitions or artefacts of metric choice?" Each has a distinct role and **different field weights** reflecting how real research teams divide cognitive labour.
 
@@ -1326,9 +1338,9 @@ explorer-a (scaling law claims)    explorer-b (metric methodology)
 
 Seven CMBs, six agents, three phases of validation. The breakthrough came from the **collision of intent and motivation fields** across agents with different perspectives -- not from any single agent's observation. The DAG traces every claim to its evidence, every challenge to its basis, every idea to the signals that produced it. **The graph IS the research.**
 
-*Verified in production:* This pattern is verified with real agents. A knowledge explorer (Linux, GitHub Actions) and a researcher agent (Claude Code, macOS) coupled via relay with E2E encryption. The daemon shared its question CMBs to the knowledge feed via anchor sync on connection. SVAF accepted the question at drift 0.068. An iOS app (MeloTune) received the xMesh insight via APNs wake push. Three platforms, one mesh, autonomous coupling. See Section 13.7 for the full production log.
+*Verified in production:* This pattern is verified with real agents. A knowledge explorer (Linux, GitHub Actions) and a researcher agent (Claude Code, macOS) coupled via relay with E2E encryption. The daemon shared its question CMBs to the knowledge feed via anchor sync on connection. SVAF accepted the question at drift 0.068. An iOS app (MeloTune) received the xMesh insight via APNs wake push. Three platforms, one mesh, autonomous coupling. See Section 14.7 for the full production log.
 
-#### 13.5.2 Consumer Agents
+#### 14.5.2 Consumer Agents
 
 **Music agent**
 
@@ -1353,7 +1365,7 @@ Seven CMBs, six agents, three phases of validation. The breakthrough came from t
 
 None of these agents told each other what to do. Each reasoned on the collective signal and acted through its own domain lens. **That is Mesh Cognition.**
 
-### 13.6 Collective Query -- Asking the Mesh
+### 14.6 Collective Query -- Asking the Mesh
 
 A single agent asking a single LLM gets one answer from one perspective. The mesh gives a **collective answer** -- every coupled agent contributes what only it can see. No new frame type is needed. The pattern uses existing CMB primitives with lineage:
 
@@ -1369,9 +1381,9 @@ This is fundamentally different from orchestrated multi-agent frameworks where a
 
 Agents that have nothing relevant to contribute simply don't respond -- SVAF rejects the question CMB because the fields don't match their domain weights. No noise, no irrelevant answers, no token waste.
 
-The collective query pattern composes with the research team example (Section 13.5.1). When the synthesis agent produces an emergent idea, the validator can "ask the mesh" whether the idea is falsifiable -- and every agent responds from its domain perspective, creating a multi-parent remix that IS the collective evaluation.
+The collective query pattern composes with the research team example (Section 15.5.1). When the synthesis agent produces an emergent idea, the validator can "ask the mesh" whether the idea is falsifiable -- and every agent responds from its domain perspective, creating a multi-parent remix that IS the collective evaluation.
 
-### 13.7 Verified: Complete Mesh Cognition Loop
+### 14.7 Verified: Complete Mesh Cognition Loop
 
 The following is a **production log** from two real MMP nodes -- a knowledge feed agent (running on GitHub Actions) and a sym-daemon (running on macOS) -- connected via WebSocket relay with E2E encryption. This is the first verified end-to-end execution of the complete Mesh Cognition loop.
 
@@ -1394,7 +1406,7 @@ The following is a **production log** from two real MMP nodes -- a knowledge fee
 [knowledge-feed] E2E encrypted fields for peer 6089e935
 [knowledge-feed] Remembered: "focus: Sycophancy in AI systems..." → 1/1 peers
 
-# 6. sym-daemon receives, E2E decrypts (Section 17.2.1)
+# 6. sym-daemon receives, E2E decrypts (Section 19.2.1)
 [sym-daemon] E2E decrypted fields from knowledge-feed
 
 # 7. SVAF content-level evaluation: ALIGNED (Section 9.2)
@@ -1403,7 +1415,7 @@ The following is a **production log** from two real MMP nodes -- a knowledge fee
 [sym-daemon] SVAF heuristic aligned from knowledge-feed:
   "focus: Sycophancy in AI systems" drift:0.005
 
-# 8. Fed to xMesh LNN (Section 12)
+# 8. Fed to xMesh LNN (Section 13)
 [sym-daemon] xMesh: ingested mesh from knowledge-feed
 
 # 9. xMesh produces collective insight
@@ -1420,7 +1432,7 @@ This log demonstrates every layer of the MMP stack operating in production:
 |---|---|---|
 | L0 Identity | Each node has its own UUID v7 + Ed25519 keypair | §3 |
 | L1 Transport | WebSocket relay with length-prefixed JSON | §4 |
-| L2 Connection | Handshake, E2E key exchange, peer discovery via relay | §5, 17.2.1 |
+| L2 Connection | Handshake, E2E key exchange, peer discovery via relay | §5, 18.2.1 |
 | L3 Memory | CMB created with CAT7 fields, stored locally, broadcast | §6, 8 |
 | L4 Coupling | Peer rejected (0.936) but CMB accepted (0.005) independently | §9.1, 9.2, 9.4 |
 | L5 Synthetic Memory | Context re-encoded after accepting CMB | §11 |
@@ -1441,7 +1453,7 @@ The verified loop ran across three platforms simultaneously:
 
 Three agents on three different operating systems -- macOS, Linux, iOS -- connected via WebSocket relay with E2E encryption, coupled through SVAF, with xMesh LNN producing insights that **woke a sleeping mobile device via APNs** to join the collective reasoning. No central server orchestrated this. Each agent acted autonomously on the collective signal.
 
-### 13.8 Implementation Requirements
+### 14.8 Implementation Requirements
 
 - Agents MUST implement CMB creation with CAT7 fields
 - Agents MUST broadcast CMBs via `remember()` or `cmb` frames
@@ -1460,11 +1472,11 @@ Three agents on three different operating systems -- macOS, Linux, iOS -- connec
 
 ---
 
-## 14. Remix
+## 15. Remix
 
 Remix is how collective intelligence emerges. Without remix, agents forward data. With remix, each agent processes incoming signals through its own domain lens and produces **new understanding that didn't exist before**. The growing graph of remixed CMBs IS the collective intelligence -- not the original observations, not the agents, not the mesh. The graph.
 
-### 14.1 What Remix Is
+### 15.1 What Remix Is
 
 When a node receives a CMB that passes SVAF evaluation (Layer 4), the agent MUST NOT store the original CMB. Instead, it MUST create a **new** CMB -- the remix -- that captures what the agent understood from the incoming signal, processed through its own domain intelligence.
 
@@ -1472,7 +1484,7 @@ The remix is not a copy. It is not a summary. It is new knowledge that exists be
 
 The remixed CMB is immutable, stored locally, and broadcast to the mesh. It becomes input for the next cycle. Other agents receive it, remix it through their lenses, and the graph grows.
 
-### 14.2 Lineage
+### 15.2 Lineage
 
 Every remixed CMB carries lineage -- the provenance chain that traces how this knowledge was built:
 
@@ -1486,7 +1498,7 @@ Every remixed CMB carries lineage -- the provenance chain that traces how this k
 
 Lineage is what makes the graph a DAG (directed acyclic graph), not a flat list. Each remix points backward to its sources. The LLM traces forward through descendants to see impact; backward through ancestors to understand origin.
 
-### 14.3 The Remix Chain
+### 15.3 The Remix Chain
 
 Collective intelligence compounds through remix chains. Each step adds domain-specific understanding that the previous agent couldn't produce:
 
@@ -1497,7 +1509,7 @@ Collective intelligence compounds through remix chains. Each step adds domain-sp
 
 Four agents. Four domains. One chain of understanding. `cmb-g7h8` (Calendar rescheduling a meeting) exists because `cmb-a1b2` (Claude Code noticing fatigue) started a chain that no single agent could have produced. The calendar agent traces `ancestors: [cmb-a1b2, cmb-c3d4, cmb-e5f6]` -- the full story of why this meeting was moved, across three domains it knows nothing about.
 
-### 14.4 Why Not Just Share?
+### 15.4 Why Not Just Share?
 
 Message buses share data. Pub/sub systems route data. RAG retrieves data. None of them produce new understanding. The difference:
 
@@ -1508,7 +1520,7 @@ Message buses share data. Pub/sub systems route data. RAG retrieves data. None o
 | RAG | Agent retrieves similar documents | Agent has retrieved data. Single-agent. No mesh. |
 | **MMP Remix** | Agent B processes A's CMB through its domain lens | **New CMB exists that neither A nor B could have produced alone. Graph grows.** |
 
-### 14.5 Implementation
+### 15.5 Implementation
 
 When SVAF accepts an incoming CMB, the agent MUST:
 
@@ -1522,7 +1534,7 @@ The original incoming CMB MUST NOT be stored. Only the remix is stored. This ens
 
 If the agent cannot produce meaningful new understanding from the incoming signal (e.g. the mood field was delivered from a rejected CMB and the agent simply adjusted its behaviour), the agent MAY create a minimal remix capturing what it did. The remix does not need to be profound -- it needs to be honest. `commitment: "now playing: calm ambient"` is a valid remix. It tells the mesh what happened. Other agents decide what it means.
 
-### 14.6 The Graph Is Intelligence
+### 15.6 The Graph Is Intelligence
 
 The DAG of remixed CMBs is not a log. It is not a database. It is the collective intelligence itself. Each node in the graph is a moment where one agent's domain knowledge intersected with another's. Each edge (lineage) traces how understanding flowed and transformed across domains.
 
@@ -1535,7 +1547,7 @@ As the graph grows:
 
 No central model aggregates this. No orchestrator directs it. Each agent remixes what it receives, stores what it understands, and broadcasts what it did. Intelligence emerges from the structure of the graph -- not from any single node in it.
 
-### 14.7 Remix Requires New Domain Data
+### 15.7 Remix Requires New Domain Data
 
 An agent MUST NOT produce a remix CMB unless it has **new observations from its own domain** that intersect with the incoming signal. Receiving a peer signal alone is not sufficient cause to remix. Silence is correct when the agent has nothing new from its domain to contribute.
 
@@ -1553,7 +1565,7 @@ This ensures the remix graph grows with genuine domain intersections, not with p
 
 ### Q&A
 
-**Does every accepted CMB need to be remixed?** -- No. An agent MUST NOT remix without new domain data (Section 14.7). If the agent has nothing new from its own domain to intersect with the signal, silence is correct. The agent MUST NOT store the original either -- it discards the original and stays silent until it has new domain observations that create a genuine intersection.
+**Does every accepted CMB need to be remixed?** -- No. An agent MUST NOT remix without new domain data (Section 15.7). If the agent has nothing new from its own domain to intersect with the signal, silence is correct. The agent MUST NOT store the original either -- it discards the original and stays silent until it has new domain observations that create a genuine intersection.
 
 **What if two agents remix the same CMB?** -- Both produce independent remixes through their own domain lenses. Both are stored with lineage pointing to the same parent. The graph branches. This is correct -- two domains produced two different understandings from the same signal.
 
@@ -1563,37 +1575,37 @@ This ensures the remix graph grows with genuine domain intersections, not with p
 
 ---
 
-## 15. Extension Mechanism
+## 16. Extension Mechanism
 
 MMP is designed for extensibility. Extensions add new frame types, handshake fields, or protocol behaviours without modifying the core specification.
 
-### 15.1 Extension Registration
+### 16.1 Extension Registration
 
 Extensions are advertised via the `extensions` field in the handshake frame. A node MUST ignore extensions it does not recognise. A node MUST NOT require a peer to support any extension.
 
-### 15.2 Frame Type Naming
+### 16.2 Frame Type Naming
 
 **Core types** (this specification): MUST NOT be redefined by extensions. **Extension types**: MUST use `<extension>-<name>` format (e.g., `consent-withdraw`). **Vendor types**: MUST use `x-<vendor>-<name>` format. Vendor types MUST be silently ignored by non-supporting nodes.
 
-### 15.3 Extension Negotiation
+### 16.3 Extension Negotiation
 
 If both peers advertise the same extension in handshake, it is active. If only one peer advertises it, the extension is NOT active -- the advertising peer MUST NOT send extension-specific frames to a peer that does not support them.
 
-### 15.4 Published Extensions
+### 16.4 Published Extensions
 
 | Extension | Status | Specification |
 |---|---|---|
 | `consent-v0.1.0` | Published | [MMP Consent Extension v0.1.0](https://sym.bot/spec/mmp-consent) |
 
-### 15.5 Extension Lifecycle
+### 16.5 Extension Lifecycle
 
 Extensions progress through a defined lifecycle:
 
 - **Proposal**: submit as a Draft extension with a specification document and at least one reference implementation.
 - **Review**: community review plus spec maintainer approval. Draft extensions MAY be deployed experimentally but MUST NOT be treated as stable.
-- **Promotion to Core**: an extension MAY be promoted to a core frame type. Promotion requires a spec version bump (see Section 17) and MUST maintain backward compatibility with existing deployments of the extension.
+- **Promotion to Core**: an extension MAY be promoted to a core frame type. Promotion requires a spec version bump (see Section 18) and MUST maintain backward compatibility with existing deployments of the extension.
 
-### 15.6 Versioning
+### 16.6 Versioning
 
 Extensions use Semantic Versioning independently of the core MMP specification version. An extension version bump MUST NOT require a core spec version bump unless the extension is being promoted to core.
 
@@ -1603,17 +1615,17 @@ Extensions use Semantic Versioning independently of the core MMP specification v
 
 ---
 
-## 16. Conformance
+## 17. Conformance
 
-### 16.1 Minimal Conformance (Relay Node)
+### 17.1 Minimal Conformance (Relay Node)
 
 A node claiming minimal MMP conformance MUST implement: Layer 0 identity (persistent UUID), Layer 1 transport (length-prefixed JSON over TCP), Layer 2 connection (handshake, heartbeat, gossip), and frame forwarding for relay. It MUST silently ignore unrecognised frame types.
 
-### 16.2 Full Conformance (Cognitive Node)
+### 17.2 Full Conformance (Cognitive Node)
 
 A node claiming full MMP conformance MUST additionally implement: Layer 3 memory (L0/L1/L2), Layer 4 SVAF evaluation (at minimum heuristic), `state-sync` exchange with drift computation and coupling, and CMB creation with CAT7 field schema.
 
-### 16.3 Cognitive Conformance
+### 17.3 Cognitive Conformance
 
 Agents that implement Layers 5-7 (Synthetic Memory, xMesh, Application) SHOULD support:
 
@@ -1621,7 +1633,7 @@ Agents that implement Layers 5-7 (Synthetic Memory, xMesh, Application) SHOULD s
 - `CMBStore` protocol -- persistent storage and retrieval of Cognitive Memory Blocks
 - xMesh insight consumption -- processing insight outputs from the Layer 6 LNN
 
-### 16.4 Testing
+### 17.4 Testing
 
 Implementations SHOULD provide unit tests for SVAF evaluation, CMB creation, and lineage computation. No formal test suite is defined by this specification yet. Future revisions MAY include a conformance test suite.
 
@@ -1631,11 +1643,11 @@ Implementations SHOULD provide unit tests for SVAF evaluation, CMB creation, and
 
 ---
 
-## 17. Security Considerations
+## 18. Security Considerations
 
 MMP is designed for autonomous agents that share cognitive state. Security must address both traditional protocol threats (spoofing, eavesdropping, injection) and novel threats specific to cognitive coupling (state poisoning, drift manipulation, lineage forgery).
 
-### 17.1 What Crosses the Mesh
+### 18.1 What Crosses the Mesh
 
 | Data type | Crosses mesh | Sensitivity |
 |---|---|---|
@@ -1647,7 +1659,7 @@ MMP is designed for autonomous agents that share cognitive state. Security must 
 
 Hidden state vectors (h₁, h₂) are compact, opaque neural representations. They encode cognitive patterns, not raw data. However, sufficiently advanced analysis could potentially reconstruct aspects of the input. Implementations handling sensitive domains SHOULD treat hidden state as confidential.
 
-### 17.2 Transport Security
+### 18.2 Transport Security
 
 MMP does not mandate transport encryption in the base specification. Implementations SHOULD apply:
 
@@ -1658,7 +1670,7 @@ MMP does not mandate transport encryption in the base specification. Implementat
 | IPC (local) | None required | Unix domain socket -- OS-level process isolation is sufficient. |
 | APNs Push (wake) | Apple TLS | Handled by Apple. Implementation uses APNs certificate. |
 
-### 17.2.1 End-to-End CMB Encryption
+### 18.2.1 End-to-End CMB Encryption
 
 WSS (TLS) encrypts the transport -- it protects from eavesdroppers on the wire. But the relay operator can still read the JSON payload inside the TLS tunnel. For `cmb` frames containing CMBs, this means the relay sees all 7 CAT7 field texts in plaintext.
 
@@ -1692,7 +1704,7 @@ The encryption scheme SHOULD use the Ed25519 keypair from Layer 0 (Section 3) fo
 
 On LAN (Bonjour TCP), E2E encryption is RECOMMENDED but not required -- there is no relay intermediary. On trusted LANs, the transport itself provides sufficient isolation.
 
-### 17.3 Node Identity & Authentication
+### 18.3 Node Identity & Authentication
 
 Node identity is UUID-based with mandatory Ed25519 cryptographic identity (Section 3.1.3). Authentication ensures that nodeId claims are verifiable and that relay intermediaries cannot impersonate peers.
 
@@ -1701,7 +1713,7 @@ Node identity is UUID-based with mandatory Ed25519 cryptographic identity (Secti
 - Peers SHOULD verify identity by challenging the node to sign a nonce with its private key.
 - Implementations that have not yet adopted cryptographic verification MAY rely on DNS-SD discovery scope and network isolation as an interim trust model, but MUST document this limitation.
 
-### 17.4 Cognitive Threats
+### 18.4 Cognitive Threats
 
 MMP introduces threats unique to cognitive coupling that traditional protocol security does not address:
 
@@ -1717,7 +1729,7 @@ MITIGATION: SVAF per-field evaluation (Layer 4) operates on content, not just dr
 **Sybil attack** -- An attacker creates multiple fake nodes to amplify influence in mesh state aggregation.
 MITIGATION: Mesh state aggregation (Section 10.1) weights by drift and recency, not by node count. Many aligned Sybil nodes produce the same aggregate as one. Cryptographic identity (Section 3) limits Sybil creation when implemented.
 
-### 17.5 Privacy & Deployment Recommendations
+### 18.5 Privacy & Deployment Recommendations
 
 MMP is designed for privacy by default -- L0 data never leaves the node, hidden states are opaque, and SVAF gates what enters. For domains with heightened privacy or IP concerns, the following deployment model is RECOMMENDED:
 
@@ -1736,7 +1748,7 @@ Additional privacy considerations:
 - The Consent Extension provides protocol-level withdrawal from cognitive coupling -- instantaneous, complete, and non-negotiable.
 - Implementations targeting GDPR, HIPAA, or similar regulatory frameworks SHOULD treat CMB field text as personal data and apply appropriate retention and deletion policies at the application layer.
 
-### 17.6 Regulatory Compliance & Audit Trail
+### 18.6 Regulatory Compliance & Audit Trail
 
 CMB immutability and lineage create a **complete, tamper-evident audit trail** by design. Every observation, every remix, every decision is traceable through the DAG:
 
@@ -1754,9 +1766,9 @@ Because CMBs are **immutable**, the audit trail cannot be retroactively altered.
 - Regulators can trace any decision backward through the remix chain to its originating observations
 - The `ancestors` field provides the complete chain without requiring graph traversal -- O(1) lookup
 - Immutability guarantees that the audit trail was not modified after the fact
-- Combined with the LAN + in-house LLM deployment (Section 17.5), all data stays on-premise and under organisational control
+- Combined with the LAN + in-house LLM deployment (Section 18.5), all data stays on-premise and under organisational control
 
-### 17.7 Data Quality & Encoding Trade-offs
+### 18.7 Data Quality & Encoding Trade-offs
 
 CMB quality depends on field extraction accuracy. The protocol does not extract fields -- agents do. Each agent's LLM (or structured-data mapper) decomposes observations into CAT7 fields. If extraction is poor, downstream evaluation inherits that error. MMP provides three layers of defense, but none eliminates the need for quality extraction at the source.
 
@@ -1775,7 +1787,7 @@ Implementations targeting domains where field extraction quality is critical (he
 - **Lineage feedback** -- CMBs that get remixed by other agents (have descendants in the DAG) signal high quality; CMBs that expire without children signal noise. This feedback loop lets the mesh itself shape extraction quality over time
 - **Semantic embedding encoder** -- implementations SHOULD use a semantic embedding model (e.g. all-MiniLM-L6-v2) for SVAF drift computation. The evaluation pipeline is encoder-agnostic -- any function that maps text to unit-normalised vectors works. N-gram encoding MAY be used as a zero-dependency fallback.
 
-### 17.8 Consent as a Security Mechanism
+### 18.8 Consent as a Security Mechanism
 
 The MMP Consent Extension is not just a privacy feature -- it is a security mechanism. Consent withdrawal:
 
@@ -1785,11 +1797,11 @@ The MMP Consent Extension is not just a privacy feature -- it is a security mech
 
 ---
 
-## 18. Configuration
+## 19. Configuration
 
 Constants are fixed by the specification. Configuration is per-agent and per-implementation. Both are normative -- implementations MUST respect constants and SHOULD use the default configuration values unless the agent's domain requires otherwise.
 
-### 18.1 Protocol Constants
+### 19.1 Protocol Constants
 
 | Constant | Value | Notes |
 |---|---|---|
@@ -1803,7 +1815,7 @@ Constants are fixed by the specification. Configuration is per-agent and per-imp
 | DNS-SD_SERVICE_TYPE | _sym._tcp | Service type for Bonjour discovery |
 | DNS-SD_DOMAIN | local. | Discovery domain |
 
-### 18.2 Agent Profiles
+### 19.2 Agent Profiles
 
 Each agent type has a pre-built configuration. The profile determines which CMB fields matter most (α_f weights), how long signals stay relevant for SVAF evaluation (freshness), and how long remixed CMBs are retained in local storage (retention). New agent types join the mesh by defining their profile -- no protocol changes needed.
 
@@ -1821,7 +1833,7 @@ Each agent type has a pre-built configuration. The profile determines which CMB 
 | finance | Finance, trading, compliance | 2h | Per regulation | MiFID II: 5yr. SEC: 7yr. Set per jurisdiction. |
 | uniform | General purpose, prototyping | 30min | 7d | Good starting point. Adjust to your domain. |
 
-### 18.3 CAT7 Field Weights (α_f)
+### 19.3 CAT7 Field Weights (α_f)
 
 Per-agent field weights control which CMB fields matter most for each agent type. Higher weight = this field has more influence on SVAF evaluation and remix relevance. The schema is fixed (7 fields). The weights are per-agent.
 
@@ -1839,7 +1851,7 @@ Per-agent field weights control which CMB fields matter most for each agent type
 
 Custom weights: derive from your domain using these patterns. Implementations SHOULD expose field weights as configuration, not hardcode them.
 
-### 18.4 SVAF Drift Thresholds
+### 19.4 SVAF Drift Thresholds
 
 SVAF computes a `totalDrift` score (0-1) for each incoming memory. Four zones determine acceptance:
 
@@ -1852,7 +1864,7 @@ SVAF computes a `totalDrift` score (0-1) for each incoming memory. Four zones de
 
 Defaults work for most agents. Override only with domain-specific reason: tighter thresholds for high-precision domains (legal, health), wider for exploratory domains (research, knowledge).
 
-### 18.5 Mood vs Memory Thresholds
+### 19.5 Mood vs Memory Thresholds
 
 Mood and memory use different acceptance paths:
 
@@ -1861,7 +1873,7 @@ Mood and memory use different acceptance paths:
 | CMB (cmb) | SVAF per-field drift | 0.50 (selective) | Full CMB acceptance -- domain-specific |
 | Mood field | Extracted from rejected CMBs | Always delivered | Affect crosses all domain boundaries (Section 9.3) |
 
-### 18.6 Drift Formula
+### 19.6 Drift Formula
 
 ```
 totalDrift = (1 - λ) × fieldDrift + λ × temporalDrift
@@ -1881,11 +1893,11 @@ At default settings (`temporalLambda: 0.3`, `freshnessSeconds: 1800`):
 
 ---
 
-## 19. JSON Schema
+## 20. JSON Schema
 
 Formal JSON Schema definitions for core frame types. Implementations SHOULD validate frames against these schemas.
 
-### 19.1 Handshake Frame Schema
+### 20.1 Handshake Frame Schema
 
 ```json
 {
@@ -1902,7 +1914,7 @@ Formal JSON Schema definitions for core frame types. Implementations SHOULD vali
 }
 ```
 
-### 19.2 CMB Schema
+### 20.2 CMB Schema
 
 The `cmb` object within a `cmb` frame:
 
@@ -1978,7 +1990,7 @@ Complete `cmb` frame with CMB:
 
 ---
 
-## 20. References
+## 21. References
 
 **[RFC 2119]** Bradner, S. (1997). Key words for use in RFCs to Indicate Requirement Levels. *IETF RFC 2119*.
 
