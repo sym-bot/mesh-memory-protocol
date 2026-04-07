@@ -3,6 +3,7 @@
 **A Mesh Protocol for Collective Intelligence**
 
 [![MMP Spec](https://img.shields.io/badge/spec-v0.2.2-purple)](https://sym.bot/spec/mmp)
+[![arXiv](https://img.shields.io/badge/arXiv-2604.03955-b31b1b.svg)](https://arxiv.org/abs/2604.03955)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC_BY_4.0-blue)](https://creativecommons.org/licenses/by/4.0/)
 
 ---
