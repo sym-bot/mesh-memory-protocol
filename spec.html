@@ -1144,6 +1144,11 @@ name MUST be the node’s nodeId.</p>
 <td>SHOULD</td>
 <td>Machine hostname</td>
 </tr>
+<tr>
+<td><code>group</code></td>
+<td>MAY</td>
+<td>Mesh group identifier (Section 5.8). Default <code>"default"</code> if absent.</td>
+</tr>
 </tbody>
 </table>
 <p>To prevent duplicate connections, the node with the lexicographically
@@ -1161,7 +1166,8 @@ available: DNS-SD for LAN, relay-peers for WAN.</p>
 <p>Upon connection, both sides MUST exchange the following frames in
 order:</p>
 <pre><code>1. handshake    { type: &quot;handshake&quot;, nodeId: &quot;&lt;uuid&gt;&quot;, name: &quot;&lt;name&gt;&quot;,
-                  publicKey: &quot;&lt;base64url&gt;&quot;, version: &quot;0.2.0&quot;, extensions: [] }
+                  publicKey: &quot;&lt;base64url&gt;&quot;, version: &quot;0.2.0&quot;, extensions: [],
+                  group: &quot;&lt;group-id&gt;&quot; }                       [optional, default &quot;default&quot;]
 2. state-sync   { type: &quot;state-sync&quot;, h1: [...], h2: [...], confidence: 0.8 }
 3. peer-info    { type: &quot;peer-info&quot;, peers: [...] }           [if known]
 4. wake-channel { type: &quot;wake-channel&quot;, platform, token, env } [if configured]</code></pre>
@@ -1171,8 +1177,13 @@ the node implements (e.g., <code>"0.2.0"</code>). Nodes SHOULD accept
 peers with the same major version. Nodes MAY reject peers with
 incompatible versions.</li>
 <li>The <code>extensions</code> field SHOULD list supported protocol
-extensions (e.g., <code>["consent-v0.1"]</code>). Nodes MUST ignore
+extensions (e.g., <code>["consent-v0.1", "mesh-group-v0.1"]</code>). Nodes MUST ignore
 unrecognised extensions.</li>
+<li>The <code>group</code> field is OPTIONAL and identifies the mesh
+group the node wishes to join (Section 5.8). A handshake without
+<code>group</code> MUST be treated as <code>group = "default"</code>.
+When two nodes handshake and discover that their declared groups
+differ, the receiver MUST close the connection.</li>
 <li>The inbound node MUST wait for a <code>handshake</code> frame as the
 first frame. If any other frame type arrives first, or no handshake
 arrives within 10,000 ms, the connection MUST be closed.</li>
@@ -1280,6 +1291,54 @@ mechanism) via the <code>wake-channel</code> frame. Peers MAY use this
 channel to wake a sleeping node when they have a signal to deliver. Wake
 requests SHOULD be rate-limited (default cooldown: 300,000 ms per
 peer).</p>
+<h3 id="mesh-groups">5.8 Mesh Groups</h3>
+<p>A SYM node MAY declare membership in a <strong>mesh group</strong> at
+handshake time via the optional <code>group</code> field (Section 5.2).
+A mesh group is a named cohort of nodes that exchange application-layer
+frames only with each other. Mesh groups give an operator a way to host
+multiple mutually-isolated meshes on the same relay or LAN segment
+without per-agent application changes, and they give an application a
+way to constrain its peers to instances of itself rather than every node
+on the wire.</p>
+<p><strong>Group identifier syntax.</strong> A group identifier is a
+string of <code>[a-z0-9-_.]+</code>, max 64 characters, case-sensitive.
+The literal string <code>"default"</code> is reserved as the implicit
+group of every node that does not declare a group; this preserves
+backward compatibility with nodes that predate this section.</p>
+<p><strong>Protocol guarantee.</strong> A node in group <code>G_A</code>
+MUST NOT exchange any application-layer MMP frames (handshake fields
+beyond identity and version, <code>cmb</code>, <code>mood</code>,
+<code>peer-info</code>, <code>xmesh-insight</code>) with a node in group
+<code>G_B</code> when <code>G_A != G_B</code>. Transport-layer connection
+establishment and ping/pong heartbeats are out of scope and MAY remain
+active across groups.</p>
+<p><strong>Layer placement.</strong> A mesh group is a Layer 2
+(Connection) concept. The application layer SHOULD declare its group at
+SDK initialisation; the relay (Section 4.4) MUST enforce group isolation
+across relay-mediated peers; nodes participating in LAN Bonjour
+discovery SHOULD enforce group isolation by checking the peer's declared
+group at handshake and closing the connection on mismatch. The
+connection-level error frame for a group mismatch is described in
+Section 7.2.</p>
+<p><strong>Recommended naming convention (non-normative).</strong> The
+protocol does not parse group identifiers beyond the character set and
+length checks above. Operators of meshes with more than a handful of
+groups SHOULD adopt a hierarchical dotted-path convention
+<code>&lt;app&gt;[.&lt;environment&gt;][.&lt;cohort&gt;]</code>, e.g.
+<code>melotune.prod</code>, <code>melotune.dev</code>,
+<code>claude-code.default</code>, <code>research.lab</code>. The dots
+are convention only; tooling MAY use them for prefix-based grouping but
+the protocol does not require this.</p>
+<p><strong>SVAF and consent interaction.</strong> SVAF (Layer 4, Section
+9) per-field evaluation runs <em>after</em> group filtering:
+<code>cmb</code> frames from peers in different groups never reach the
+SVAF evaluator. The consent extension (<code>consent-v0.1</code>) is
+orthogonal — consent state is per-group and not shared across
+groups.</p>
+<p>The full design rationale, the prefix-based group claims relay
+enhancement, and the operational migration record are documented in
+<code>MMP-MESH-GROUPS-DESIGN.md</code> on the symbot-website
+repository.</p>
 <hr />
 <h2 id="layer-3-memory">6. Layer 3: Memory</h2>
 <p>MMP defines three memory layers with graduated disclosure:</p>
