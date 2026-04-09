@@ -375,9 +375,101 @@ The primary LAN transport. Nodes MUST listen on a TCP port and advertise it via 
 
 ### 4.4 WebSocket Relay Transport (WAN)
 
-For nodes not on the same LAN, a relay node forwards frames. Relay frames are JSON envelopes over WebSocket: `{ "to": "<nodeId>", "payload": <frame> }`. The relay MUST NOT inspect or modify the payload. The relay is a peer, not a server -- any always-on node MAY serve as a relay.
+A relay is an OPTIONAL WebSocket intermediary that enables connectivity between peers on different networks. Peers on the same LAN discover each other directly via Bonjour mDNS (§4.2) and do not require a relay. The relay provides internet-scale routing between peers behind NAT, a peer directory with wake-channel gossip, and per-token channel isolation for multi-tenant deployments.
 
-**Multi-relay failover.** Implementations SHOULD support configuring multiple relay URLs. If the primary relay is unavailable (connection refused, timeout, or heartbeat failure), the node SHOULD attempt connection to the next configured relay. Relay selection order is implementation-defined. When a failed relay recovers, the node MAY reconnect to restore the preferred relay. This mitigates single-point-of-failure risk for WAN connectivity.
+A relay is pure routing infrastructure. It does not store CMBs, evaluate SVAF, or participate in mesh cognition. Payloads are opaque to the relay. The relay MUST NOT inspect or modify frame payloads.
+
+#### 4.4.1 Authentication
+
+Clients connect via WebSocket (RFC 6455) and MUST send a `relay-auth` frame within 10 seconds. Failure results in close code 4001.
+
+```json
+{
+  "type": "relay-auth",
+  "nodeId": "<uuid-v7>",
+  "name": "<display-name>",
+  "token": "<channel-token>",
+  "wakeChannel": {
+    "platform": "apns",
+    "token": "<push-token>",
+    "environment": "production"
+  }
+}
+```
+
+- `nodeId`, `name`: MUST be present. Missing fields result in close code 4002.
+- `token`: SHOULD be present if the relay requires authentication. Invalid token results in close code 4003.
+- `wakeChannel`: MAY be present. Registers push notification credentials for waking this peer when offline (§5.5).
+
+On success, the relay registers the connection, sends a `relay-peers` response, and broadcasts `relay-peer-joined` to all other clients on the same channel.
+
+#### 4.4.2 Peer List
+
+Immediately after authentication, the relay sends the current peer list:
+
+```json
+{
+  "type": "relay-peers",
+  "peers": [
+    { "nodeId": "<uuid>", "name": "<name>", "wakeChannel": {...}, "offline": false }
+  ]
+}
+```
+
+The array includes all connected peers on the same channel (excluding the requester) plus offline peers with registered wake channels (`offline: true`). Clients SHOULD treat each non-offline entry as a peer-joined event.
+
+#### 4.4.3 Peer Presence
+
+When a peer joins or leaves the channel, the relay broadcasts to all other peers on the same channel:
+
+```json
+{ "type": "relay-peer-joined", "nodeId": "<uuid>", "name": "<name>" }
+{ "type": "relay-peer-left",   "nodeId": "<uuid>", "name": "<name>" }
+```
+
+#### 4.4.4 Message Routing
+
+Clients send frames with a routing envelope:
+
+```json
+{ "to": "<target-nodeId>", "payload": { "type": "cmb", ... } }
+```
+
+If `to` is present, the relay forwards to that peer only. If absent, the relay broadcasts to all peers on the same channel. The relay adds `from` and `fromName` to forwarded frames. The relay MUST NOT route frames across channels.
+
+#### 4.4.5 Keepalive
+
+The relay sends `relay-ping` at a regular interval (RECOMMENDED: 10 seconds). Clients MUST respond with `relay-pong`. A client that misses two consecutive pings is closed with code 4005. Clients MAY send unsolicited `relay-pong` frames; the relay MUST accept them.
+
+#### 4.4.6 Re-authentication
+
+If the relay loses a client's registration (e.g. relay restart behind a TLS proxy), it sends `{ "type": "relay-reauth" }`. The client MUST re-send `relay-auth` in response.
+
+#### 4.4.7 Duplicate Identity
+
+When a client authenticates with a `nodeId` already held by an existing connection:
+
+- **Fresh existing (< 5s):** the relay MUST reject the newcomer with close code 4006. This prevents ping-pong loops where two processes with the same identity kick each other.
+- **Stale existing (>= 5s):** the relay MAY replace the existing connection by closing it with code 4004. The relay MUST NOT broadcast `relay-peer-left` for the replaced connection.
+
+Clients receiving code 4004 SHOULD log the collision and MUST NOT automatically reconnect (§5.3). Clients receiving code 4006 SHOULD NOT reconnect -- the existing holder is the legitimate one.
+
+#### 4.4.8 Channel Isolation
+
+A relay MAY support multiple isolated channels. Each authentication token maps to exactly one channel. Cross-channel routing MUST NOT occur: frames, peer lists, and presence notifications are scoped to the channel. A relay with no token configured operates in open mode (single default channel, no authentication).
+
+#### 4.4.9 Close Codes
+
+| Code | Name | Client Action |
+|------|------|---------------|
+| 4001 | Auth timeout | Retry with auth |
+| 4002 | Auth invalid | Fix auth frame |
+| 4003 | Invalid token | Check token config |
+| 4004 | Replaced | Log collision, do NOT reconnect |
+| 4005 | Heartbeat timeout | Reconnect with backoff |
+| 4006 | Duplicate rejected | Do NOT reconnect |
+
+**Multi-relay failover.** Implementations SHOULD support configuring multiple relay URLs. If the primary relay is unavailable, the node SHOULD attempt connection to the next configured relay. This mitigates single-point-of-failure risk for WAN connectivity.
 
 
 ### 4.5 IPC Transport (Local)
