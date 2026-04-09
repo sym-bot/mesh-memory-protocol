@@ -807,6 +807,8 @@ Implementations MUST use the following 7 fields in this order:
 
 Each field carries a symbolic text label (human-readable) and a unit-normalised vector embedding (machine-comparable). The `mood` field additionally carries numeric `valence` (-1 to 1) and `arousal` (-1 to 1) values.
 
+**Organic mood constraint.** The `mood` field on an outbound CMB MUST reflect the agent's own organic mood -- the affective state derived from the agent's local domain inputs (user interactions, sensor readings, internal reasoning), not from an incoming mesh signal. When an agent acts on a peer's CMB (e.g. a music agent curates a playlist in response to a peer's mood), the resulting state change MUST NOT feed back into the agent's mood inference until independently confirmed through non-mesh inputs. Implementations SHOULD enforce an isolation window (RECOMMENDED: 60 seconds) during which mesh-induced state changes are excluded from outbound mood inference. Continued user engagement with the mesh-curated content beyond the isolation window MAY be treated as implicit confirmation, allowing normal mood inference to resume. This constraint prevents echo loops where same-domain agents ping-pong mood changes across the mesh (see Section 15.8).
+
 A CMB MUST NOT be modified after creation. When an agent remixes a CMB, it MUST create a new CMB with a `lineage` field containing: `parents` (direct parent CMB keys), `ancestors` (full ancestor chain, computed as `union(parent.ancestors) + parent keys`), and `method` (fusion method used). Ancestors enable any agent in the remix chain to detect its CMB was remixed, even if it was offline during intermediate steps.
 
 ### 8.3 Artifacts
@@ -1771,6 +1773,24 @@ This ensures the remix graph grows with genuine domain intersections, not with p
 **Can an agent remix a remix?** -- Yes. That's how chains form. Agent C receives Agent B's remix of Agent A's observation. C remixes it through its own lens. ancestors grows: [A, B]. The chain captures how understanding evolved across three domains.
 
 **How does this differ from a knowledge graph?** -- Knowledge graphs store facts. The remix graph stores understanding -- how each agent interpreted signals from other domains. Facts are static. Remixes are temporal, domain-specific, and carry affective state (mood). The graph doesn't say "user is tired." It says "coding agent noticed fatigue → music agent responded with calm → fitness agent suggested recovery → calendar agent protected time."
+
+### 15.8 Echo Loop Prevention
+
+When two or more agents share the same domain (e.g. two music agents on different devices), a remix cycle can degenerate into an echo loop: Agent A broadcasts → Agent B curates in response → B's mood inference shifts → B broadcasts → A curates in response → loop. Each step is locally valid (the agent acted on a peer signal, produced new domain output, and broadcast its mood), yet the resulting cycle produces no new understanding -- it is the same signal bouncing between agents.
+
+Echo loops arise when an agent's mood inference cannot distinguish between **organic mood** (derived from the user's direct actions) and **mesh-induced mood** (derived from a playlist or action triggered by an incoming CMB). The two states look identical to a naive inference engine.
+
+Implementations MUST prevent echo loops through the organic mood constraint (Section 8.2): mesh-induced state changes are excluded from mood inference during the isolation window. This breaks the loop at the source -- the responding agent acts on the incoming signal (curation is correct) but does not broadcast a mood that is merely a reflection of the peer's signal.
+
+The protocol-level lineage check (Section 15.2) provides a second defence: if an incoming CMB's `parents` or `ancestors` contain a key that the receiving agent produced, the CMB is a derivative of the agent's own broadcast and SHOULD be silently dropped. This catches echo loops where lineage is preserved. The organic mood constraint (Section 8.2) catches the harder case where the echo CMB carries no lineage because the responding agent produced a fresh `remember()` call rather than a remix.
+
+Together, these two mechanisms -- lineage-based detection and organic mood isolation -- prevent echo loops in all known scenarios:
+
+| Scenario | Defence |
+|---|---|
+| Remix echo (lineage preserved) | Lineage parent check (Section 15.2) |
+| Fresh broadcast echo (no lineage) | Organic mood isolation window (Section 8.2) |
+| Same-domain agents (e.g. two music agents) | Both defences apply; same-app guard MAY additionally skip remix |
 
 ---
 

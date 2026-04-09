@@ -2264,6 +2264,21 @@ unit-normalised vector embedding (machine-comparable). The
 <code>mood</code> field additionally carries numeric
 <code>valence</code> (-1 to 1) and <code>arousal</code> (-1 to 1)
 values.</p>
+<p><strong>Organic mood constraint.</strong> The <code>mood</code> field
+on an outbound CMB MUST reflect the agent’s own organic mood – the
+affective state derived from the agent’s local domain inputs (user
+interactions, sensor readings, internal reasoning), not from an incoming
+mesh signal. When an agent acts on a peer’s CMB (e.g. a music agent
+curates a playlist in response to a peer’s mood), the resulting state
+change MUST NOT feed back into the agent’s mood inference until
+independently confirmed through non-mesh inputs. Implementations SHOULD
+enforce an isolation window (RECOMMENDED: 60 seconds) during which
+mesh-induced state changes are excluded from outbound mood inference.
+Continued user engagement with the mesh-curated content beyond the
+isolation window MAY be treated as implicit confirmation, allowing
+normal mood inference to resume. This constraint prevents echo loops
+where same-domain agents ping-pong mood changes across the mesh (see
+Section 15.8).</p>
 <p>A CMB MUST NOT be modified after creation. When an agent remixes a
 CMB, it MUST create a new CMB with a <code>lineage</code> field
 containing: <code>parents</code> (direct parent CMB keys),
@@ -4247,6 +4262,61 @@ Remixes are temporal, domain-specific, and carry affective state (mood).
 The graph doesn’t say “user is tired.” It says “coding agent noticed
 fatigue → music agent responded with calm → fitness agent suggested
 recovery → calendar agent protected time.”</p>
+<h3 id="echo-loop-prevention">15.8 Echo Loop Prevention</h3>
+<p>When two or more agents share the same domain (e.g. two music agents
+on different devices), a remix cycle can degenerate into an echo loop:
+Agent A broadcasts → Agent B curates in response → B’s mood inference
+shifts → B broadcasts → A curates in response → loop. Each step is
+locally valid (the agent acted on a peer signal, produced new domain
+output, and broadcast its mood), yet the resulting cycle produces no new
+understanding – it is the same signal bouncing between agents.</p>
+<p>Echo loops arise when an agent’s mood inference cannot distinguish
+between <strong>organic mood</strong> (derived from the user’s direct
+actions) and <strong>mesh-induced mood</strong> (derived from a playlist
+or action triggered by an incoming CMB). The two states look identical
+to a naive inference engine.</p>
+<p>Implementations MUST prevent echo loops through the organic mood
+constraint (Section 8.2): mesh-induced state changes are excluded from
+mood inference during the isolation window. This breaks the loop at the
+source – the responding agent acts on the incoming signal (curation is
+correct) but does not broadcast a mood that is merely a reflection of
+the peer’s signal.</p>
+<p>The protocol-level lineage check (Section 15.2) provides a second
+defence: if an incoming CMB’s <code>parents</code> or
+<code>ancestors</code> contain a key that the receiving agent produced,
+the CMB is a derivative of the agent’s own broadcast and SHOULD be
+silently dropped. This catches echo loops where lineage is preserved.
+The organic mood constraint (Section 8.2) catches the harder case where
+the echo CMB carries no lineage because the responding agent produced a
+fresh <code>remember()</code> call rather than a remix.</p>
+<p>Together, these two mechanisms – lineage-based detection and organic
+mood isolation – prevent echo loops in all known scenarios:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Defence</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Remix echo (lineage preserved)</td>
+<td>Lineage parent check (Section 15.2)</td>
+</tr>
+<tr>
+<td>Fresh broadcast echo (no lineage)</td>
+<td>Organic mood isolation window (Section 8.2)</td>
+</tr>
+<tr>
+<td>Same-domain agents (e.g. two music agents)</td>
+<td>Both defences apply; same-app guard MAY additionally skip remix</td>
+</tr>
+</tbody>
+</table>
 <hr />
 <h2 id="extension-mechanism">16. Extension Mechanism</h2>
 <p>MMP is designed for extensibility. Extensions add new frame types,
