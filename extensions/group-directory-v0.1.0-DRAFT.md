@@ -7,7 +7,7 @@
 | Version | 0.1.0-DRAFT |
 | Status | Draft — not yet published, not yet implemented |
 | Date | 19 April 2026 |
-| Author | Hongwei Xu <hongwei@sym.bot>, SYM.BOT Ltd |
+| Author | Hongwei Xu <hongwei@sym.bot>, SYM.BOT |
 | Extends | [MMP v0.2.3](https://sym.bot/spec/mmp) — Section 5.8 (Mesh Groups) |
 | Depends on | [sym-relay](https://github.com/sym-bot/sym-relay) — token-channel isolation (already shipped) |
 | Canonical URL | https://sym.bot/spec/mmp-group-directory (not yet live) |

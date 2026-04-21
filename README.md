@@ -72,7 +72,7 @@ When an agent processes a peer's CMB through its own domain intelligence and pro
 
 ## Production Deployment
 
-SYM.BOT Ltd runs its operations on MMP with 4 autonomous agents (COO, Research, Marketing, Product) producing real decisions for the founder daily. This is both the reference deployment and the most credible demonstration of the protocol.
+SYM.BOT runs its operations on MMP with 4 autonomous agents (COO, Research, Marketing, Product) producing real decisions for the founder daily. This is both the reference deployment and the most credible demonstration of the protocol.
 
 ## Contributing
 
@@ -83,6 +83,6 @@ MMP is an open specification published under [CC BY 4.0](https://creativecommons
 
 ## Author
 
-**Hongwei Xu** — [SYM.BOT Ltd](https://sym.bot)
+**Hongwei Xu** — [SYM.BOT](https://sym.bot)
 
-Mesh Memory Protocol, MMP, SYM, and related marks are trademarks of SYM.BOT Ltd.
+Mesh Memory Protocol, MMP, SYM, and related marks are trademarks of SYM.BOT.
