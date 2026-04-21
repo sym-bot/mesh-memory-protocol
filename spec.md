@@ -4,11 +4,11 @@
 
 | Field | Value |
 |---|---|
-| Version | 0.2.2 |
+| Version | 0.2.3 |
 | Status | Published |
-| Date | 6 April 2026 |
+| Date | 21 April 2026 |
 | Author | Hongwei Xu <hongwei@sym.bot> |
-| Organisation | SYM.BOT Ltd |
+| Organisation | SYM.BOT |
 | Canonical URL | https://sym.bot/spec/mmp |
 | Licence | CC BY 4.0 (specification text); Apache 2.0 (reference implementations) |
 
@@ -43,7 +43,7 @@ This specification is published under the Creative Commons Attribution 4.0 Inter
 
 The reference implementations are published under the Apache Licence 2.0.
 
-Mesh Memory Protocol, MMP, SYM, and related marks are trademarks of SYM.BOT Ltd.
+Mesh Memory Protocol, MMP, SYM, and related marks are trademarks of SYM.BOT.
 
 ---
 
@@ -2222,4 +2222,4 @@ Complete `cmb` frame with CMB:
 
 ---
 
-(c) 2026 SYM.BOT Ltd. Specification text licenced under CC BY 4.0. Reference implementations licenced under Apache 2.0.
+(c) 2026 SYM.BOT. Specification text licenced under CC BY 4.0. Reference implementations licenced under Apache 2.0.
