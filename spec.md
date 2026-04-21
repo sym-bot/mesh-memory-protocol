@@ -6,7 +6,7 @@
 |---|---|
 | Version | 0.2.3 |
 | Status | Published |
-| Date | 21 April 2026 |
+| Date | 17 April 2026 |
 | Author | Hongwei Xu <hongwei@sym.bot> |
 | Organisation | SYM.BOT |
 | Canonical URL | https://sym.bot/spec/mmp |
