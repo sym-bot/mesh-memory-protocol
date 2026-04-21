@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Mesh Memory Protocol (MMP) v0.2.2</title>
+  <title>Mesh Memory Protocol (MMP) v0.2.3</title>
   <style>
     /* Default styles provided by pandoc.
     ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -238,7 +238,7 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">Mesh Memory Protocol (MMP) v0.2.2</h1>
+<h1 class="title">Mesh Memory Protocol (MMP) v0.2.3</h1>
 </header>
 <h1 id="mesh-memory-protocol-mmp-specification">Mesh Memory Protocol
 (MMP) Specification</h1>
@@ -520,7 +520,7 @@ participation and MAY be omitted for relay-only nodes.</p>
 <tr>
 <td>7</td>
 <td>APPLICATION</td>
-<td>Domain Agents – Music, Code, Fitness, Robotics, BCI</td>
+<td>Domain Agents – Music, Code, Fitness, Robotics, Agent Systems</td>
 <td>Where agents live and their LLMs reason on the remix subgraph. Mesh
 Cognition happens here.</td>
 </tr>
@@ -542,10 +542,9 @@ derived knowledge into CfC-compatible hidden state vectors.</td>
 <tr>
 <td>4</td>
 <td>COUPLING</td>
-<td>Drift · SVAF Per-Field Evaluation · Consent</td>
-<td>The gate. SVAF evaluates each of 7 CMB fields independently. Consent
-primitive enables withdrawal. Nothing enters cognition without passing
-this layer.</td>
+<td>Drift · SVAF Per-Field Evaluation</td>
+<td>The gate. SVAF evaluates each of 7 CMB fields independently. Nothing
+enters cognition without passing this layer.</td>
 </tr>
 </tbody>
 </table>
@@ -576,7 +575,7 @@ gated by SVAF. L2 is exchanged via state-sync.</td>
 <tr>
 <td>2</td>
 <td>CONNECTION</td>
-<td>Handshake · State-Sync · Gossip · Wake · Consent</td>
+<td>Handshake · State-Sync · Gossip · Wake</td>
 <td>Connection lifecycle: discover, connect, handshake, heartbeat,
 gossip node metadata, wake sleeping nodes.</td>
 </tr>
@@ -1452,8 +1451,8 @@ the node implements (e.g., <code>"0.2.0"</code>). Nodes SHOULD accept
 peers with the same major version. Nodes MAY reject peers with
 incompatible versions.</li>
 <li>The <code>extensions</code> field SHOULD list supported protocol
-extensions (e.g., <code>["consent-v0.1", "mesh-group-v0.1"]</code>).
-Nodes MUST ignore unrecognised extensions.</li>
+extensions (e.g., <code>["mesh-group-v0.1"]</code>). Nodes MUST ignore
+unrecognised extensions.</li>
 <li>The <code>group</code> field is OPTIONAL and identifies the mesh
 group the node wishes to join (Section 5.8). A handshake without
 <code>group</code> MUST be treated as <code>group = "default"</code>.
@@ -1487,7 +1486,7 @@ AWAITING_HANDSHAKE (10s timeout)
     ▼
 CONNECTED (peer registered, frames routed)
     │
-    │  timeout / close / consent-withdraw
+    │  timeout / close
     ▼
 DISCONNECTED (peer removed, re-discover)</code></pre>
 <table>
@@ -1522,7 +1521,7 @@ DISCONNECTED (peer removed, re-discover)</code></pre>
 <tr>
 <td>CONNECTED</td>
 <td>DISCONNECTED</td>
-<td>Heartbeat timeout, TCP close, consent-withdraw, or error</td>
+<td>Heartbeat timeout, TCP close, or error</td>
 </tr>
 </tbody>
 </table>
@@ -1604,12 +1603,10 @@ e.g. <code>melotune.prod</code>, <code>melotune.dev</code>,
 <code>claude-code.default</code>, <code>research.lab</code>. The dots
 are convention only; tooling MAY use them for prefix-based grouping but
 the protocol does not require this.</p>
-<p><strong>SVAF and consent interaction.</strong> SVAF (Layer 4, Section
-9) per-field evaluation runs <em>after</em> group filtering:
+<p><strong>SVAF and group filtering.</strong> SVAF (Layer 4, Section 9)
+per-field evaluation runs <em>after</em> group filtering:
 <code>cmb</code> frames from peers in different groups never reach the
-SVAF evaluator. The consent extension (<code>consent-v0.1</code>) is
-orthogonal – consent state is per-group and not shared across
-groups.</p>
+SVAF evaluator.</p>
 <p>The full design rationale, the prefix-based group claims relay
 enhancement, and the operational migration record are documented in
 <code>MMP-MESH-GROUPS-DESIGN.md</code> on the symbot-website
@@ -2127,12 +2124,6 @@ as commands.</p>
 <td>None</td>
 <td>Memory-share rejected by SVAF (informational)</td>
 </tr>
-<tr>
-<td>2002</td>
-<td>CONSENT_WITHDRAWN</td>
-<td>Close</td>
-<td>Consent withdrawn by this node</td>
-</tr>
 </tbody>
 </table>
 <p>Codes 1xxx are connection-level (close connection). Codes 2xxx are
@@ -2149,23 +2140,22 @@ format and MUST be silently ignored by non-supporting nodes.</p>
 <p><strong>Why MUST nodes silently ignore unknown frame types?</strong>
 – Without this rule, you can never add new features to the protocol. If
 a node crashes or rejects unknown frame types, then deploying a new
-extension (like the consent primitive) requires upgrading every node on
-the mesh simultaneously – impossible in a peer-to-peer system. Silent
-ignore means old nodes and new nodes coexist: a node running the consent
-extension sends consent-withdraw frames, and nodes that don’t support
-consent yet simply ignore them. No crash, no error, the mesh keeps
-working. When a node adds consent support later, it handles the frame.
-No coordinated upgrade needed. This is the same principle used by HTTP
-(unknown headers ignored), TCP (unknown options skipped), and HTML
-(unknown tags ignored). Every successful protocol is evolvable because
-of this rule.</p>
+extension (like mesh groups) requires upgrading every node on the mesh
+simultaneously – impossible in a peer-to-peer system. Silent ignore
+means old nodes and new nodes coexist: a node running a new extension
+sends its frames, and nodes that don’t support the extension simply
+ignore them. No crash, no error, the mesh keeps working. When a node
+adds support later, it handles the frame. No coordinated upgrade needed.
+This is the same principle used by HTTP (unknown headers ignored), TCP
+(unknown options skipped), and HTML (unknown tags ignored). Every
+successful protocol is evolvable because of this rule.</p>
 <p><strong>What happens if a relay receives an unknown frame
 type?</strong> – The relay forwards it. The relay is a dumb transport
 pipe – it wraps the payload in a { from, fromName, payload } envelope
 and sends it to the target or broadcasts it. It never inspects the
-payload type. This means extension frames (consent, vendor, future
-types) flow through the relay without any relay changes. The
-intelligence is at the endpoints, not the transport.</p>
+payload type. This means extension frames (group, vendor, future types)
+flow through the relay without any relay changes. The intelligence is at
+the endpoints, not the transport.</p>
 <p><strong>Can an extension frame break an existing node?</strong> – No,
 if the node follows Section 7. The frame handler switches on msg.type.
 Unknown types fall through with no match and no action. The node’s
@@ -4330,7 +4320,7 @@ recognise. A node MUST NOT require a peer to support any extension.</p>
 <p><strong>Core types</strong> (this specification): MUST NOT be
 redefined by extensions. <strong>Extension types</strong>: MUST use
 <code>&lt;extension&gt;-&lt;name&gt;</code> format (e.g.,
-<code>consent-withdraw</code>). <strong>Vendor types</strong>: MUST use
+<code>mesh-group-join</code>). <strong>Vendor types</strong>: MUST use
 <code>x-&lt;vendor&gt;-&lt;name&gt;</code> format. Vendor types MUST be
 silently ignored by non-supporting nodes.</p>
 <h3 id="extension-negotiation">16.3 Extension Negotiation</h3>
@@ -4339,28 +4329,7 @@ active. If only one peer advertises it, the extension is NOT active –
 the advertising peer MUST NOT send extension-specific frames to a peer
 that does not support them.</p>
 <h3 id="published-extensions">16.4 Published Extensions</h3>
-<table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
-<thead>
-<tr>
-<th>Extension</th>
-<th>Status</th>
-<th>Specification</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>consent-v0.1.0</code></td>
-<td>Published</td>
-<td><a href="https://sym.bot/spec/mmp-consent">MMP Consent Extension
-v0.1.0</a></td>
-</tr>
-</tbody>
-</table>
+<p><em>(No Published Extensions at this time.)</em></p>
 <h3 id="extension-lifecycle">16.5 Extension Lifecycle</h3>
 <p>Extensions progress through a defined lifecycle:</p>
 <ul>
@@ -4381,8 +4350,9 @@ spec version bump unless the extension is being promoted to core.</p>
 <h3 id="qa-9">Q&amp;A</h3>
 <p><strong>Can an extension become a core frame type?</strong> – Yes. An
 extension that proves stable and widely adopted MAY be promoted to a
-core frame type via a spec version bump. The Consent extension started
-as an extension and is a candidate for future core inclusion.</p>
+core frame type via a spec version bump. Mesh groups (Section 5.8)
+started as an extension proposal before being promoted into the core
+spec.</p>
 <hr />
 <h2 id="conformance">17. Conformance</h2>
 <h3 id="minimal-conformance-relay-node">17.1 Minimal Conformance (Relay
@@ -4604,8 +4574,8 @@ protocol security does not address:</p>
 hidden state vectors (h₁, h₂) designed to skew the receiver’s cognitive
 state toward a desired outcome. MITIGATION: Drift-bounded blending
 (Section 10) limits any peer’s influence to α &lt; 1. High-drift state
-is rejected automatically. Consent withdrawal (MMP Consent Extension)
-provides immediate escape.</p>
+is rejected automatically. Peer-level disconnection at Layer 2 provides
+immediate escape.</p>
 <p><strong>Lineage forgery</strong> – A node claims false lineage –
 listing ancestors it never actually remixed – to inflate its remix count
 or inject itself into chains. MITIGATION: CMB keys are content hashes
@@ -4667,8 +4637,6 @@ environment</li>
 data.</li>
 <li>Wake channels expose push tokens to peers. Implementations SHOULD
 restrict wake channel gossip to trusted relays only.</li>
-<li>The Consent Extension provides protocol-level withdrawal from
-cognitive coupling – instantaneous, complete, and non-negotiable.</li>
 <li>Implementations targeting GDPR, HIPAA, or similar regulatory
 frameworks SHOULD treat CMB field text as personal data and apply
 appropriate retention and deletion policies at the application
@@ -4787,18 +4755,6 @@ use a semantic embedding model (e.g. all-MiniLM-L6-v2) for SVAF drift
 computation. The evaluation pipeline is encoder-agnostic – any function
 that maps text to unit-normalised vectors works. N-gram encoding MAY be
 used as a zero-dependency fallback.</li>
-</ul>
-<h3 id="consent-as-a-security-mechanism">18.8 Consent as a Security
-Mechanism</h3>
-<p>The MMP Consent Extension is not just a privacy feature – it is a
-security mechanism. Consent withdrawal:</p>
-<ul>
-<li>Overrides ALL coupling evaluation – a hard gate at Layer 2 that
-prevents cognitive frames from reaching higher layers.</li>
-<li>Is locally enforceable – the withdrawing node stops coupling before
-notifying the peer. Network partition cannot prevent withdrawal.</li>
-<li>Mitigates state poisoning, drift manipulation, and Sybil attacks by
-allowing immediate disconnection from any suspect peer.</li>
 </ul>
 <hr />
 <h2 id="configuration">19. Configuration</h2>

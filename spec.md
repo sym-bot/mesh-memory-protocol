@@ -4,7 +4,7 @@
 
 | Field | Value |
 |---|---|
-| Version | 0.2.3 |
+| Version | 0.2.2 |
 | Status | Published |
 | Date | 6 April 2026 |
 | Author | Hongwei Xu <hongwei@sym.bot> |
@@ -32,7 +32,7 @@ Feedback and errata: spec@sym.bot or github.com/sym-bot/sym/issues.
 
 | Version | Date | Changes |
 |---|---|---|
-| 0.2.3 | 2026-04-06 | Section 11 -- Feedback Modulation: how collective intelligence becomes self-correcting. Validator-authority CMBs with per-field reasoning modulate SVAF coupling weights and CfC temporal adaptation through the existing mesh cognition loop. Neuroscience-grounded: dopaminergic prediction error model with per-field direction and τ-modulated adaptation rate. Directive feedback for standalone domain knowledge injection. Validator-origin anchor weight 2.0 with role-grant verification. CfC state persistence across restarts. ABNF wire format grammar. CMB forward compatibility. Multi-relay failover. All cognitive content MUST use cmb frames. |
+| 0.2.2 | 2026-04-06 | Section 11 -- Feedback Modulation: how collective intelligence becomes self-correcting. Validator-authority CMBs with per-field reasoning modulate SVAF coupling weights and CfC temporal adaptation through the existing mesh cognition loop. Neuroscience-grounded: dopaminergic prediction error model with per-field direction and τ-modulated adaptation rate. Directive feedback for standalone domain knowledge injection. Validator-origin anchor weight 2.0 with role-grant verification. CfC state persistence across restarts. ABNF wire format grammar. CMB forward compatibility. Multi-relay failover. All cognitive content MUST use cmb frames. |
 | 0.2.1 | 2026-04-02 | Node model: every autonomous agent MUST be a full peer node with own identity, coupling engine, and memory store. SVAF band-pass evaluation: four-class model (redundant/aligned/guarded/rejected) with per-field redundancy detection. CMB lifecycle: observed/remixed/validated/canonical/archived with anchor weight progression. Semantic encoder SHOULD for SVAF drift computation. Handshake adds version and extensions fields. Error frame type. |
 | 0.2.0 | 2026-03-27 | Formal specification published. 8-layer architecture. CAT7 CMB schema with lineage (parents + ancestors). SVAF per-field evaluation. Wire format normatively specified. Error frame. Frame type registry. Extension mechanism. JSON Schema. Connection state machine. Wire examples. |
 | 0.1.0 | 2025-08-01 | Initial protocol design (Consenix Labs Ltd). 4-layer architecture. Scalar drift evaluation. |
@@ -81,17 +81,17 @@ MMP is an 8-layer protocol stack. Each layer has a defined responsibility. Imple
 
 | Layer | Name | Description | Detail |
 |---|---|---|---|
-| 7 | APPLICATION | Domain Agents -- Music, Code, Fitness, Robotics, BCI | Where agents live and their LLMs reason on the remix subgraph. Mesh Cognition happens here. |
+| 7 | APPLICATION | Domain Agents -- Music, Code, Fitness, Robotics, Agent Systems | Where agents live and their LLMs reason on the remix subgraph. Mesh Cognition happens here. |
 | 6 | xMesh | Per-Agent LNN -- Continuous-Time Cognitive State | Each agent runs its own Liquid Neural Network. Fast neurons track mood; slow neurons preserve domain expertise. Hidden state (h₁, h₂) is exchanged via state-sync. |
 | 5 | SYNTHETIC MEMORY | LLM-Derived Knowledge from Remix Subgraph → CfC | The bridge between reasoning (LLM) and dynamics (LNN). Encodes derived knowledge into CfC-compatible hidden state vectors. |
-| 4 | COUPLING | Drift · SVAF Per-Field Evaluation · Consent | The gate. SVAF evaluates each of 7 CMB fields independently. Consent primitive enables withdrawal. Nothing enters cognition without passing this layer. |
+| 4 | COUPLING | Drift · SVAF Per-Field Evaluation | The gate. SVAF evaluates each of 7 CMB fields independently. Nothing enters cognition without passing this layer. |
 
 **Protocol Infrastructure (Layers 0-3)**
 
 | Layer | Name | Description | Detail |
 |---|---|---|---|
 | 3 | MEMORY | L0 Events · L1 Structured (CMBs) · L2 Cognitive | Three memory tiers with graduated disclosure. L0 stays local. L1 is gated by SVAF. L2 is exchanged via state-sync. |
-| 2 | CONNECTION | Handshake · State-Sync · Gossip · Wake · Consent | Connection lifecycle: discover, connect, handshake, heartbeat, gossip node metadata, wake sleeping nodes. |
+| 2 | CONNECTION | Handshake · State-Sync · Gossip · Wake | Connection lifecycle: discover, connect, handshake, heartbeat, gossip node metadata, wake sleeping nodes. |
 | 1 | TRANSPORT | IPC · TCP/Bonjour · WebSocket · APNs Push | Length-prefixed JSON over TCP (LAN), WebSocket (relay), IPC (local). Zero configuration discovery via DNS-SD. |
 | 0 | IDENTITY | nodeId · name · cryptographic keypair | Persistent UUID per node. Never changes. The foundation everything else builds on. |
 
@@ -539,7 +539,7 @@ Upon connection, both sides MUST exchange the following frames in order:
 ```
 
 - The `version` field MUST be the MMP specification version the node implements (e.g., `"0.2.0"`). Nodes SHOULD accept peers with the same major version. Nodes MAY reject peers with incompatible versions.
-- The `extensions` field SHOULD list supported protocol extensions (e.g., `["consent-v0.1", "mesh-group-v0.1"]`). Nodes MUST ignore unrecognised extensions.
+- The `extensions` field SHOULD list supported protocol extensions (e.g., `["mesh-group-v0.1"]`). Nodes MUST ignore unrecognised extensions.
 - The `group` field is OPTIONAL and identifies the mesh group the node wishes to join (Section 5.8). A handshake without `group` MUST be treated as `group = "default"`. When two nodes handshake and discover that their declared groups differ, the receiver MUST close the connection.
 - The inbound node MUST wait for a `handshake` frame as the first frame. If any other frame type arrives first, or no handshake arrives within 10,000 ms, the connection MUST be closed.
 - If a node receives a handshake with a nodeId that is already connected via the **same transport type**, the new connection MUST be closed (duplicate guard). If the existing connection uses a **different transport type** (e.g. peer connected via relay, new connection via LAN TCP), the new connection MUST be accepted as a secondary transport per Section 4.6.
@@ -560,7 +560,7 @@ AWAITING_HANDSHAKE (10s timeout)
     ▼
 CONNECTED (peer registered, frames routed)
     │
-    │  timeout / close / consent-withdraw
+    │  timeout / close
     ▼
 DISCONNECTED (peer removed, re-discover)
 ```
@@ -570,7 +570,7 @@ DISCONNECTED (peer removed, re-discover)
 | DISCONNECTED | AWAITING_HANDSHAKE | TCP connect or accept |
 | AWAITING_HANDSHAKE | CONNECTED | Valid handshake within 10,000 ms |
 | AWAITING_HANDSHAKE | DISCONNECTED | Timeout, invalid frame, or duplicate nodeId |
-| CONNECTED | DISCONNECTED | Heartbeat timeout, TCP close, consent-withdraw, or error |
+| CONNECTED | DISCONNECTED | Heartbeat timeout, TCP close, or error |
 
 Implementations MUST NOT process cognitive frames (`cmb`, `state-sync`, `xmesh-insight`) in the AWAITING_HANDSHAKE state.
 
@@ -607,7 +607,7 @@ A SYM node MAY declare membership in a **mesh group** at handshake time via the 
 
 **Recommended naming convention (non-normative).** The protocol does not parse group identifiers beyond the character set and length checks above. Operators of meshes with more than a handful of groups SHOULD adopt a hierarchical dotted-path convention `<app>[.<environment>][.<cohort>]`, e.g. `melotune.prod`, `melotune.dev`, `claude-code.default`, `research.lab`. The dots are convention only; tooling MAY use them for prefix-based grouping but the protocol does not require this.
 
-**SVAF and consent interaction.** SVAF (Layer 4, Section 9) per-field evaluation runs *after* group filtering: `cmb` frames from peers in different groups never reach the SVAF evaluator. The consent extension (`consent-v0.1`) is orthogonal -- consent state is per-group and not shared across groups.
+**SVAF and group filtering.** SVAF (Layer 4, Section 9) per-field evaluation runs *after* group filtering: `cmb` frames from peers in different groups never reach the SVAF evaluator.
 
 The full design rationale, the prefix-based group claims relay enhancement, and the operational migration record are documented in `MMP-MESH-GROUPS-DESIGN.md` on the symbot-website repository.
 
@@ -759,7 +759,6 @@ When a node encounters a protocol-level error, it SHOULD send an `error` frame b
 | 1004 | HANDSHAKE_TIMEOUT | Close | No handshake within deadline |
 | 1005 | DUPLICATE_NODE | Close | nodeId already connected |
 | 2001 | SVAF_REJECTED | None | Memory-share rejected by SVAF (informational) |
-| 2002 | CONSENT_WITHDRAWN | Close | Consent withdrawn by this node |
 
 Codes 1xxx are connection-level (close connection). Codes 2xxx are evaluation-level (informational). Error frames MUST NOT contain sensitive information.
 
@@ -769,9 +768,9 @@ Frame types are identified by their `type` string value. **Core types** (this sp
 
 ### Q&A
 
-**Why MUST nodes silently ignore unknown frame types?** -- Without this rule, you can never add new features to the protocol. If a node crashes or rejects unknown frame types, then deploying a new extension (like the consent primitive) requires upgrading every node on the mesh simultaneously -- impossible in a peer-to-peer system. Silent ignore means old nodes and new nodes coexist: a node running the consent extension sends consent-withdraw frames, and nodes that don't support consent yet simply ignore them. No crash, no error, the mesh keeps working. When a node adds consent support later, it handles the frame. No coordinated upgrade needed. This is the same principle used by HTTP (unknown headers ignored), TCP (unknown options skipped), and HTML (unknown tags ignored). Every successful protocol is evolvable because of this rule.
+**Why MUST nodes silently ignore unknown frame types?** -- Without this rule, you can never add new features to the protocol. If a node crashes or rejects unknown frame types, then deploying a new extension (like mesh groups) requires upgrading every node on the mesh simultaneously -- impossible in a peer-to-peer system. Silent ignore means old nodes and new nodes coexist: a node running a new extension sends its frames, and nodes that don't support the extension simply ignore them. No crash, no error, the mesh keeps working. When a node adds support later, it handles the frame. No coordinated upgrade needed. This is the same principle used by HTTP (unknown headers ignored), TCP (unknown options skipped), and HTML (unknown tags ignored). Every successful protocol is evolvable because of this rule.
 
-**What happens if a relay receives an unknown frame type?** -- The relay forwards it. The relay is a dumb transport pipe -- it wraps the payload in a { from, fromName, payload } envelope and sends it to the target or broadcasts it. It never inspects the payload type. This means extension frames (consent, vendor, future types) flow through the relay without any relay changes. The intelligence is at the endpoints, not the transport.
+**What happens if a relay receives an unknown frame type?** -- The relay forwards it. The relay is a dumb transport pipe -- it wraps the payload in a { from, fromName, payload } envelope and sends it to the target or broadcasts it. It never inspects the payload type. This means extension frames (group, vendor, future types) flow through the relay without any relay changes. The intelligence is at the endpoints, not the transport.
 
 **Can an extension frame break an existing node?** -- No, if the node follows Section 7. The frame handler switches on msg.type. Unknown types fall through with no match and no action. The node's cognitive state, memory, and coupling are unaffected. This is a hard requirement -- implementations that reject or error on unknown types are non-conformant.
 
@@ -1804,7 +1803,7 @@ Extensions are advertised via the `extensions` field in the handshake frame. A n
 
 ### 16.2 Frame Type Naming
 
-**Core types** (this specification): MUST NOT be redefined by extensions. **Extension types**: MUST use `<extension>-<name>` format (e.g., `consent-withdraw`). **Vendor types**: MUST use `x-<vendor>-<name>` format. Vendor types MUST be silently ignored by non-supporting nodes.
+**Core types** (this specification): MUST NOT be redefined by extensions. **Extension types**: MUST use `<extension>-<name>` format (e.g., `mesh-group-join`). **Vendor types**: MUST use `x-<vendor>-<name>` format. Vendor types MUST be silently ignored by non-supporting nodes.
 
 ### 16.3 Extension Negotiation
 
@@ -1812,9 +1811,7 @@ If both peers advertise the same extension in handshake, it is active. If only o
 
 ### 16.4 Published Extensions
 
-| Extension | Status | Specification |
-|---|---|---|
-| `consent-v0.1.0` | Published | [MMP Consent Extension v0.1.0](https://sym.bot/spec/mmp-consent) |
+*(No Published Extensions at this time.)*
 
 ### 16.5 Extension Lifecycle
 
@@ -1830,7 +1827,7 @@ Extensions use Semantic Versioning independently of the core MMP specification v
 
 ### Q&A
 
-**Can an extension become a core frame type?** -- Yes. An extension that proves stable and widely adopted MAY be promoted to a core frame type via a spec version bump. The Consent extension started as an extension and is a candidate for future core inclusion.
+**Can an extension become a core frame type?** -- Yes. An extension that proves stable and widely adopted MAY be promoted to a core frame type via a spec version bump. Mesh groups (Section 5.8) started as an extension proposal before being promoted into the core spec.
 
 ---
 
@@ -1939,7 +1936,7 @@ Node identity is UUID-based with mandatory Ed25519 cryptographic identity (Secti
 MMP introduces threats unique to cognitive coupling that traditional protocol security does not address:
 
 **State poisoning** -- A malicious node sends crafted hidden state vectors (h₁, h₂) designed to skew the receiver's cognitive state toward a desired outcome.
-MITIGATION: Drift-bounded blending (Section 10) limits any peer's influence to α < 1. High-drift state is rejected automatically. Consent withdrawal (MMP Consent Extension) provides immediate escape.
+MITIGATION: Drift-bounded blending (Section 10) limits any peer's influence to α < 1. High-drift state is rejected automatically. Peer-level disconnection at Layer 2 provides immediate escape.
 
 **Lineage forgery** -- A node claims false lineage -- listing ancestors it never actually remixed -- to inflate its remix count or inject itself into chains.
 MITIGATION: CMB keys are content hashes (md5 of field texts). A forged lineage referencing a non-existent key is detectable. Cryptographic CMB signing (future) would make forgery provably impossible.
@@ -1969,7 +1966,6 @@ Additional privacy considerations:
 
 - Error frames MUST NOT contain sensitive information. The `detail` field is for debugging, not for conveying user data.
 - Wake channels expose push tokens to peers. Implementations SHOULD restrict wake channel gossip to trusted relays only.
-- The Consent Extension provides protocol-level withdrawal from cognitive coupling -- instantaneous, complete, and non-negotiable.
 - Implementations targeting GDPR, HIPAA, or similar regulatory frameworks SHOULD treat CMB field text as personal data and apply appropriate retention and deletion policies at the application layer.
 
 ### 18.6 Regulatory Compliance & Audit Trail
@@ -2010,14 +2006,6 @@ Implementations targeting domains where field extraction quality is critical (he
 - **Confidence thresholds** -- the LLM can assign a confidence score to its extraction; low-confidence CMBs can be withheld
 - **Lineage feedback** -- CMBs that get remixed by other agents (have descendants in the DAG) signal high quality; CMBs that expire without children signal noise. This feedback loop lets the mesh itself shape extraction quality over time
 - **Semantic embedding encoder** -- implementations SHOULD use a semantic embedding model (e.g. all-MiniLM-L6-v2) for SVAF drift computation. The evaluation pipeline is encoder-agnostic -- any function that maps text to unit-normalised vectors works. N-gram encoding MAY be used as a zero-dependency fallback.
-
-### 18.8 Consent as a Security Mechanism
-
-The MMP Consent Extension is not just a privacy feature -- it is a security mechanism. Consent withdrawal:
-
-- Overrides ALL coupling evaluation -- a hard gate at Layer 2 that prevents cognitive frames from reaching higher layers.
-- Is locally enforceable -- the withdrawing node stops coupling before notifying the peer. Network partition cannot prevent withdrawal.
-- Mitigates state poisoning, drift manipulation, and Sybil attacks by allowing immediate disconnection from any suspect peer.
 
 ---
 

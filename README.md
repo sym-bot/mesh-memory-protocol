@@ -25,7 +25,6 @@ AI agents today run in isolation. They share data through message buses, API cal
 The full specification is published at **[sym.bot/spec/mmp](https://sym.bot/spec/mmp)** and mirrored in this repository:
 
 - **[spec.md](spec.md)** — MMP v0.2.3 (current)
-- **[extensions/consent-v0.1.0.md](extensions/consent-v0.1.0.md)** — Consent Extension
 
 ### 8-Layer Architecture
 
@@ -36,7 +35,7 @@ The full specification is published at **[sym.bot/spec/mmp](https://sym.bot/spec
 | 5 | Synthetic Memory | LLM-derived knowledge encoded to CfC hidden state |
 | 4 | Coupling | SVAF per-field evaluation — the gate. Nothing enters cognition without passing. |
 | 3 | Memory | Three tiers: L0 events (local), L1 structured (CMBs), L2 cognitive (state-sync) |
-| 2 | Connection | Handshake, heartbeat, gossip, wake, consent |
+| 2 | Connection | Handshake, heartbeat, gossip, wake |
 | 1 | Transport | TCP/Bonjour (LAN), WebSocket (relay), IPC (local tools) |
 | 0 | Identity | UUID v7 + Ed25519 keypair per node |
 

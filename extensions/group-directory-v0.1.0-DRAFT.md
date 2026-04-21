@@ -222,7 +222,6 @@ list in human-readable form.
 | sym-relay token/channel isolation | Shipped | This extension uses token/channel as the transport primitive for directory-registered private groups. Creation emits a token; accept hands the token to the accepted member. |
 | `sym_invite_create` / `sym_invite_info` | Shipped (v0.1.23) | URL-based invite flow remains as the **private** join path — admin generates invite, shares out of band, each invite bundles the channel token. Works with or without directory registration. |
 | `sym_join_group` | Shipped (v0.1.23) | Extended: for directory-registered groups, `sym_join_group` becomes multi-step — issues `group-join-request`, waits for accept, then hot-swaps with the granted token. |
-| MMP Consent extension | Published (v0.1.0) | Consent withdrawal at the member level remains per-pair, independent of group membership. Revoking membership terminates coupling with all other members of that group but doesn't revoke pairwise coupling outside the group. |
 
 ### Implementation surface
 
