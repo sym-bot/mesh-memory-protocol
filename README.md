@@ -1,88 +1,36 @@
 # Mesh Memory Protocol (MMP)
 
-**A Mesh Protocol for Collective Intelligence**
+**A wire protocol for collective intelligence.**
 
-[![MMP Spec](https://img.shields.io/badge/spec-v0.2.3-purple)](https://sym.bot/spec/mmp)
-[![arXiv](https://img.shields.io/badge/arXiv-2604.03955-b31b1b.svg)](https://arxiv.org/abs/2604.03955)
+[![Spec](https://img.shields.io/badge/spec-v1.0-orange)](https://meshcognition.org/spec/mmp)
+[![arXiv](https://img.shields.io/badge/arXiv-2604.19540-b31b1b.svg)](https://arxiv.org/abs/2604.19540)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC_BY_4.0-blue)](https://creativecommons.org/licenses/by/4.0/)
 
----
+## Canonical home
 
-AI agents today run in isolation. They share data through message buses, API calls, or shared databases — but they do not think together. MMP defines how autonomous agents discover each other, exchange cognitive state, evaluate incoming signals per-field, and remix each other's observations into new understanding — without servers, without central coordination, and without sharing raw data.
+The Mesh Memory Protocol specification is published at **[meshcognition.org/spec/mmp](https://meshcognition.org/spec/mmp)**.
 
-## What Makes MMP Different
+- Browse the spec by section: [meshcognition.org/spec/mmp](https://meshcognition.org/spec/mmp)
+- Single-page Markdown: [meshcognition.org/spec/mmp-v1.0.md](https://meshcognition.org/spec/mmp-v1.0.md)
+- Single-page HTML: [meshcognition.org/spec/mmp-v1.0.html](https://meshcognition.org/spec/mmp-v1.0.html)
+- Governance + RFC process: [meshcognition.org/governance](https://meshcognition.org/governance)
 
-| Dimension | Message Bus | Shared Memory | MCP / A2A | **MMP** |
-|---|---|---|---|---|
-| What flows | Messages | Shared state | Tool calls / Tasks | **Remixed CMBs + hidden state** |
-| Evaluation | Topic routing | None | None | **Per-field SVAF (7 dimensions)** |
-| Intelligence | None | Central model | None | **LLM reasons on remix graph** |
-| Coordination | Central broker | Central store | Client-server | **Agent-to-agent (no centre)** |
-| Memory | Fire and forget | Mutable shared | Stateless | **Immutable CMBs with lineage** |
+## What this repository hosts
 
-## Specification
+- **[`extensions/`](./extensions/)** — community extension drafts, edited via pull request. Promoted to core MMP per the §16.5 lifecycle.
+- **[Issues](https://github.com/sym-bot/mesh-memory-protocol/issues)** — public RFC discussion forum for spec changes. File proposals here with `[spec-rfc]` in the title.
+- License: [CC BY 4.0](./LICENSE) (specification text). Reference implementations are licensed Apache 2.0.
 
-The full specification is published at **[sym.bot/spec/mmp](https://sym.bot/spec/mmp)** and mirrored in this repository:
+## Reference implementations
 
-- **[spec.md](spec.md)** — MMP v0.2.3 (current)
-
-### 8-Layer Architecture
-
-| Layer | Name | Description |
+| Language | Project | Scope |
 |---|---|---|
-| 7 | Application | Domain agents — where LLMs reason on the remix subgraph |
-| 6 | xMesh | Per-agent LNN — continuous-time cognitive state (CfC) |
-| 5 | Synthetic Memory | LLM-derived knowledge encoded to CfC hidden state |
-| 4 | Coupling | SVAF per-field evaluation — the gate. Nothing enters cognition without passing. |
-| 3 | Memory | Three tiers: L0 events (local), L1 structured (CMBs), L2 cognitive (state-sync) |
-| 2 | Connection | Handshake, heartbeat, gossip, wake |
-| 1 | Transport | TCP/Bonjour (LAN), WebSocket (relay), IPC (local tools) |
-| 0 | Identity | UUID v7 + Ed25519 keypair per node |
+| Node.js | [`sym-bot/sym`](https://github.com/sym-bot/sym) | Full L0–L7 |
+| Swift | [`sym-bot/sym-swift`](https://github.com/sym-bot/sym-swift) | Full L0–L7, Apple platforms |
+| Python | [`sym-bot/mesh-cognition`](https://github.com/sym-bot/mesh-cognition) ([pypi](https://pypi.org/project/mesh-cognition)) | Coupling kernel: L4 (per-field admission) + L6 (state blending) for CfC neural networks |
 
-## Reference Implementations
+## Citation
 
-| SDK | Language | Install | Repo |
-|---|---|---|---|
-| **SYM** | Node.js | `npm install @sym-bot/sym` | [sym-bot/sym](https://github.com/sym-bot/sym) |
-| **SYM Swift** | Swift/iOS | Swift Package Manager | [sym-bot/sym-swift](https://github.com/sym-bot/sym-swift) |
+If you use MMP in your research, cite the foundational paper:
 
-## Key Concepts
-
-### Cognitive Memory Blocks (CMBs)
-
-Every signal is decomposed into 7 typed semantic fields (CAT7 schema): **focus**, **issue**, **intent**, **motivation**, **commitment**, **perspective**, **mood**. CMBs are immutable — when an agent remixes a signal, it creates a new CMB with lineage pointing to the source.
-
-### SVAF (Symbolic-Vector Attention Fusion)
-
-Per-field evaluation of incoming signals. Each of 7 fields is evaluated independently — a signal with relevant mood but irrelevant focus is partially accepted, not ambiguously scored. Each agent defines its own field weights (α_f) — no routing configuration needed.
-
-### Remix
-
-When an agent processes a peer's CMB through its own domain intelligence and produces **new knowledge** that didn't exist before. The growing DAG of remixed CMBs IS the collective intelligence.
-
-### CMB Lifecycle
-
-| State | Trigger | Anchor Weight |
-|---|---|---|
-| observed | Agent creates CMB | 1.0 |
-| remixed | Peer remixes it | 1.5 |
-| validated | Human acts on it | 2.0 |
-| canonical | Validated + remixed by 2+ agents | 3.0 |
-| archived | No remix for 30 days | 0.5 |
-
-## Production Deployment
-
-SYM.BOT runs its operations on MMP with 4 autonomous agents (COO, Research, Marketing, Product) producing real decisions for the founder daily. This is both the reference deployment and the most credible demonstration of the protocol.
-
-## Contributing
-
-MMP is an open specification published under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Reference implementations are [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0).
-
-- Spec feedback: [issues](https://github.com/sym-bot/mesh-memory-protocol/issues) or spec@sym.bot
-- SDK contributions: see [sym](https://github.com/sym-bot/sym) and [sym-swift](https://github.com/sym-bot/sym-swift)
-
-## Author
-
-**Hongwei Xu** — [SYM.BOT](https://sym.bot)
-
-Mesh Memory Protocol, MMP, SYM, and related marks are trademarks of SYM.BOT.
+> Xu, H. (2026). *Mesh Memory Protocol: Semantic Infrastructure for Multi-Agent LLM Systems.* arXiv:2604.19540.
