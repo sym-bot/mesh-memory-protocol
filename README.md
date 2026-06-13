@@ -2,7 +2,7 @@
 
 **A wire protocol for collective intelligence.**
 
-[![Spec](https://img.shields.io/badge/spec-v1.0-orange)](https://meshcognition.org/spec/mmp)
+[![Spec](https://img.shields.io/badge/spec-v1.0.1-orange)](https://meshcognition.org/spec/mmp)
 [![arXiv](https://img.shields.io/badge/arXiv-2604.19540-b31b1b.svg)](https://arxiv.org/abs/2604.19540)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC_BY_4.0-blue)](https://creativecommons.org/licenses/by/4.0/)
 
@@ -27,7 +27,7 @@ The Mesh Memory Protocol specification is published at **[meshcognition.org/spec
 |---|---|---|
 | Node.js | [`sym-bot/sym`](https://github.com/sym-bot/sym) | Full L0–L7 |
 | Swift | [`sym-bot/sym-swift`](https://github.com/sym-bot/sym-swift) | Full L0–L7, Apple platforms |
-| Python | [`sym-bot/mesh-cognition`](https://github.com/sym-bot/mesh-cognition) ([pypi](https://pypi.org/project/mesh-cognition)) | Coupling kernel: L4 (per-field admission) + L6 (state blending) for CfC neural networks |
+| Python | [`sym-bot/mesh-cognition`](https://github.com/sym-bot/mesh-cognition) ([pypi](https://pypi.org/project/mesh-cognition)) | Coupling kernel: L4 (per-field admission) + L6 (Cognitive State) for CfC neural networks |
 
 ## Citation
 
