@@ -11,12 +11,13 @@
 The Mesh Memory Protocol specification is published at **[meshcognition.org/spec/mmp](https://meshcognition.org/spec/mmp)**.
 
 - Browse the spec by section: [meshcognition.org/spec/mmp](https://meshcognition.org/spec/mmp)
-- Single-page Markdown: [meshcognition.org/spec/mmp-v1.0.md](https://meshcognition.org/spec/mmp-v1.0.md)
-- Single-page HTML: [meshcognition.org/spec/mmp-v1.0.html](https://meshcognition.org/spec/mmp-v1.0.html)
+- Single-page Markdown: [meshcognition.org/spec/mmp-v1.0.md](https://meshcognition.org/spec/mmp-v1.0.md) ([in this repo](./spec/mmp-v1.0.md))
+- Single-page HTML: [meshcognition.org/spec/mmp-v1.0.html](https://meshcognition.org/spec/mmp-v1.0.html) ([in this repo](./spec/mmp-v1.0.html))
 - Governance + RFC process: [meshcognition.org/governance](https://meshcognition.org/governance)
 
 ## What this repository hosts
 
+- **[`spec/`](./spec/)** — the single-page specification (Markdown + HTML), mirrored from the canonical site. The site is the source of truth; these are kept in sync for git history, offline reading, and GitHub rendering.
 - **[`extensions/`](./extensions/)** — community extension drafts, edited via pull request. Promoted to core MMP per the §16.5 lifecycle.
 - **[Issues](https://github.com/sym-bot/mesh-memory-protocol/issues)** — public RFC discussion forum for spec changes. File proposals here with `[spec-rfc]` in the title.
 - License: [CC BY 4.0](./LICENSE) (specification text). Reference implementations are licensed Apache 2.0.
