@@ -2,7 +2,7 @@
 
 **A wire protocol for collective intelligence.**
 
-[![Spec](https://img.shields.io/badge/spec-v1.0.2-orange)](https://meshcognition.org/spec/mmp)
+[![Spec](https://img.shields.io/badge/spec-v1.0.3-orange)](https://meshcognition.org/spec/mmp)
 [![arXiv](https://img.shields.io/badge/arXiv-2604.19540-b31b1b.svg)](https://arxiv.org/abs/2604.19540)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC_BY_4.0-blue)](https://creativecommons.org/licenses/by/4.0/)
 

@@ -1,8 +1,8 @@
-# Mesh Memory Protocol (MMP) v1.0.2
+# Mesh Memory Protocol (MMP) v1.0.3
 
 > A Mesh Protocol for Collective Intelligence
 >
-> **Version:** 1.0.2  ·  **Date:** 14 June 2026  ·  **Editor:** Hongwei Xu  ·  **License:** CC BY 4.0
+> **Version:** 1.0.3  ·  **Date:** 16 June 2026  ·  **Editor:** Hongwei Xu  ·  **License:** CC BY 4.0
 >
 > **Canonical:** https://meshcognition.org/spec/mmp  ·  **arXiv:** https://arxiv.org/abs/2604.19540
 
@@ -49,7 +49,7 @@ A Mesh Protocol for Collective Intelligence
 
 Version
 
-1.0.2
+1.0.3
 
 Status
 
@@ -85,7 +85,7 @@ The problem is semantic, not transport. **Hidden state never crosses the wire** 
 
 ## Status of This Document
 
-This is a published specification (current version 1.0.2). It reflects the protocol as implemented in the [SYM Node.js](https://github.com/sym-bot/sym) and [SYM Swift](https://github.com/sym-bot/sym-swift) full-stack reference implementations, plus the [mesh-cognition](https://github.com/sym-bot/mesh-cognition) Python coupling kernel (Layers 4 + 6). The specification is versioned. Breaking changes increment the minor version; non-breaking additions increment the patch version.
+This is a published specification (current version 1.0.3). It reflects the protocol as implemented in the [SYM Node.js](https://github.com/sym-bot/sym) and [SYM Swift](https://github.com/sym-bot/sym-swift) full-stack reference implementations, plus the [mesh-cognition](https://github.com/sym-bot/mesh-cognition) Python coupling kernel (Layers 4 + 6). The specification is versioned. Breaking changes increment the minor version; non-breaking additions increment the patch version.
 
 Feedback and errata: [spec@meshcognition.org](mailto:spec@meshcognition.org) or [github.com/sym-bot/sym/issues](https://github.com/sym-bot/sym/issues).
 
@@ -130,6 +130,12 @@ Version
 Date
 
 Changes
+
+1.0.3
+
+2026-06-16
+
+[§15.7.1 Source-Novel Forwarding](/spec/mmp/remix#source-novel-forwarding) — carve-out distinguishing _forwarding_ from the remix-paraphrase §15.7 forbids. An agent **MAY** re-emit an admitted observation it did not natively produce, carrying the **inherited lineage root**, when and only when that observation is _source-novel_ to the receiver — its lineage roots are not already present in the receiver’s admitted store. This is not the value-only echo §15.7 prevents: a forwarded observation carries a source the receiver has not yet seen even though the forwarder adds no new domain data. Forwarding **MUST NOT** mint a fresh root for content that already carries one, and **MUST NOT** re-emit a source the receiver already holds — the anti-echo guarantee is preserved exactly. Forwarding **SHOULD** be non-selective, so every observation reaches the agents whose understanding depends on it. In short: remix requires new domain data; forwarding requires a new source. Backward-compatible addition (patch).
 
 1.0.2
 
