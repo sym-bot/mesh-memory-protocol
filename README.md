@@ -38,11 +38,11 @@ MMP is one layer of a characterised stack — *which to admit* (SVAF) · *whethe
 
 | Paper | arXiv |
 |---|---|
-| **Mesh Inference** — A Formal Model of Collective Inference Without a Center (convergence, identification-completeness, observation-only confidentiality) | [2606.19537](https://arxiv.org/abs/2606.19537) |
 | **On the Necessity of a Liquid Substrate for Mesh Intelligence** — for any *fixed-weight* agent folding peers' projections online, an adaptive timescale and gap-awareness are necessary (necessary, not sufficient) | [2606.28413](https://arxiv.org/abs/2606.28413) |
+| **Mesh Inference** — A Formal Model of Collective Inference Without a Center (convergence, identification-completeness, observation-only confidentiality) | [2606.19537](https://arxiv.org/abs/2606.19537) |
 | **MMP** — Mesh Memory Protocol: Semantic Infrastructure for Multi-Agent LLM Systems | [2604.19540](https://arxiv.org/abs/2604.19540) |
-| **SVAF** — Symbolic-Vector Attention Fusion for Collective Intelligence (the per-field admission gate, L4) | [2604.03955](https://arxiv.org/abs/2604.03955) |
 | **MeloTune** — On-Device Arousal Learning and Peer-to-Peer Mood Coupling (first deployed reference) | [2604.10815](https://arxiv.org/abs/2604.10815) |
+| **SVAF** — Symbolic-Vector Attention Fusion for Collective Intelligence (the per-field admission gate, L4) | [2604.03955](https://arxiv.org/abs/2604.03955) |
 
 ## Citation
 
