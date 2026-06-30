@@ -29,9 +29,23 @@ The Mesh Memory Protocol specification is published at **[meshcognition.org/spec
 | Node.js | [`sym-bot/sym`](https://github.com/sym-bot/sym) | Full L0–L7 |
 | Swift | [`sym-bot/sym-swift`](https://github.com/sym-bot/sym-swift) | Full L0–L7, Apple platforms |
 | Python | [`sym-bot/mesh-cognition`](https://github.com/sym-bot/mesh-cognition) ([pypi](https://pypi.org/project/mesh-cognition)) | Coupling kernel: L4 (per-field admission) + L6 (Cognitive State) for CfC neural networks |
+| Node.js | [`sym-bot/xmesh-agent`](https://github.com/sym-bot/xmesh-agent) | Autonomous agent runtime — Anthropic / OpenAI / Ollama on the MMP wire |
+| Node.js | [`sym-bot/sym-mesh-channel`](https://github.com/sym-bot/sym-mesh-channel) | Real-time Claude-to-Claude mesh (Claude Code plugin) — first non-Anthropic Channels implementation on MMP |
+
+## Foundational papers
+
+MMP is one layer of a characterised stack — *which to admit* (SVAF) · *whether a center-free collective can recover the answer* (Mesh Inference) · *how each agent tracks an evolving latent in time* (Liquid Necessity) — carried by the protocol and shown in a deployed reference. The canonical record is **[meshcognition.org/research](https://meshcognition.org/research/)**:
+
+| Paper | arXiv |
+|---|---|
+| **Mesh Inference** — A Formal Model of Collective Inference Without a Center (convergence, identification-completeness, observation-only confidentiality) | [2606.19537](https://arxiv.org/abs/2606.19537) |
+| **On the Necessity of a Liquid Substrate for Mesh Intelligence** — for any *fixed-weight* agent folding peers' projections online, an adaptive timescale and gap-awareness are necessary (necessary, not sufficient) | [2606.28413](https://arxiv.org/abs/2606.28413) |
+| **MMP** — Mesh Memory Protocol: Semantic Infrastructure for Multi-Agent LLM Systems | [2604.19540](https://arxiv.org/abs/2604.19540) |
+| **SVAF** — Symbolic-Vector Attention Fusion for Collective Intelligence (the per-field admission gate, L4) | [2604.03955](https://arxiv.org/abs/2604.03955) |
+| **MeloTune** — On-Device Arousal Learning and Peer-to-Peer Mood Coupling (first deployed reference) | [2604.10815](https://arxiv.org/abs/2604.10815) |
 
 ## Citation
 
-If you use MMP in your research, cite the foundational paper:
+If you use MMP in your research, cite the protocol paper:
 
 > Xu, H. (2026). *Mesh Memory Protocol: Semantic Infrastructure for Multi-Agent LLM Systems.* arXiv:2604.19540.
