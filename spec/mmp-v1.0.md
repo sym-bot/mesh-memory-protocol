@@ -2,7 +2,7 @@
 
 > A Mesh Protocol for Collective Intelligence
 >
-> **Version:** 1.0.3  ·  **Date:** 16 June 2026  ·  **Editor:** Hongwei Xu  ·  **License:** CC BY 4.0
+> **Version:** 1.0.3  ·  **Published:** 27 March 2026  ·  **Last updated:** 16 June 2026  ·  **Editor:** Hongwei Xu  ·  **License:** CC BY 4.0
 >
 > **Canonical:** https://meshcognition.org/spec/mmp  ·  **arXiv:** https://arxiv.org/abs/2604.19540
 
@@ -55,9 +55,13 @@ Status
 
 Published
 
-Date
+Published
 
-27 April 2026
+27 March 2026
+
+Last updated
+
+16 June 2026
 
 Author
 
