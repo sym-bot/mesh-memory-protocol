@@ -1,6 +1,6 @@
 # Mesh Memory Protocol (MMP)
 
-**A wire protocol for collective intelligence.**
+**The wire protocol for mesh cognition — collective intelligence with no center.**
 
 [![Spec](https://img.shields.io/badge/spec-v1.0.3-orange)](https://meshcognition.org/spec/mmp)
 [![arXiv](https://img.shields.io/badge/arXiv-2604.19540-b31b1b.svg)](https://arxiv.org/abs/2604.19540)
