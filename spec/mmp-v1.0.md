@@ -1649,7 +1649,7 @@ An outcome is an attestation, not a fact. The grounding CMB asserts that its _au
 
 Groundedness is receiver-relative. A CMB is _grounded_, in the view of a given node, iff a recognised grounding CMB targeting it (directly, or via the node’s admitted remix of one whose expanded ancestors reach it, §15.2) is present in that node’s own store. There is no global grounded state; a node MUST NOT treat cognition as grounded on the strength of a grounding entry it never admitted. Grounding runs upward only — a grounding CMB grounds the CMBs its lineage points at, never descendants of those CMBs: a remix of verified cognition is not itself verified.
 
-Outcomes are observations of a changing world. When several recognised grounding CMBs target the same cognition in one store, the latest by stored time wins: a later `failed:` un-grounds what an earlier `verified:` established (a regression must surface, not be shadowed by history). “Stored time” is the receiver-local time the entry entered the evaluating store — never the author-asserted `createdAt`, which is unwitnessed (§6.6) and would let a backdated or future-dated attestation game the ordering. Authority modulates whether to _act_ on an attestation, not the temporal ordering of observations — but acting cuts both ways: a receiver _SHOULD_ weigh the author’s resolved authority before letting a `failed:` from a low-authority author un-ground cognition whose `verified:` came from a validator or anchor (see the §18.4 threat note on outcome griefing).
+Outcomes are observations of a changing world. When several recognised grounding CMBs target the same cognition in one store, the latest by stored time wins: a later `failed:` un-grounds what an earlier `verified:` established (a regression must surface, not be shadowed by history). “Stored time” is the receiver-local time the entry entered the evaluating store — never the author-asserted `createdAt`, which is unwitnessed (§6.6) and would let a backdated or future-dated attestation game the ordering. Authority modulates whether to _act_ on an attestation, not the temporal ordering of observations — and latest-wins applies within an authority tier, not across tiers. Hard-gate reading (normative): a `failed:` from an author below the authority of the standing `verified:` MUST NOT un-ground it — a below-validator `failed:` cannot overturn a validator-or-above `verified:`. This is the tested-effective form: a soft authority-weighted vote is defeated by sheer low-authority volume, whereas the tier gate holds a validated outcome against any number of below-tier `failed:` reports (see the §18.4 threat note on outcome griefing). Within a tier — equal authority, or a genuine same-authority regression — latest-wins still applies, so a real regression surfaces.
 
 Grounding never advances lifecycle by itself. §6.5 stands unweakened: a CMB cannot self-grant effect, and a grounding CMB is a CMB. A node _MAY_ advance its own store’s entries to `validated` on grounding evidence — evidence-based validation — but only as an explicit act under validator-or-above authority (§6.5–§6.6), never as an automatic consequence of receiving or reading a grounding CMB, and never as a side effect of a query. The elevating authority is accountable for the judgment; it _SHOULD_ require `verified:` polarity and weigh the grounding author’s resolved authority before acting. Self-reported outcomes from unauthenticated or participant-rank authors _SHOULD NOT_ trigger elevation.
 
@@ -1728,6 +1728,22 @@ cmb
 SVAF
 
 timestamp (int), cmb (object: { key, createdBy, createdAt, fields, lineage, sig?, sigAlg?, group?, to? }) — full schema §20.2
+
+cmb-fetch
+
+3
+
+No
+
+reqId (string), key (string content address), from (nodeId), timestamp — request the CMB stored under an exact content-address key (§15.8 re-verification of lineage roots). Serving is discretionary: a node MAY answer, and only with content it holds under that exact key.
+
+cmb-fetch-result
+
+3
+
+No
+
+reqId, key, found (bool), cmb (object|null; fields text-only — the address binds text, re-verifiers re-encode) — response to cmb-fetch. Self-verifying: the requester MUST recompute the content address and discard a mismatch (treated as a miss); an unsolicited result MUST NOT terminate a pending request.
 
 role-grant
 
@@ -2037,7 +2053,7 @@ A CMB MUST NOT be modified after creation. When an agent remixes a CMB, it MUST 
 
 ### 8.2.1 Content Address & Canonical Serialization
 
-A CMB’s `key` is a content address: a SHA-256 hash over a fully specified canonical serialization of the block, prefixed to be self-describing about its scheme. Two independent conforming implementations MUST compute the identical key for the same logical CMB — the key is both the node identity in the lineage DAG and the value the author signature binds (§18.3.1), so any divergence breaks lineage, dedup, citation, and integrity. The published test vectors are the normative contract.
+A CMB’s `key` is a content address: a SHA-256 hash over a fully specified canonical serialization of the block, prefixed to be self-describing about its scheme. Two independent conforming implementations MUST compute the identical key for the same logical CMB — the key is both the node identity in the lineage DAG and the value the author signature binds (§18.3.1), so any divergence breaks lineage, dedup, citation, and integrity. The [published test vectors](https://github.com/sym-bot/mesh-memory-protocol/tree/main/conformance) are the normative contract.
 
 Legacy scheme (`cmb-`) — the previous format, retained for the migration: a conforming node MUST still _verify_ it. It is specified here byte-exactly (it was previously under-specified, which is how an implementation change went undetected against the spec):
 
@@ -4456,7 +4472,9 @@ Lineage guarantees provenance of _descent_, not semantic fidelity (§15.1: the r
 
 The invariant. A remix asserts lineage only where the descent claim would survive its own anchor’s scrutiny: at integration time (§15.5), the remixing node MUST evaluate its remix against the nearest resolvable lineage root (the oldest `ancestors` entry it can resolve; roots are always carried, §15.2 — and across a mesh boundary the anchor is the boundary root, §5.11, so the interior stays opaque) as if evaluating against a store holding only that anchor, and MUST NOT attach the lineage when that evaluation lands in the reject band (§9.2: content the anchor’s own membrane would refuse as unrelated has no honest claim to descend from it). The evaluation is content-only — the §9.2 temporal term does not apply, because the tether tests fidelity, not freshness — so the floor is the α-weighted field drift against the anchor exceeding Tguarded. Both sides of the comparison MUST be encoded within a single kernel: vectors produced by different encoders are not comparable, and thresholds are meaningful only within a pinned encoder (§9.2.1). The threshold is the existing reject floor — no new constant. Below the floor the node MUST store its CMB as a fresh root instead (under §8.2.1 this is simply minting with `role = root`: a root’s key binds content only), and MAY record the departed source informally in its own fields; it MUST NOT carry the severed chain’s `parents`/`ancestors`.
 
-Why the anchor, not the parent. Per-hop checks compound — k hops at drift ε bound the chain only by kε, and the measured median substantive hop is far too large to squeeze without killing legitimate re-projection. A check against the root does not compound: every surviving chain certifies that _every_ depth stays above the floor with respect to its root, so the bound is depth-independent by construction. No vector crosses the wire: the root is content-addressed (§8.2.1 — embeddings are deliberately excluded from the address), so any holder of the root re-encodes its text and recomputes the tether; receivers SHOULD re-verify opportunistically when they hold the root, the same verify-if-resolvable posture as signatures (§18.3.1). A receiver that cannot resolve the root treats the tether as unverified — a trust state, not a rejection.
+Why the anchor, not the parent. Per-hop checks compound — k hops at drift ε bound the chain only by kε, and the measured median substantive hop is far too large to squeeze without killing legitimate re-projection. A check against the root does not compound: every surviving chain certifies that _every_ depth stays above the floor with respect to its root, so the bound is depth-independent by construction. No vector crosses the wire: the root is content-addressed (§8.2.1 — embeddings are deliberately excluded from the address), so any holder of the root re-encodes its text and recomputes the tether; receivers SHOULD re-verify opportunistically when they hold the root, the same verify-if-resolvable posture as signatures (§18.3.1). A receiver that cannot resolve the root locally MAY fetch it by its content address (`cmb-fetch`, §7): the fetched root self-verifies against its key, so re-verification requires no trust in the serving peer — the recomputed verdict is made in the fetcher’s own kernel (comparability per `kernelId` below). Failing both, the receiver treats the tether as unverified — a trust state, not a rejection — or as attested-by-integrator where a verified attestation rides the remix (below).
+
+Tether attestation and kernel identity. Every φ-space judgement is kernel-relative, so a tether record MUST name the kernel it was evaluated in: a short stable `kernelId` token identifying encoder and comparison dimensionality. Two tether verdicts are comparable _iff_ their `kernelId` values are equal; drifts MUST NOT be compared across kernels. The integrating node SHOULD record its evaluation as a signed tether attestation carried on the remix: a record binding the remix key, anchor key, `kernelId`, measured drift (fixed to six fractional digits so the signed bytes are implementation-independent), verdict (`tethered` | `severed`), integrator nodeId, and integrator time — serialized with the §8.2.1 length-prefix discipline under the domain tag `mmp-tether-v1` and signed with the integrator’s identity key (§18.3.1; verification resolves the key through §6.6). A receiver that cannot resolve the anchor MAY treat a verified attestation as the certificate’s standing — attested-by-integrator, weighed by the integrator’s resolved authority (§6.5–§6.6) — instead of unchecked; an attestation whose signature fails against the integrator’s resolved key MUST be discarded (a forged certificate is worse than an absent one). An attestation proves _who_ evaluated, in _which kernel_, with _what result_ — never that the evaluation was honest; honesty is weighed exactly as it is for admission attestations.
 
 Distinct from §15.7.1’s mint prohibition. Forwarding MUST NOT mint a fresh root because forwarded content is _unchanged_ — re-rooting it would forge novelty. Tether severance mints a fresh root because the content has _changed past the point of honest descent_ — keeping the lineage would forge fidelity. Same mechanism, opposite honesty conditions; both grow the DAG with claims that are true. Severance also interacts correctly with source-novel forwarding: a severed row is a genuinely new source, and its departed predecessor’s roots are no longer claimed by it.
 
@@ -4550,27 +4568,36 @@ Q&A   Can an extension become a core frame type? — Yes. An extension that pro
 
 ## 17\. Conformance
 
-### 17.1 Minimal Conformance (Relay Node)
+MMP conformance is defined in two classes, not one ladder, because the protocol’s two halves have different natures. Emission — minting a well-formed CAT7 block and putting it on the wire — is a message-format contract: fully specified, byte-testable, and implementable by any party in an afternoon. Cognition — admission, temporal integration, reinforcement, branching — is a coupled runtime whose correctness lives in dynamics, not in a wire format; it is documented so an emitter can _trust_ what a mesh will do with its blocks, not so third parties _rebuild_ it. Interoperability lives at the emission layer; the receiver-side is a runtime, and the reference implementation is its normative behavior. (This is the deliberate architecture, not a limitation — see the formalization’s “reference implementation is the standard” note.)
 
-A node claiming minimal MMP conformance MUST implement: Layer 0 identity (a stable nodeId backed by a persistent Ed25519 keypair, Sections 3.1.3 and 18.3), Layer 1 transport (length-prefixed JSON over TCP), Layer 2 connection (handshake, heartbeat, gossip), and frame forwarding for relay. It MUST silently ignore unrecognised frame types.
+### 17.1 Class 1 — Emitter (the open standard)
 
-### 17.2 Full Conformance (Cognitive Node)
+An Emitter participates in a mesh by producing CAT7 blocks and delivering them; it need not admit, store, or reason. This is the third-party conformance target — what a sensor, a CI pipeline, or another vendor’s agent implements to _emit into_ a mesh. A conforming Emitter MUST:
 
-A node claiming full MMP conformance MUST additionally implement: Layer 3 memory (L0/L1/L2, with L2 hidden state kept strictly local per Section 2.7), Layer 4 SVAF evaluation (at minimum heuristic), CMB-derived peer drift computation and coupling (Section 9.1), and CMB creation with CAT7 field schema. A conformant node MUST NOT emit `state-sync` frames.
+-   Identity — hold a stable nodeId backed by a persistent Ed25519 keypair (§3.1.3, §18.3).
+-   CAT7 blocks — mint CMBs carrying all seven typed fields (§8.2), absent fields normalized to `"neutral"`, never omitted.
+-   Content address — compute the `cmb1-` key over the canonical serialization (§8.2.1); two conforming emitters MUST produce the identical key for the same block. Verified by the [published `cmb-key-v1` vectors](https://github.com/sym-bot/mesh-memory-protocol/tree/main/conformance).
+-   Signature — sign the block over the §18.3.1 payload (binding key, author, time, and audience); `cmb-sig-v1` vectors are the contract.
+-   Transport + handshake — length-prefixed JSON over TCP (LAN) or WSS (relay), the §5 handshake, and deliver a `cmb` frame (§7). Silently ignore unrecognised frame types.
+-   Anti-echo — emit only on genuinely new domain data (§15.7); an emitter that re-states without new observation is noise.
 
-### 17.3 Cognitive Conformance
+An Emitter is fully specified today and needs no receiver-side machinery: it does not run SVAF, keeps no store, and hosts no cognitive state. (The relay/forwarding-only node of earlier revisions is an Emitter sub-profile that forwards frames without minting them.) An SDK SHOULD package this as a thin client so emitting is a handful of lines; where the reference SDK does not yet provide a standalone emitter, the wire requirements above remain the normative contract — see [§17.6](#implementation-status).
 
-Agents that implement Layers 5–7 (Synthetic Memory, Cognitive State, Application) SHOULD support:
+### 17.2 Class 2 — Cognitive Node (reference-implementation behavior)
 
--   `remember(fields, parents?)` API — creating CMBs with optional lineage
--   `CMBStore` protocol — persistent storage and retrieval of Cognitive Memory Blocks
--   Cognitive State insight consumption — processing insight outputs from the Layer 6 LNN
--   Synthetic Memory encode pipeline (Section 12.2) — LLM reasoning output MUST be encoded into CfC-compatible vectors
--   CfC state persistence — hidden state vectors (h₁, h₂) MUST be persisted across restarts to preserve feedback modulation learning (Section 11)
+A Cognitive Node is a full mesh participant: it admits, integrates, reinforces, and branches. Its behavior is specified for transparency, not reimplementation — so an Emitter knows what a mesh guarantees about its blocks (what the membrane admits, how lineage is kept, what grounding means), and so a deployment is auditable. A Cognitive Node MUST honor every Emitter obligation, plus:
+
+-   Hidden-state locality — Layer-2 hidden state (h₁, h₂) MUST NOT cross the wire (§2.7); a conformant node MUST NOT emit `state-sync`.
+-   Admission — per-field SVAF evaluation against local anchors (§9.2), satisfying the §9.2.1 δf interface invariants; the reference baseline is vector-tested (`svaf-baseline`).
+-   Integration — store an admitted block as a remix with lineage (§15.5), never the raw peer block; lineage remains walkable (§15.2) and honors the tether (§15.8).
+-   Memory + Canon — the lifecycle and retention rules of §6, including the Canon exemption (§6.3) and grounding (§6.7).
+-   Cognitive layers (Layers 5–7, optional) — synthetic memory (§12), Cognitive State (§13), and application (§14); a node MAY implement these, and if it persists Layer-6 state it MUST keep it across restarts (§11).
+
+The normative behavior of Class 2 is what the [reference implementation](/spec/mmp#implementations) does; the specification of these layers is documentation of that runtime, and independent reimplementation is neither required nor expected for interoperability. Two independent Cognitive Nodes are not guaranteed to agree block-for-block — admission is receiver-divergent by design (§9.2.1), the embedding kernel is receiver-local, and thresholds are meaningful only within a pinned encoder. A mesh interoperates with a Cognitive Node; it does not certify a re-built one.
 
 ### 17.4 Testing
 
-Implementations SHOULD provide unit tests for SVAF evaluation, CMB creation, and lineage computation. At minimum, tests SHOULD cover the following testable requirements:
+Class 1 conformance is verified byte-for-byte against the published [conformance vectors](https://github.com/sym-bot/mesh-memory-protocol/tree/main/conformance) (`cmb-key-v1`, `cmb-sig-v1`) — an Emitter that reproduces them meshes with any deployment. Class 2 implementations SHOULD additionally test admission (the `svaf-baseline` vectors), CMB creation, and lineage. At minimum, tests SHOULD cover:
 
 -   Ed25519 identity keypair — generated at first launch, persisted, and presented in the handshake (Sections 3.1.3, 18.3)
 -   CMB signature verification — a receiver holding the author’s key MUST reject forged or tampered CMBs (Section 18.3.1)
@@ -4579,7 +4606,7 @@ Implementations SHOULD provide unit tests for SVAF evaluation, CMB creation, and
 -   Hidden-state locality — hidden state (h₁, h₂) MUST NOT cross the wire (Section 2.7)
 -   Lifecycle authority gates — lifecycle advancement honored only for authors whose role resolves through the signed grant chain (Section 6.5)
 
-No formal test suite is defined by this specification yet. Future revisions MAY include a conformance test suite.
+The normative [conformance test vectors](https://github.com/sym-bot/mesh-memory-protocol/tree/main/conformance) are published in the protocol repository: `cmb-key-v1` (§8.2.1 content addresses), `cmb-sig-v1` (§18.3.1 signing payload + Ed25519), `svaf-baseline` (§9.2/§9.2.1 admission math, the nearest-anchor redundancy witnesses, and the evaluation-time flip window), and `tether-v1` (§15.8 drift checks + `mmp-tether-v1` attestation). A conforming implementation MUST reproduce every expectation exactly; the SVAF vectors carry raw field vectors and no text — they test the math, not the encoder (§9.2.1). The reference implementation re-derives every vector in its own suite, so it cannot drift from the published contract.
 
 ### 17.5 Requirements Added in 1.1.0
 
@@ -4610,7 +4637,7 @@ Nearest-anchor redundancy basis
 
 §9.2.1
 
-Implemented (Node.js)
+Implemented (Node.js, Swift — both reproduce the published svaf-baseline vectors)
 
 Repeat verification & failure channel
 
@@ -4623,6 +4650,24 @@ Lineage tether
 §15.8
 
 Implemented (Node.js)
+
+Tether attestation & kernel identity
+
+§15.8
+
+Implemented (Node.js)
+
+Content-addressed fetch (`cmb-fetch`)
+
+§7, §15.8
+
+Implemented (Node.js)
+
+§15.8 applied to pre-existing stores (retroactive audit)
+
+§15.8
+
+Implemented (Node.js) — annotate + attest by default, severance opt-in; unresolvable roots stay unchecked, never severed
 
 Source-novel forwarding
 
@@ -4642,13 +4687,25 @@ Semantic encoder default
 
 Node.js: default. Swift: optional (host-supplied); lexical fallback warns once
 
+Conformance test vectors
+
+§17.4
+
+Published — [mesh-memory-protocol/conformance](https://github.com/sym-bot/mesh-memory-protocol/tree/main/conformance) (key, signature, SVAF baseline, tether); guarded by the reference suite
+
+Standalone Emitter SDK (Class 1, §17.1)
+
+§17.1
+
+Wire contract complete + vector-tested; a thin emit-only client is not yet packaged (today emitting runs through a full node or the local daemon IPC) — SDK gap, not a spec gap
+
 Machine-readable schema files
 
 §20
 
-Standards-program deliverable
+Published — [mesh-memory-protocol/schema](https://github.com/sym-bot/mesh-memory-protocol/tree/main/schema) (handshake, cmb + tether attestation, cmb frame, cmb-fetch pair; guarded by the reference suite); remaining frame types tracked
 
-Q&A   Is Layer 7 (Application) required? — No. Minimal conformance is Layers 0–3. Full cognitive conformance adds Layers 4–7. An agent can participate in the mesh without an LLM — it only needs transport, connection, and memory layers to relay and store CMBs.
+Q&A   What’s the smallest thing I can build to join a mesh? — A Class 1 Emitter (§17.1): identity, CAT7 minting, the `cmb1-` address, a signature, and the handshake + `cmb` frame. No LLM, no SVAF, no store. You emit into a mesh; the Cognitive Nodes (§17.2) admit, rank, and remix what you send. Being a Cognitive Node is the runtime, not a reimplementation target.
 
 
 
@@ -4819,7 +4876,7 @@ Fake outcome attestation (grounding abuse)
 
 A node emits intent="ground" CMBs (§6.7) with fabricated "verified:" outcomes against its own cognition to steer receivers’ evidence-based validation — or griefs with "failed:" attestations to un-ground cognition a validator or anchor verified (latest-observation-wins, §6.7).
 
-MITIGATION An outcome is an attestation, never a fact (§6.7): it advances no lifecycle by itself, and elevation is an explicit act under validator-or-above authority that SHOULD weigh the grounding author’s resolved authority (§6.5–§6.6). Groundedness is receiver-relative — only attestations the receiver’s own SVAF admitted count — and ordering uses receiver-local stored time, so backdated createdAt cannot game latest-wins. A receiver SHOULD NOT let a low-authority "failed:" un-ground a validator’s "verified:" without the same authority weighing.
+MITIGATION An outcome is an attestation, never a fact (§6.7): it advances no lifecycle by itself, and elevation is an explicit act under validator-or-above authority that SHOULD weigh the grounding author’s resolved authority (§6.5–§6.6). Groundedness is receiver-relative — only attestations the receiver’s own SVAF admitted count — and ordering uses receiver-local stored time, so backdated createdAt cannot game latest-wins. A below-validator "failed:" MUST NOT un-ground a validator-or-above "verified:" (§6.7 hard-gate reading) — a tier gate, not a soft weighted vote, since sheer low-authority volume defeats a weighted vote but not the gate; within a tier, latest-wins still surfaces a genuine same-authority regression.
 
 Drift manipulation
 
@@ -5350,7 +5407,7 @@ Temporal drift contribution
 
 ## 20\. JSON Schema
 
-Formal JSON Schema definitions for core frame types, matching the wire objects the reference implementation emits. Implementations SHOULD validate frames against these schemas. `additionalProperties` is `true` by design: §8 requires unrecognised fields to be silently ignored, so a schema SHOULD not reject a forward-compatible extension. The single-page [downloadable specification](/spec/mmp-v1.0.md) carries the full rendered spec; machine-readable schema files for every frame type are tracked as a standards-program deliverable (see the hardening roadmap).
+Formal JSON Schema definitions for core frame types, matching the wire objects the reference implementation emits. Implementations SHOULD validate frames against these schemas. `additionalProperties` is `true` by design: §8 requires unrecognised fields to be silently ignored, so a schema SHOULD not reject a forward-compatible extension. The single-page [downloadable specification](/spec/mmp-v1.0.md) carries the full rendered spec. Machine-readable schema files are [published in the protocol repository](https://github.com/sym-bot/mesh-memory-protocol/tree/main/schema) — handshake, CMB (including the §15.8 tether attestation), the cmb frame, and the cmb-fetch pair — and are guarded by the reference implementation’s suite: real wire objects it produces must validate against them. Schemas for the remaining frame types are tracked as a standards-program deliverable.
 
 Two scope notes. These are the _wire_ schemas: receiver-local fields (`source`, `originTimestamp`, `storedAt`, `confidence`, `provenance`) are set on receipt and never cross the wire, so they are not listed. And the CMB schema describes the _decrypted_ form: under end-to-end encryption (§18.2.1) a CMB in transit carries `fields` as ciphertext plus `_e2e.nonce`, and the object schema below applies after decryption. Each field also carries a `vector` embedding; it is _advisory_ and encoder-specific (§18.7) — not part of the content address (§8.2.1), and a receiver recomputes it locally rather than trusting the sender’s. Optional application-level fields (`meta`, `payload`) MAY also be present and are permitted by `additionalProperties`.
 
