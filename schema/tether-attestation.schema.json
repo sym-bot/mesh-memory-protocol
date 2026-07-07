@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meshcognition.org/spec/mmp/schema/tether-attestation.schema.json",
+  "title": "MMP tether attestation \u2014 mmp-tether-v1 (\u00a715.8)",
+  "type": "object",
+  "required": [
+    "of",
+    "anchor",
+    "kernelId",
+    "drift",
+    "verdict",
+    "by",
+    "at"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "of": {
+      "type": "string",
+      "description": "Content-address key of the remix this attestation covers"
+    },
+    "anchor": {
+      "type": "string",
+      "description": "Content-address key of the lineage anchor evaluated against"
+    },
+    "kernelId": {
+      "type": "string",
+      "description": "Kernel the verdict was made in; verdicts comparable iff equal (\u00a715.8)"
+    },
+    "drift": {
+      "type": "number",
+      "description": "Content-only \u03b1-weighted drift; signed fixed to six fractional digits"
+    },
+    "verdict": {
+      "enum": [
+        "tethered",
+        "severed"
+      ]
+    },
+    "by": {
+      "type": "string",
+      "description": "Integrator nodeId; signature verifies against its resolved key (\u00a76.6)"
+    },
+    "at": {
+      "type": "integer",
+      "description": "Integrator time, Unix ms"
+    },
+    "sig": {
+      "type": "string",
+      "description": "base64url Ed25519 over the mmp-tether-v1 payload"
+    },
+    "sigAlg": {
+      "const": "ed25519"
+    }
+  }
+}

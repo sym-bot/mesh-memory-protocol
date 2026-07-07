@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meshcognition.org/spec/mmp/schema/cmb-frame.schema.json",
+  "title": "MMP cmb frame (\u00a77, \u00a720.2)",
+  "type": "object",
+  "required": [
+    "type",
+    "cmb"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "type": {
+      "const": "cmb"
+    },
+    "timestamp": {
+      "type": "integer"
+    },
+    "to": {
+      "type": "string",
+      "description": "Directed recipient nodeId (\u00a74.4.4); absent for broadcast"
+    },
+    "directed": {
+      "type": "boolean"
+    },
+    "cmb": {
+      "$ref": "cmb.schema.json"
+    }
+  }
+}

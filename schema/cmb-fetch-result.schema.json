@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meshcognition.org/spec/mmp/schema/cmb-fetch-result.schema.json",
+  "title": "MMP cmb-fetch-result frame (\u00a77, \u00a715.8)",
+  "type": "object",
+  "required": [
+    "type",
+    "reqId",
+    "key",
+    "found"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "type": {
+      "const": "cmb-fetch-result"
+    },
+    "reqId": {
+      "type": "string"
+    },
+    "key": {
+      "type": "string"
+    },
+    "found": {
+      "type": "boolean"
+    },
+    "cmb": {
+      "anyOf": [
+        {
+          "$ref": "cmb.schema.json"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Text-only fields; the requester MUST recompute the content address and discard a mismatch"
+    },
+    "timestamp": {
+      "type": "integer"
+    }
+  }
+}

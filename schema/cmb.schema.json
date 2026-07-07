@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "key",
+    "createdBy",
+    "createdAt",
+    "fields"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "key": {
+      "type": "string",
+      "description": "Content address (\u00a78.2.1): normative scheme cmb1- + full-width SHA-256 over the canonical serialization; legacy cmb- (SHA-256/128, pipe-joined) MUST still be verified during migration."
+    },
+    "createdBy": {
+      "type": "string",
+      "description": "The author identifier (nodeId or agent name); bound by the signature (\u00a718.3.1)"
+    },
+    "createdAt": {
+      "type": "integer",
+      "description": "Unix ms timestamp of creation \u2014 the author's own; bound by the signature (\u00a718.3.1)"
+    },
+    "sig": {
+      "type": "string",
+      "description": "base64url Ed25519 signature over the \u00a718.3.1 payload. SHOULD be present; a receiver holding the author's key MUST verify it."
+    },
+    "sigAlg": {
+      "const": "ed25519",
+      "description": "Signature algorithm; a verifier MUST pin this rather than trust the field (\u00a718.3.1)."
+    },
+    "group": {
+      "type": "string",
+      "description": "cmb1- only: the group this CMB was authored for \u2014 audience binding (\u00a718.3.1). Absent on legacy cmb-."
+    },
+    "to": {
+      "type": "string",
+      "description": "cmb1- only: directed recipient nodeId; empty or absent for a broadcast (\u00a718.3.1)."
+    },
+    "_e2e": {
+      "type": "object",
+      "description": "Present only when the CMB is E2E-encrypted in transit (\u00a718.2.1): then 'fields' is ciphertext, not the object below.",
+      "properties": {
+        "nonce": {
+          "type": "string"
+        }
+      }
+    },
+    "fields": {
+      "type": "object",
+      "required": [
+        "focus",
+        "issue",
+        "intent",
+        "motivation",
+        "commitment",
+        "perspective",
+        "mood"
+      ],
+      "properties": {
+        "focus": {
+          "type": "object",
+          "required": [
+            "text"
+          ],
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "vector": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "issue": {
+          "type": "object",
+          "required": [
+            "text"
+          ],
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "vector": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "intent": {
+          "type": "object",
+          "required": [
+            "text"
+          ],
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "vector": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "motivation": {
+          "type": "object",
+          "required": [
+            "text"
+          ],
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "vector": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "commitment": {
+          "type": "object",
+          "required": [
+            "text"
+          ],
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "vector": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "perspective": {
+          "type": "object",
+          "required": [
+            "text"
+          ],
+          "properties": {
+            "text": {
+              "type": "string"
+            },
+            "vector": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "mood": {
+          "type": "object",
+          "required": [
+            "text"
+          ],
+          "properties": {
+            "text": {
+              "type": "string",
+              "description": "Mood keyword (MUST)"
+            },
+            "valence": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1,
+              "description": "RECOMMENDED when agent has reliable circumplex data"
+            },
+            "arousal": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1,
+              "description": "RECOMMENDED when agent has reliable circumplex data"
+            },
+            "vector": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "lineage": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "description": "null on a root/origin CMB (no parents)",
+      "properties": {
+        "parents": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Direct parent CMB keys"
+        },
+        "ancestors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Full ancestor chain"
+        },
+        "method": {
+          "type": "string",
+          "description": "Fusion method (e.g. SVAF-v2)"
+        }
+      }
+    },
+    "tether": {
+      "$ref": "tether-attestation.schema.json",
+      "description": "Optional \u00a715.8 tether attestation carried on a stored/re-emitted remix"
+    }
+  },
+  "$id": "https://meshcognition.org/spec/mmp/schema/cmb.schema.json",
+  "title": "MMP Cognitive Memory Block (\u00a720.2, \u00a78.2.1, \u00a718.3.1, \u00a715.8)"
+}
