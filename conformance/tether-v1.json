@@ -1,0 +1,144 @@
+{
+  "description": "MMP §15.8 lineage tether: content-only drift check vectors + mmp-tether-v1 attestation payload and Ed25519 signature (fixed TEST keypair — see cmb-sig-v1.json).",
+  "driftCases": [
+    {
+      "label": "faithful: cos 0.8 → drift 0.2 → tethered",
+      "remixFields": {
+        "focus": {
+          "vector": [
+            0.8,
+            0.6
+          ]
+        }
+      },
+      "anchorFields": {
+        "focus": {
+          "vector": [
+            1,
+            0
+          ]
+        }
+      },
+      "expected": {
+        "checked": true,
+        "tethered": true,
+        "drift": 0.2
+      }
+    },
+    {
+      "label": "departed: near-orthogonal → severed",
+      "remixFields": {
+        "focus": {
+          "vector": [
+            0.1,
+            0.99498743710662
+          ]
+        }
+      },
+      "anchorFields": {
+        "focus": {
+          "vector": [
+            1,
+            0
+          ]
+        }
+      },
+      "expected": {
+        "checked": true,
+        "tethered": false,
+        "drift": 0.9
+      }
+    },
+    {
+      "label": "unverifiable: dimension mismatch → unchecked, never severed",
+      "remixFields": {
+        "focus": {
+          "vector": [
+            1,
+            0
+          ]
+        }
+      },
+      "anchorFields": {
+        "focus": {
+          "vector": [
+            1,
+            0,
+            0
+          ]
+        }
+      },
+      "expected": {
+        "checked": false,
+        "tethered": true,
+        "drift": null
+      }
+    },
+    {
+      "label": "α-weighted across shared fields",
+      "remixFields": {
+        "focus": {
+          "vector": [
+            1,
+            0
+          ]
+        },
+        "intent": {
+          "vector": [
+            0,
+            1
+          ]
+        }
+      },
+      "anchorFields": {
+        "focus": {
+          "vector": [
+            1,
+            0
+          ]
+        },
+        "intent": {
+          "vector": [
+            1,
+            0
+          ]
+        }
+      },
+      "fieldWeights": {
+        "focus": 3,
+        "intent": 1
+      },
+      "expected": {
+        "checked": true,
+        "tethered": true,
+        "drift": 0.25
+      }
+    }
+  ],
+  "attestation": {
+    "record": {
+      "of": "cmb1-remix-vector",
+      "anchor": "cmb1-root-vector",
+      "kernelId": "minilm-l6-v2-h192",
+      "drift": 0.752348,
+      "verdict": "severed",
+      "by": "integrator-node",
+      "at": 1751000000000
+    },
+    "payloadHex": "6d6d702d7465746865722d76310a31373a636d62312d72656d69782d766563746f7231363a636d62312d726f6f742d766563746f7231373a6d696e696c6d2d6c362d76322d68313932383a302e373532333438373a7365766572656431353a696e7465677261746f722d6e6f646531333a31373531303030303030303030",
+    "expectedSig": "BWGN5D6ORjNGwP0MegfU2m5OmDUah3p05IaHQNFje6IyczUMpEdM-6HWA5wutHJ47_G20hKAp7xbiE4Uhfi9CA",
+    "sigAlg": "ed25519",
+    "comparability": [
+      {
+        "a": "minilm-l6-v2-h192",
+        "b": "minilm-l6-v2-h192",
+        "comparable": true
+      },
+      {
+        "a": "minilm-l6-v2-h192",
+        "b": "ngram-h32",
+        "comparable": false
+      }
+    ]
+  }
+}

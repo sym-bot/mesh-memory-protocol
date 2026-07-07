@@ -1,0 +1,243 @@
+{
+  "description": "MMP §9.2/§9.2.1 reference-baseline conformance vectors: fixed field vectors (no text — the math, not the encoder), adaptive-τ off. Includes the nearest-anchor redundancy basis witnesses and the evaluation-time flip window.",
+  "cases": [
+    {
+      "label": "redundant: identical anchor (nearest-anchor basis, invariant 2)",
+      "incoming": {
+        "focus": [
+          1,
+          0
+        ]
+      },
+      "anchors": [
+        {
+          "focus": [
+            1,
+            0
+          ]
+        }
+      ],
+      "ageSeconds": 0,
+      "config": {
+        "stableThreshold": 0.25,
+        "guardedThreshold": 0.5,
+        "temporalLambda": 0.3,
+        "freshnessSeconds": 1800,
+        "fieldWeights": {
+          "focus": 1
+        }
+      },
+      "expected": {
+        "accepted": false,
+        "decision": "redundant",
+        "totalDrift": 0,
+        "maxNearestDrift": 0
+      }
+    },
+    {
+      "label": "redundancy invariant survives readout pull: identical anchor + two off-anchors stays redundant",
+      "incoming": {
+        "focus": [
+          1,
+          0
+        ]
+      },
+      "anchors": [
+        {
+          "focus": [
+            1,
+            0
+          ]
+        },
+        {
+          "focus": [
+            0.6,
+            0.8
+          ]
+        },
+        {
+          "focus": [
+            0.6,
+            0.8
+          ]
+        }
+      ],
+      "ageSeconds": 0,
+      "config": {
+        "stableThreshold": 0.25,
+        "guardedThreshold": 0.5,
+        "temporalLambda": 0.3,
+        "freshnessSeconds": 1800,
+        "fieldWeights": {
+          "focus": 1
+        }
+      },
+      "expected": {
+        "accepted": false,
+        "decision": "redundant",
+        "totalDrift": 0.088761609,
+        "maxNearestDrift": 0
+      }
+    },
+    {
+      "label": "basis split: nearest-far/fused-near admits (fused δ inside the old redundancy band)",
+      "incoming": {
+        "focus": [
+          1,
+          0
+        ]
+      },
+      "anchors": [
+        {
+          "focus": [
+            0.85,
+            0.5267826876426369
+          ]
+        },
+        {
+          "focus": [
+            0.5,
+            -0.8660254037844386
+          ]
+        }
+      ],
+      "ageSeconds": 0,
+      "config": {
+        "stableThreshold": 0.25,
+        "guardedThreshold": 0.5,
+        "temporalLambda": 0.3,
+        "freshnessSeconds": 1800,
+        "fieldWeights": {
+          "focus": 1
+        }
+      },
+      "expected": {
+        "accepted": true,
+        "decision": "aligned",
+        "totalDrift": 0.000080529
+      }
+    },
+    {
+      "label": "aligned math: anchor at cos 0.8 → δ 0.2, totalDrift 0.14",
+      "incoming": {
+        "focus": [
+          1,
+          0
+        ]
+      },
+      "anchors": [
+        {
+          "focus": [
+            0.8,
+            0.6
+          ]
+        }
+      ],
+      "ageSeconds": 0,
+      "config": {
+        "stableThreshold": 0.25,
+        "guardedThreshold": 0.5,
+        "temporalLambda": 0.3,
+        "freshnessSeconds": 1800,
+        "fieldWeights": {
+          "focus": 1
+        }
+      },
+      "expected": {
+        "accepted": true,
+        "decision": "aligned",
+        "totalDrift": 0.14
+      }
+    },
+    {
+      "label": "flip window low edge: field drift 0.5 admits fresh (guarded)",
+      "incoming": {
+        "focus": [
+          0.5,
+          0.8660254037844386
+        ]
+      },
+      "anchors": [
+        {
+          "focus": [
+            1,
+            0
+          ]
+        }
+      ],
+      "ageSeconds": 0,
+      "config": {
+        "stableThreshold": 0.25,
+        "guardedThreshold": 0.5,
+        "temporalLambda": 0.3,
+        "freshnessSeconds": 1800,
+        "fieldWeights": {
+          "focus": 1
+        }
+      },
+      "expected": {
+        "accepted": true,
+        "decision": "guarded",
+        "totalDrift": 0.35
+      }
+    },
+    {
+      "label": "flip window: the same content rejects when stale (temporal blend, age ≫ τ)",
+      "incoming": {
+        "focus": [
+          0.5,
+          0.8660254037844386
+        ]
+      },
+      "anchors": [
+        {
+          "focus": [
+            1,
+            0
+          ]
+        }
+      ],
+      "ageSeconds": 36000,
+      "config": {
+        "stableThreshold": 0.25,
+        "guardedThreshold": 0.5,
+        "temporalLambda": 0.3,
+        "freshnessSeconds": 1800,
+        "fieldWeights": {
+          "focus": 1
+        }
+      },
+      "expected": {
+        "accepted": false,
+        "decision": "rejected",
+        "totalDrift": 0.649999999
+      }
+    },
+    {
+      "label": "cold start: empty memory admits to bootstrap",
+      "incoming": {
+        "focus": [
+          1,
+          0
+        ]
+      },
+      "anchors": [],
+      "ageSeconds": 0,
+      "config": {
+        "stableThreshold": 0.25,
+        "guardedThreshold": 0.5,
+        "temporalLambda": 0.3,
+        "freshnessSeconds": 1800,
+        "fieldWeights": {
+          "focus": 1
+        }
+      },
+      "expected": {
+        "accepted": true,
+        "decision": "aligned",
+        "totalDrift": 0,
+        "maxNearestDrift": 0
+      }
+    }
+  ]
+}

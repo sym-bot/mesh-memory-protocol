@@ -1,0 +1,139 @@
+{
+  "description": "MMP §8.2.1 cmb1- content addresses. A conforming implementation MUST compute the identical key for each case. mood contributes text only.",
+  "cases": [
+    {
+      "label": "root: plain ascii",
+      "fields": {
+        "focus": "testing conformance vectors",
+        "issue": "none",
+        "intent": "verify implementations agree",
+        "motivation": "interop",
+        "commitment": "exact bytes",
+        "perspective": "generator",
+        "mood": {
+          "text": "neutral",
+          "valence": 0,
+          "arousal": 0
+        }
+      },
+      "expectedKey": "cmb1-567e99d3f443ee0e0867ac2c7b8e0de9d2331daaf42cc8364bcc34dfc423b1cf"
+    },
+    {
+      "label": "root: unicode NFC normalization (é composed vs decomposed must agree)",
+      "fields": {
+        "focus": "café conformance",
+        "issue": "café conformance",
+        "intent": "verify implementations agree",
+        "motivation": "interop",
+        "commitment": "exact bytes",
+        "perspective": "generator",
+        "mood": {
+          "text": "neutral",
+          "valence": 0,
+          "arousal": 0
+        }
+      },
+      "expectedKey": "cmb1-a5a74718cfb81b0966efdb77fde407ff4b068e355b6d9eb5c5cb52c8a06cee89"
+    },
+    {
+      "label": "root: empty optional fields contribute empty strings",
+      "fields": {
+        "focus": "testing conformance vectors",
+        "issue": "",
+        "intent": "verify implementations agree",
+        "motivation": "",
+        "commitment": "exact bytes",
+        "perspective": "generator",
+        "mood": {
+          "text": "neutral",
+          "valence": 0,
+          "arousal": 0
+        }
+      },
+      "expectedKey": "cmb1-ce71bbfae4440402f39ecfe0c71f5f558e5c67ac309f943eee1cc4ebe6324f3e"
+    },
+    {
+      "label": "root: delimiter injection is inert under length-prefixing",
+      "fields": {
+        "focus": "a|b",
+        "issue": "3:abc",
+        "intent": "verify implementations agree",
+        "motivation": "interop",
+        "commitment": "exact bytes",
+        "perspective": "generator",
+        "mood": {
+          "text": "neutral",
+          "valence": 0,
+          "arousal": 0
+        }
+      },
+      "expectedKey": "cmb1-55f68838d97bf9ec35044e01d309a6edd5d80d7987c8b459dfaa40edd860f033"
+    },
+    {
+      "label": "remix: binds sorted parent set + receiver",
+      "fields": {
+        "focus": "testing conformance vectors",
+        "issue": "none",
+        "intent": "verify implementations agree",
+        "motivation": "interop",
+        "commitment": "exact bytes",
+        "perspective": "generator",
+        "mood": {
+          "text": "neutral",
+          "valence": 0,
+          "arousal": 0
+        }
+      },
+      "parents": [
+        "cmb1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "cmb1-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "receiver": "receiver-node",
+      "expectedKey": "cmb1-0589f6578ea061c37247e7ea3866e460508f75958dc295e489aa06079d9146b6"
+    },
+    {
+      "label": "remix: parent order must not matter (same expected key as above)",
+      "fields": {
+        "focus": "testing conformance vectors",
+        "issue": "none",
+        "intent": "verify implementations agree",
+        "motivation": "interop",
+        "commitment": "exact bytes",
+        "perspective": "generator",
+        "mood": {
+          "text": "neutral",
+          "valence": 0,
+          "arousal": 0
+        }
+      },
+      "parents": [
+        "cmb1-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "cmb1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+      ],
+      "receiver": "receiver-node",
+      "expectedKey": "cmb1-0589f6578ea061c37247e7ea3866e460508f75958dc295e489aa06079d9146b6"
+    },
+    {
+      "label": "remix: different receiver → different key",
+      "fields": {
+        "focus": "testing conformance vectors",
+        "issue": "none",
+        "intent": "verify implementations agree",
+        "motivation": "interop",
+        "commitment": "exact bytes",
+        "perspective": "generator",
+        "mood": {
+          "text": "neutral",
+          "valence": 0,
+          "arousal": 0
+        }
+      },
+      "parents": [
+        "cmb1-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "cmb1-bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+      ],
+      "receiver": "other-node",
+      "expectedKey": "cmb1-e1ff0ceb9d3771b22332eb3f78742bda05a26b2a4c718982c46c34c21d3fd509"
+    }
+  ]
+}

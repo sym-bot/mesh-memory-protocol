@@ -1,0 +1,36 @@
+{
+  "description": "MMP §18.3.1 mmp-sig-v1 payload + Ed25519 signature over it. TEST keypair only — never an identity.",
+  "testKeypair": {
+    "note": "FIXED TEST KEY — conformance only",
+    "seedHex": "4242424242424242424242424242424242424242424242424242424242424242",
+    "privateKeyB64url": "QkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkI",
+    "publicKeyB64url": "IVL40Zt5HSRFMkLhXy6rbLfP-ntqXtMAl5YOBpiB2xI"
+  },
+  "cases": [
+    {
+      "label": "broadcast (to empty)",
+      "cmb": {
+        "key": "cmb1-567e99d3f443ee0e0867ac2c7b8e0de9d2331daaf42cc8364bcc34dfc423b1cf",
+        "createdBy": "vector-author",
+        "createdAt": 1751000000000,
+        "group": "conformance-group"
+      },
+      "signingPayloadHex": "6d6d702d7369672d76310a36393a636d62312d3536376539396433663434336565306530383637616332633762386530646539643233333164616166343263633833363462636333346466633432336231636631333a766563746f722d617574686f7231333a3137353130303030303030303031373a636f6e666f726d616e63652d67726f7570303a",
+      "expectedSig": "ujqyB4JQAkWE0ReOuyZCL7Y924Sjqth70roknm-S-Ho9NyFjQmHqoKuaFGS-yiU78xp_GLtDUbGzdEFs-Mu3AA",
+      "sigAlg": "ed25519"
+    },
+    {
+      "label": "directed (to bound)",
+      "cmb": {
+        "key": "cmb1-567e99d3f443ee0e0867ac2c7b8e0de9d2331daaf42cc8364bcc34dfc423b1cf",
+        "createdBy": "vector-author",
+        "createdAt": 1751000000000,
+        "group": "conformance-group",
+        "to": "recipient-node-id"
+      },
+      "signingPayloadHex": "6d6d702d7369672d76310a36393a636d62312d3536376539396433663434336565306530383637616332633762386530646539643233333164616166343263633833363462636333346466633432336231636631333a766563746f722d617574686f7231333a3137353130303030303030303031373a636f6e666f726d616e63652d67726f757031373a726563697069656e742d6e6f64652d6964",
+      "expectedSig": "6Y8HBbhjWriABzg0RwMkopnUwWmChTEbavXzA29FErSXLx5k9OE9yrNai7QlG6Mk1vV_8QsRpd0oN-2ltC7SBA",
+      "sigAlg": "ed25519"
+    }
+  ]
+}
