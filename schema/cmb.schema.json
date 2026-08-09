@@ -1,53 +1,18 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meshcognition.org/spec/mmp/schema/cmb.schema.json",
+  "title": "MMP Cognitive Memory Block (§8.2 Record Model)",
+  "description": "The two-section record. `fields` carries the CAT7 content; `metadata` carries every provable fact about the record — its address, author, time, audience and descent. The split is normative: the address is a function of the categories alone (§8.2.3), so identical observations from different nodes collapse to one address.",
   "type": "object",
   "required": [
-    "key",
-    "createdBy",
-    "createdAt",
-    "fields"
+    "categories",
+    "metadata"
   ],
   "additionalProperties": true,
   "properties": {
-    "key": {
-      "type": "string",
-      "description": "Content address (\u00a78.2.1): normative scheme cmb1- + full-width SHA-256 over the canonical serialization; legacy cmb- (SHA-256/128, pipe-joined) MUST still be verified during migration."
-    },
-    "createdBy": {
-      "type": "string",
-      "description": "The author identifier (nodeId or agent name); bound by the signature (\u00a718.3.1)"
-    },
-    "createdAt": {
-      "type": "integer",
-      "description": "Unix ms timestamp of creation \u2014 the author's own; bound by the signature (\u00a718.3.1)"
-    },
-    "sig": {
-      "type": "string",
-      "description": "base64url Ed25519 signature over the \u00a718.3.1 payload. SHOULD be present; a receiver holding the author's key MUST verify it."
-    },
-    "sigAlg": {
-      "const": "ed25519",
-      "description": "Signature algorithm; a verifier MUST pin this rather than trust the field (\u00a718.3.1)."
-    },
-    "group": {
-      "type": "string",
-      "description": "cmb1- only: the group this CMB was authored for \u2014 audience binding (\u00a718.3.1). Absent on legacy cmb-."
-    },
-    "to": {
-      "type": "string",
-      "description": "cmb1- only: directed recipient nodeId; empty or absent for a broadcast (\u00a718.3.1)."
-    },
-    "_e2e": {
+    "categories": {
       "type": "object",
-      "description": "Present only when the CMB is E2E-encrypted in transit (\u00a718.2.1): then 'fields' is ciphertext, not the object below.",
-      "properties": {
-        "nonce": {
-          "type": "string"
-        }
-      }
-    },
-    "fields": {
-      "type": "object",
+      "description": "The CAT7 container. Seven categories, each carrying `text`. The wire key and the prose term are the same word. Its key name never enters an address or signature preimage.",
       "required": [
         "focus",
         "issue",
@@ -57,173 +22,143 @@
         "perspective",
         "mood"
       ],
+      "additionalProperties": false,
       "properties": {
-        "focus": {
-          "type": "object",
-          "required": [
-            "text"
-          ],
-          "properties": {
-            "text": {
-              "type": "string"
-            },
-            "vector": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              }
-            }
-          }
-        },
-        "issue": {
-          "type": "object",
-          "required": [
-            "text"
-          ],
-          "properties": {
-            "text": {
-              "type": "string"
-            },
-            "vector": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              }
-            }
-          }
-        },
-        "intent": {
-          "type": "object",
-          "required": [
-            "text"
-          ],
-          "properties": {
-            "text": {
-              "type": "string"
-            },
-            "vector": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              }
-            }
-          }
-        },
-        "motivation": {
-          "type": "object",
-          "required": [
-            "text"
-          ],
-          "properties": {
-            "text": {
-              "type": "string"
-            },
-            "vector": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              }
-            }
-          }
-        },
-        "commitment": {
-          "type": "object",
-          "required": [
-            "text"
-          ],
-          "properties": {
-            "text": {
-              "type": "string"
-            },
-            "vector": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              }
-            }
-          }
-        },
-        "perspective": {
-          "type": "object",
-          "required": [
-            "text"
-          ],
-          "properties": {
-            "text": {
-              "type": "string"
-            },
-            "vector": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              }
-            }
-          }
-        },
+        "focus": { "$ref": "#/$defs/category" },
+        "issue": { "$ref": "#/$defs/category" },
+        "intent": { "$ref": "#/$defs/category" },
+        "motivation": { "$ref": "#/$defs/category" },
+        "commitment": { "$ref": "#/$defs/category" },
+        "perspective": { "$ref": "#/$defs/category" },
         "mood": {
           "type": "object",
           "required": [
             "text"
           ],
+          "additionalProperties": false,
           "properties": {
             "text": {
               "type": "string",
-              "description": "Mood keyword (MUST)"
+              "description": "Mood keyword (MUST). Mood contributes its TEXT ONLY to any preimage — valence and arousal are excluded, so no preimage contains a floating-point number."
             },
             "valence": {
               "type": "number",
               "minimum": -1,
               "maximum": 1,
-              "description": "RECOMMENDED when agent has reliable circumplex data"
+              "description": "RECOMMENDED when the agent has reliable circumplex data. Not part of any preimage."
             },
             "arousal": {
               "type": "number",
               "minimum": -1,
               "maximum": 1,
-              "description": "RECOMMENDED when agent has reliable circumplex data"
-            },
-            "vector": {
-              "type": "array",
-              "items": {
-                "type": "number"
-              }
+              "description": "RECOMMENDED when the agent has reliable circumplex data. Not part of any preimage."
             }
           }
         }
       }
     },
-    "lineage": {
-      "type": [
-        "object",
-        "null"
+    "metadata": {
+      "type": "object",
+      "description": "Provable facts about the record (§8.2.1 Two-section record).",
+      "required": [
+        "key",
+        "createdBy",
+        "createdTimestamp"
       ],
-      "description": "null on a root/origin CMB (no parents)",
+      "additionalProperties": true,
       "properties": {
-        "parents": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Direct parent CMB keys"
-        },
-        "ancestors": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "description": "Full ancestor chain"
-        },
-        "method": {
+        "key": {
           "type": "string",
-          "description": "Fusion method (e.g. SVAF-v2)"
+          "pattern": "^cmb-[0-9a-f]{64}$",
+          "description": "Content address (§8.2.3): `cmb-` followed by exactly 64 lowercase hex characters. The digest is a promote-odd Merkle root over the seven per-category keys — NOT a hash of a concatenated preimage. A key is valid iff it matches this form; implementations MUST reject anything else rather than attempt a legacy interpretation."
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "The authoring node identity; bound by the signature (§8.2.4)."
+        },
+        "createdTimestamp": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Milliseconds since epoch — the AUTHOR'S own, never a receiver-local timestamp; bound by the signature (§8.2.4)."
+        },
+        "room": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Audience boundary. Signed (§8.2.4), so a signature is valid only for the room it was made for."
+        },
+        "to": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "Directed recipient, or null for a broadcast. Signed (§8.2.4) — this is what stops a directed record being replayed as a broadcast."
+        },
+        "lineage": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "description": "Descent; null for a root record.",
+          "properties": {
+            "parents": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Direct parent CMB keys. A SET: sorted bytewise before framing, so order cannot change the signed bytes."
+            },
+            "ancestors": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Full ancestor chain."
+            },
+            "method": {
+              "type": "string",
+              "description": "Fusion method."
+            }
+          }
+        },
+        "sig": {
+          "type": "string",
+          "description": "base64url Ed25519 signature over the §8.2.4 payload (domain tag `mmp-sig-v2`). SHOULD be present; a receiver holding the author's key MUST verify it."
+        },
+        "sigAlg": {
+          "const": "ed25519",
+          "description": "Signature algorithm; a verifier MUST pin this rather than trust the field."
+        }
+      }
+    },
+    "_e2e": {
+      "type": "object",
+      "description": "Present only when the container is E2E-encrypted in transit (§18.2.1): then `categories` is a ciphertext string rather than the object above.",
+      "properties": {
+        "nonce": {
+          "type": "string"
         }
       }
     },
     "tether": {
       "$ref": "tether-attestation.schema.json",
-      "description": "Optional \u00a715.8 tether attestation carried on a stored/re-emitted remix"
+      "description": "Optional §15.8 tether attestation carried on a stored or re-emitted remix."
     }
   },
-  "$id": "https://meshcognition.org/spec/mmp/schema/cmb.schema.json",
-  "title": "MMP Cognitive Memory Block (\u00a720.2, \u00a78.2.1, \u00a718.3.1, \u00a715.8)"
+  "$defs": {
+    "category": {
+      "type": "object",
+      "required": [
+        "text"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "text": {
+          "type": "string",
+          "description": "The category's content. TEXT IS THE NORMATIVE CONTENT — an embedding vector is receiver-local and MUST NOT be emitted in a record (§9.2.1): a foreign vector is not comparable in the receiver's own encoder, so a receiver re-encodes from text and never uses a transmitted vector for admission."
+        }
+      }
+    }
+  }
 }

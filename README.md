@@ -2,7 +2,7 @@
 
 **The wire protocol for mesh cognition — collective intelligence with no center.**
 
-[![Spec](https://img.shields.io/badge/spec-v1.1.0-orange)](https://meshcognition.org/spec/mmp)
+[![Spec](https://img.shields.io/badge/spec-v2.0-orange)](https://meshcognition.org/spec/mmp)
 [![arXiv](https://img.shields.io/badge/arXiv-2604.19540-b31b1b.svg)](https://arxiv.org/abs/2604.19540)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC_BY_4.0-blue)](https://creativecommons.org/licenses/by/4.0/)
 
@@ -11,8 +11,8 @@
 The Mesh Memory Protocol specification is published at **[meshcognition.org/spec/mmp](https://meshcognition.org/spec/mmp)**.
 
 - Browse the spec by section: [meshcognition.org/spec/mmp](https://meshcognition.org/spec/mmp)
-- Single-page Markdown: [meshcognition.org/spec/mmp-v1.0.md](https://meshcognition.org/spec/mmp-v1.0.md) ([in this repo](./spec/mmp-v1.0.md))
-- Single-page HTML: [meshcognition.org/spec/mmp-v1.0.html](https://meshcognition.org/spec/mmp-v1.0.html) ([in this repo](./spec/mmp-v1.0.html))
+- Single-page Markdown: [meshcognition.org/spec/mmp-v2.0.md](https://meshcognition.org/spec/mmp-v2.0.md) ([in this repo](./spec/mmp-v2.0.md))
+- Single-page HTML: [meshcognition.org/spec/mmp-v2.0.html](https://meshcognition.org/spec/mmp-v2.0.html) ([in this repo](./spec/mmp-v2.0.html))
 - Governance + RFC process: [meshcognition.org/governance](https://meshcognition.org/governance)
 
 ## What this repository hosts

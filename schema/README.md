@@ -7,7 +7,7 @@ unrecognised fields), so a schema never rejects a forward-compatible extension.
 | File | Sections |
 |---|---|
 | `handshake.schema.json` | §20.1 |
-| `cmb.schema.json` | §20.2, §8.2.1, §18.3.1, §15.8 (optional tether attestation) |
+| `cmb.schema.json` | §20.2, §8.2 Record Model, §15.8 (optional tether attestation) |
 | `cmb-frame.schema.json` | §7 |
 | `cmb-fetch.schema.json` / `cmb-fetch-result.schema.json` | §7, §15.8 |
 | `tether-attestation.schema.json` | §15.8 (`mmp-tether-v1`) |
