@@ -1,0 +1,32 @@
+{
+  "$schema": "https://meshcognition.org/spec/mmp/schema/frame-registry.schema.json",
+  "protocolVersion": "2.0",
+  "frames": [
+    { "type": "client-hello", "scope": "peer", "layer": "2", "gated": "No", "status": "core", "schema": "handshake.schema.json", "fields": "First authenticated handshake offer." },
+    { "type": "server-hello", "scope": "peer", "layer": "2", "gated": "No", "status": "core", "schema": "handshake.schema.json", "fields": "Server offer, negotiated extensions, transcript proof and key confirmation." },
+    { "type": "client-finish", "scope": "peer", "layer": "2", "gated": "No", "status": "core", "schema": "handshake.schema.json", "fields": "Transcript hash, client proof and key confirmation." },
+    { "type": "cmb", "scope": "peer", "layer": "3/4", "gated": "SVAF", "status": "core", "schema": "cmb-frame.schema.json", "fields": "Signed CAT7 record assertion." },
+    { "type": "cmb-encrypted", "scope": "peer", "layer": "2/3", "gated": "After decrypt", "status": "core", "schema": "encrypted-cmb-frame.schema.json", "fields": "Directional ChaCha20-Poly1305 envelope with session, sequence, routing metadata and sealed record bytes." },
+    { "type": "cmb-fetch", "scope": "peer", "layer": "3", "gated": "No", "status": "core", "schema": "cmb-fetch.schema.json", "fields": "Request a record by exact content address." },
+    { "type": "cmb-fetch-result", "scope": "peer", "layer": "3", "gated": "No", "status": "core", "schema": "cmb-fetch-result.schema.json", "fields": "Self-verifying result for an exact content-address request." },
+    { "type": "role-grant", "scope": "peer", "layer": "3", "gated": "Authority", "status": "core", "schema": "authority-frame.schema.json", "fields": "Signed, anchor-rooted lifecycle role grant." },
+    { "type": "role-revoke", "scope": "peer", "layer": "3", "gated": "Authority", "status": "core", "schema": "authority-frame.schema.json", "fields": "Signed revocation of a lifecycle role grant." },
+    { "type": "peer-info", "scope": "peer", "layer": "2", "gated": "No", "status": "core", "schema": "control-frame.schema.json", "fields": "Authenticated-room peer and wake-channel gossip." },
+    { "type": "wake-channel", "scope": "peer", "layer": "2", "gated": "No", "status": "core", "schema": "control-frame.schema.json", "fields": "Platform wake-channel registration." },
+    { "type": "error", "scope": "peer", "layer": "2", "gated": "No", "status": "core", "schema": "control-frame.schema.json", "fields": "Protocol error code, message and optional bounded detail." },
+    { "type": "ping", "scope": "peer", "layer": "2", "gated": "No", "status": "core", "schema": "control-frame.schema.json", "fields": "Peer keepalive request." },
+    { "type": "pong", "scope": "peer", "layer": "2", "gated": "No", "status": "core", "schema": "control-frame.schema.json", "fields": "Peer keepalive response." },
+    { "type": "relay-auth", "scope": "relay", "layer": "1", "gated": "Relay auth", "status": "transport", "schema": "relay-frame.schema.json", "fields": "Authenticate a node to a relay." },
+    { "type": "relay-peers", "scope": "relay", "layer": "1", "gated": "No", "status": "transport", "schema": "relay-frame.schema.json", "fields": "Relay peer directory." },
+    { "type": "relay-ping", "scope": "relay", "layer": "1", "gated": "No", "status": "transport", "schema": "relay-frame.schema.json", "fields": "Relay keepalive request." },
+    { "type": "relay-pong", "scope": "relay", "layer": "1", "gated": "No", "status": "transport", "schema": "relay-frame.schema.json", "fields": "Relay keepalive response." },
+    { "type": "relay-reauth", "scope": "relay", "layer": "1", "gated": "No", "status": "transport", "schema": "relay-frame.schema.json", "fields": "Request a fresh relay-auth frame." },
+    { "type": "relay-peer-joined", "scope": "relay", "layer": "1", "gated": "No", "status": "transport", "schema": "relay-frame.schema.json", "fields": "Relay presence notification." },
+    { "type": "relay-peer-left", "scope": "relay", "layer": "1", "gated": "No", "status": "transport", "schema": "relay-frame.schema.json", "fields": "Relay departure notification." },
+    { "type": "relay-error", "scope": "relay", "layer": "1", "gated": "No", "status": "transport", "schema": "relay-frame.schema.json", "fields": "Relay-level error." },
+    { "type": "state-sync", "scope": "peer", "layer": "deprecated", "gated": "No", "status": "legacy", "schema": null, "fields": "Reserved legacy type. MUST NOT emit; ignore on receipt." },
+    { "type": "message", "scope": "peer", "layer": "legacy", "gated": "No", "status": "legacy", "schema": null, "fields": "Legacy unsigned application message." },
+    { "type": "mood", "scope": "peer", "layer": "legacy", "gated": "No", "status": "legacy", "schema": null, "fields": "Legacy mood fast path; Core Secure carries mood inside CAT7." },
+    { "type": "xmesh-insight", "scope": "peer", "layer": "legacy", "gated": "No", "status": "legacy", "schema": null, "fields": "Legacy runtime projection." }
+  ]
+}

@@ -15,13 +15,42 @@
     "metadata": {
       "type": "object",
       "description": "Clear routing and verification metadata. metadata.application omits data; all members are AEAD-bound and record-signed.",
-      "required": ["key", "assertionId", "createdByNodeId", "room", "to"],
+      "required": [
+        "key", "addressScheme", "assertionId", "signatureSuite",
+        "createdByNodeId", "createdBy", "createdTimestamp", "room", "to",
+        "lineage", "application", "sigAlg", "sig"
+      ],
+      "additionalProperties": false,
       "properties": {
         "key": { "type": "string", "pattern": "^cmb-[0-9a-f]{64}$" },
+        "addressScheme": { "const": "mmp-cmb-merkle-v2" },
         "assertionId": { "type": "string", "pattern": "^asrt-[0-9a-f]{64}$" },
+        "signatureSuite": { "const": "mmp-sig-v2.0" },
         "createdByNodeId": { "type": "string", "format": "uuid" },
+        "createdBy": { "type": "string", "minLength": 1 },
+        "createdTimestamp": { "type": "integer", "minimum": 0 },
         "room": { "type": "string", "minLength": 1 },
-        "to": { "anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }] }
+        "to": { "anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }] },
+        "lineage": { "anyOf": [{ "$ref": "cmb.schema.json#/$defs/lineage" }, { "type": "null" }] },
+        "application": {
+          "anyOf": [
+            {
+              "type": "object",
+              "required": ["mediaType", "schema", "encoding", "byteLength", "digest"],
+              "additionalProperties": false,
+              "properties": {
+                "mediaType": { "type": "string", "minLength": 1 },
+                "schema": { "type": "string", "format": "uri" },
+                "encoding": { "const": "base64url" },
+                "byteLength": { "type": "integer", "minimum": 0 },
+                "digest": { "type": "string", "pattern": "^sha256-[0-9a-f]{64}$" }
+              }
+            },
+            { "type": "null" }
+          ]
+        },
+        "sigAlg": { "const": "ed25519" },
+        "sig": { "type": "string", "pattern": "^[A-Za-z0-9_-]{86}$" }
       }
     },
     "sealed": {

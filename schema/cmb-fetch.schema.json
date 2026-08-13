@@ -8,23 +8,28 @@
     "reqId",
     "key"
   ],
-  "additionalProperties": true,
+  "additionalProperties": false,
   "properties": {
     "type": {
       "const": "cmb-fetch"
     },
     "reqId": {
-      "type": "string"
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128
     },
     "key": {
       "type": "string",
+      "pattern": "^cmb-[0-9a-f]{64}$",
       "description": "Content-address key requested (\u00a78.2.1)"
     },
     "from": {
-      "type": "string"
+      "type": "string",
+      "format": "uuid"
     },
     "timestamp": {
-      "type": "integer"
+      "type": "integer",
+      "minimum": 0
     }
   }
 }

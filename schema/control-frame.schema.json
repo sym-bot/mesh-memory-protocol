@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meshcognition.org/spec/mmp/schema/control-frame.schema.json",
+  "title": "MMP v2.0 peer control frames",
+  "oneOf": [
+    { "$ref": "#/$defs/peerInfo" },
+    { "$ref": "#/$defs/wakeChannel" },
+    { "$ref": "#/$defs/error" },
+    { "$ref": "#/$defs/ping" },
+    { "$ref": "#/$defs/pong" }
+  ],
+  "$defs": {
+    "wake": {
+      "type": "object",
+      "required": ["platform", "token", "environment"],
+      "additionalProperties": false,
+      "properties": {
+        "platform": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "token": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "environment": { "type": "string", "minLength": 1, "maxLength": 32 }
+      }
+    },
+    "peerInfo": {
+      "type": "object",
+      "required": ["type", "peers"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "peer-info" },
+        "peers": {
+          "type": "array",
+          "maxItems": 4096,
+          "items": {
+            "type": "object",
+            "required": ["nodeId", "name", "lastSeen"],
+            "additionalProperties": false,
+            "properties": {
+              "nodeId": { "type": "string", "format": "uuid" },
+              "name": { "type": "string", "minLength": 1, "maxLength": 255 },
+              "wakeChannel": { "$ref": "#/$defs/wake" },
+              "lastSeen": { "type": "integer", "minimum": 0 }
+            }
+          }
+        }
+      }
+    },
+    "wakeChannel": {
+      "type": "object",
+      "required": ["type", "platform", "token", "environment"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "wake-channel" },
+        "platform": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "token": { "type": "string", "minLength": 1, "maxLength": 4096 },
+        "environment": { "type": "string", "minLength": 1, "maxLength": 32 }
+      }
+    },
+    "error": {
+      "type": "object",
+      "required": ["type", "code", "message"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "error" },
+        "code": { "type": "integer", "minimum": 1000, "maximum": 9999 },
+        "message": { "type": "string", "minLength": 1, "maxLength": 1024 },
+        "detail": { "type": "string", "maxLength": 4096 }
+      }
+    },
+    "ping": { "type": "object", "required": ["type"], "additionalProperties": false, "properties": { "type": { "const": "ping" } } },
+    "pong": { "type": "object", "required": ["type"], "additionalProperties": false, "properties": { "type": { "const": "pong" } } }
+  }
+}

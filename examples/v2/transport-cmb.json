@@ -1,0 +1,93 @@
+{
+  "type": "cmb",
+  "protocolVersion": "2.0",
+  "cmb": {
+    "categories": {
+      "focus": {
+        "text": "user coding for 3 hours, energy declining",
+        "meta": {
+          "key": "8b18a6a666984aa302c18b670b7c0f580ba9a13f72bcc1c80006b4ebc4eaa891",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        }
+      },
+      "issue": {
+        "text": "sedentary since morning, skipping lunch",
+        "meta": {
+          "key": "f7c2fb57884d9b68704b0381d38b6bba2574b10169b9002af019caa42942361d",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        }
+      },
+      "intent": {
+        "text": "recommend movement break before fatigue worsens",
+        "meta": {
+          "key": "6c7876aca1833fa873a673dcbfdffff0c340e2313d7aa741a10f0c9e4e685f7d",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        }
+      },
+      "motivation": {
+        "text": "three agents reported declining energy in the last hour",
+        "meta": {
+          "key": "4e65c95741b7be92674e62919599b09b60590885592993b916a82c03ac11c34d",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        }
+      },
+      "commitment": {
+        "text": "fitness monitoring active, ten-minute stretch queued",
+        "meta": {
+          "key": "112a9cd044c87587cfcc68044a128f9126fc1255f412a8d990b7b27a27ac483e",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        }
+      },
+      "perspective": {
+        "text": "fitness agent, afternoon session, home office",
+        "meta": {
+          "key": "f5dd4c3134cb72d9a153126889432fb5cd59bae7b70c311a2079597caa417f3a",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        }
+      },
+      "mood": {
+        "text": "concerned, low energy",
+        "meta": {
+          "key": "20504e25877d24384571595d4e99dec308d69e9b207e9ce7871554ce835a9c95",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        },
+        "valence": -0.3,
+        "arousal": -0.4
+      }
+    },
+    "metadata": {
+      "key": "cmb-091003a832567f0c4ec11b6a5d5be4557f2f0dbf561ba182d251d87edcfcd7a7",
+      "addressScheme": "mmp-cmb-merkle-v2",
+      "signatureSuite": "mmp-sig-v2.0",
+      "createdByNodeId": "018f47a0-7b21-7abc-8def-aaaaaaaaaaaa",
+      "createdBy": "sensor-a",
+      "createdTimestamp": 1711540800000,
+      "room": "spec-examples",
+      "to": null,
+      "lineage": {
+        "parents": [
+          "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+        ],
+        "method": "svaf-heuristic"
+      },
+      "application": null,
+      "assertionId": "asrt-bb2003c7c34ceb1f4be7889342ff38dd34a1943e14e4724ddf257c466c1e76a8",
+      "sigAlg": "ed25519",
+      "sig": "ueE00X-6Q3E3X_fKmB048CGA0fcfpwX6MjcuNL7yH7eIG58SQOg0OS3W9JrdNNWnB1ULQhoq92DZIiPSsa_1CQ"
+    }
+  }
+}

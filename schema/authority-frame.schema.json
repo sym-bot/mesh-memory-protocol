@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meshcognition.org/spec/mmp/schema/authority-frame.schema.json",
+  "title": "MMP v2.0 signed lifecycle authority frames",
+  "oneOf": [
+    { "$ref": "#/$defs/grantFrame" },
+    { "$ref": "#/$defs/revokeFrame" }
+  ],
+  "$defs": {
+    "signedBase": {
+      "type": "object",
+      "required": ["type", "grantee", "grantedBy", "grantedAt", "sigAlg", "sig"],
+      "properties": {
+        "type": { "enum": ["role-grant", "role-revoke"] },
+        "grantee": { "type": "string", "format": "uuid" },
+        "grantedBy": { "type": "string", "format": "uuid" },
+        "grantedAt": { "type": "integer", "minimum": 0 },
+        "sigAlg": { "const": "ed25519" },
+        "sig": { "type": "string", "pattern": "^[A-Za-z0-9_-]{86}$" }
+      }
+    },
+    "grant": {
+      "allOf": [
+        { "$ref": "#/$defs/signedBase" },
+        {
+          "type": "object",
+          "required": ["role"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "role-grant" },
+            "grantee": true,
+            "grantedBy": true,
+            "grantedAt": true,
+            "sigAlg": true,
+            "sig": true,
+            "role": { "enum": ["validator", "anchor"] },
+            "granteeKey": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" }
+          }
+        }
+      ]
+    },
+    "revoke": {
+      "allOf": [
+        { "$ref": "#/$defs/signedBase" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "role-revoke" },
+            "grantee": true,
+            "grantedBy": true,
+            "grantedAt": true,
+            "sigAlg": true,
+            "sig": true
+          }
+        }
+      ]
+    },
+    "grantFrame": {
+      "type": "object",
+      "required": ["type", "grant"],
+      "additionalProperties": false,
+      "properties": { "type": { "const": "role-grant" }, "grant": { "$ref": "#/$defs/grant" } }
+    },
+    "revokeFrame": {
+      "type": "object",
+      "required": ["type", "grant"],
+      "additionalProperties": false,
+      "properties": { "type": { "const": "role-revoke" }, "grant": { "$ref": "#/$defs/revoke" } }
+    }
+  }
+}

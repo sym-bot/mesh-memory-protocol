@@ -1,3 +1,9 @@
+---
+layout: ../../../../layouts/SpecMdLayout.astro
+title: 'MMP Extension: Group Directory (Draft) — Mesh Memory Protocol'
+description: 'Persistent group metadata, admin approval, and directory enumeration for cognitive mesh coupling. Higher-layer extension building on MMP §5.8 mesh groups.'
+---
+
 # MMP Extension: Group Directory (Draft)
 
 **Persistent Group Metadata, Admin Approval, and Directory Enumeration for Cognitive Mesh Coupling**
@@ -8,7 +14,7 @@
 | Status | Draft — not yet published, not yet implemented |
 | Date | 19 April 2026 |
 | Author | Hongwei Xu <hongwei@sym.bot>, SYM.BOT |
-| Extends | [MMP v0.2.3](https://sym.bot/spec/mmp) — Section 5.8 (Mesh Groups) |
+| Extends | [MMP v2.0](/spec/mmp) — Section 5.8 (Mesh Groups) and the mesh-group candidate convention |
 | Depends on | [sym-relay](https://github.com/sym-bot/sym-relay) — token-channel isolation (already shipped) |
 | Canonical URL | https://sym.bot/spec/mmp-group-directory (not yet live) |
 | Licence | CC BY 4.0 (specification text) |
@@ -118,59 +124,62 @@ low write volume, single-digit-MB scale even at thousands of groups).
 Group records survive relay restart; member presence does not (presence
 is ephemeral, already gossiped through existing `relay-peers` frames).
 
-### Protocol frames (new)
+### Protocol frames (proposed)
 
-All frames travel on the existing relay WebSocket. Frames are
-JSON-encoded and follow the `type` discriminator convention from MMP §5.
+These proposed frames are JSON-encoded and follow the extension type naming rule from MMP §16.
+They MUST NOT be sent unless the relay and client have authenticated and explicitly selected
+`group-directory-v0.1.0`. This draft does not yet define that relay-capability negotiation, so the
+section is a design target rather than an interoperable wire contract; promotion is blocked until
+the negotiation and schemas are published.
 
 **From client to relay:**
 
 ```jsonc
-{ "type": "group-create", "name": "backend-team", "description": "...",
+{ "type": "group-directory-create", "name": "backend-team", "description": "...",
   "visibility": "private" }
 
-{ "type": "group-list", "visibility": "public" }   // public only — admin auth
+{ "type": "group-directory-list", "visibility": "public" }   // public only — admin auth
                                                    // required for "private" list
 
-{ "type": "group-join-request", "group_id": "…", "message": "..." }
+{ "type": "group-directory-join-request", "group_id": "…", "message": "..." }
 
-{ "type": "group-accept", "group_id": "…", "node_id": "…" }   // admin only
+{ "type": "group-directory-accept", "group_id": "…", "node_id": "…" }   // admin only
 
-{ "type": "group-reject", "group_id": "…", "node_id": "…", "reason": "..." }
+{ "type": "group-directory-reject", "group_id": "…", "node_id": "…", "reason": "..." }
 
-{ "type": "group-leave", "group_id": "…" }
+{ "type": "group-directory-leave", "group_id": "…" }
 
-{ "type": "group-revoke", "group_id": "…", "node_id": "…" }   // admin only
+{ "type": "group-directory-revoke", "group_id": "…", "node_id": "…" }   // admin only
 
-{ "type": "group-transfer-admin", "group_id": "…", "new_admin": "…" }
+{ "type": "group-directory-transfer-admin", "group_id": "…", "new_admin": "…" }
 
-{ "type": "group-delete", "group_id": "…" }   // admin only
+{ "type": "group-directory-delete", "group_id": "…" }   // admin only
 ```
 
 **From relay to client:**
 
 ```jsonc
-{ "type": "group-created", "group": { ... } }         // response to create
+{ "type": "group-directory-created", "group": { ... } }         // response to create
 
-{ "type": "group-list-result", "groups": [ ... ] }    // response to list
+{ "type": "group-directory-list-result", "groups": [ ... ] }    // response to list
 
-{ "type": "group-join-pending", "group_id": "…" }     // requester waits
+{ "type": "group-directory-join-pending", "group_id": "…" }     // requester waits
 
-{ "type": "group-join-accepted", "group_id": "…", "channel_token": "…" }
+{ "type": "group-directory-join-accepted", "group_id": "…", "channel_token": "…" }
 
-{ "type": "group-join-rejected", "group_id": "…", "reason": "…" }
+{ "type": "group-directory-join-rejected", "group_id": "…", "reason": "…" }
 
-{ "type": "group-member-joined", "group_id": "…", "node_id": "…" }   // fanout
+{ "type": "group-directory-member-joined", "group_id": "…", "node_id": "…" }   // fanout
 
-{ "type": "group-member-left", "group_id": "…", "node_id": "…" }
+{ "type": "group-directory-member-left", "group_id": "…", "node_id": "…" }
 
-{ "type": "group-pending-update", "group_id": "…",
+{ "type": "group-directory-pending-update", "group_id": "…",
   "pending": [ PendingRequest, ... ] }                              // admin only
 
-{ "type": "group-admin-transferred", "group_id": "…",
+{ "type": "group-directory-admin-transferred", "group_id": "…",
   "old_admin": "…", "new_admin": "…" }
 
-{ "type": "group-deleted", "group_id": "…" }
+{ "type": "group-directory-deleted", "group_id": "…" }
 ```
 
 ### Authorisation
