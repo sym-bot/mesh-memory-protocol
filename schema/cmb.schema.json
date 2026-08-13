@@ -1,27 +1,15 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://meshcognition.org/spec/mmp/schema/cmb.schema.json",
-  "title": "MMP Cognitive Memory Block (§8.2 Record Model)",
-  "description": "The two-section record. `fields` carries the CAT7 content; `metadata` carries every provable fact about the record — its address, author, time, audience and descent. The split is normative: the address is a function of the categories alone (§8.2.3), so identical observations from different nodes collapse to one address.",
+  "title": "MMP v2.0 Cognitive Memory Block — corrected Core Secure profile",
+  "description": "The decrypted logical record has exactly two top-level sections. CAT7 cognition is content-addressed; metadata carries authenticated authorship, audience, descent and optional application bytes.",
   "type": "object",
-  "required": [
-    "categories",
-    "metadata"
-  ],
-  "additionalProperties": true,
+  "required": ["categories", "metadata"],
+  "additionalProperties": false,
   "properties": {
     "categories": {
       "type": "object",
-      "description": "The CAT7 container. Seven categories, each carrying `text`. The wire key and the prose term are the same word. Its key name never enters an address or signature preimage.",
-      "required": [
-        "focus",
-        "issue",
-        "intent",
-        "motivation",
-        "commitment",
-        "perspective",
-        "mood"
-      ],
+      "required": ["focus", "issue", "intent", "motivation", "commitment", "perspective", "mood"],
       "additionalProperties": false,
       "properties": {
         "focus": { "$ref": "#/$defs/category" },
@@ -30,134 +18,107 @@
         "motivation": { "$ref": "#/$defs/category" },
         "commitment": { "$ref": "#/$defs/category" },
         "perspective": { "$ref": "#/$defs/category" },
-        "mood": {
-          "type": "object",
-          "required": [
-            "text"
-          ],
-          "additionalProperties": false,
-          "properties": {
-            "text": {
-              "type": "string",
-              "description": "Mood keyword (MUST). Mood contributes its TEXT ONLY to any preimage — valence and arousal are excluded, so no preimage contains a floating-point number."
-            },
-            "valence": {
-              "type": "number",
-              "minimum": -1,
-              "maximum": 1,
-              "description": "RECOMMENDED when the agent has reliable circumplex data. Not part of any preimage."
-            },
-            "arousal": {
-              "type": "number",
-              "minimum": -1,
-              "maximum": 1,
-              "description": "RECOMMENDED when the agent has reliable circumplex data. Not part of any preimage."
-            }
-          }
-        }
+        "mood": { "$ref": "#/$defs/moodCategory" }
       }
     },
     "metadata": {
       "type": "object",
-      "description": "Provable facts about the record (§8.2.1 Two-section record).",
       "required": [
-        "key",
-        "createdBy",
-        "createdTimestamp"
-      ],
-      "additionalProperties": true,
-      "properties": {
-        "key": {
-          "type": "string",
-          "pattern": "^cmb-[0-9a-f]{64}$",
-          "description": "Content address (§8.2.3): `cmb-` followed by exactly 64 lowercase hex characters. The digest is a promote-odd Merkle root over the seven per-category keys — NOT a hash of a concatenated preimage. A key is valid iff it matches this form; implementations MUST reject anything else rather than attempt a legacy interpretation."
-        },
-        "createdBy": {
-          "type": "string",
-          "description": "The authoring node identity; bound by the signature (§8.2.4)."
-        },
-        "createdTimestamp": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Milliseconds since epoch — the AUTHOR'S own, never a receiver-local timestamp; bound by the signature (§8.2.4)."
-        },
-        "room": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "Audience boundary. Signed (§8.2.4), so a signature is valid only for the room it was made for."
-        },
-        "to": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "description": "Directed recipient, or null for a broadcast. Signed (§8.2.4) — this is what stops a directed record being replayed as a broadcast."
-        },
-        "lineage": {
-          "type": [
-            "object",
-            "null"
-          ],
-          "description": "Descent; null for a root record.",
-          "properties": {
-            "parents": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "description": "Direct parent CMB keys. A SET: sorted bytewise before framing, so order cannot change the signed bytes."
-            },
-            "ancestors": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "description": "Full ancestor chain."
-            },
-            "method": {
-              "type": "string",
-              "description": "Fusion method."
-            }
-          }
-        },
-        "sig": {
-          "type": "string",
-          "description": "base64url Ed25519 signature over the §8.2.4 payload (domain tag `mmp-sig-v2`). SHOULD be present; a receiver holding the author's key MUST verify it."
-        },
-        "sigAlg": {
-          "const": "ed25519",
-          "description": "Signature algorithm; a verifier MUST pin this rather than trust the field."
-        }
-      }
-    },
-    "_e2e": {
-      "type": "object",
-      "description": "Present only when the container is E2E-encrypted in transit (§18.2.1): then `categories` is a ciphertext string rather than the object above.",
-      "properties": {
-        "nonce": {
-          "type": "string"
-        }
-      }
-    },
-    "tether": {
-      "$ref": "tether-attestation.schema.json",
-      "description": "Optional §15.8 tether attestation carried on a stored or re-emitted remix."
-    }
-  },
-  "$defs": {
-    "category": {
-      "type": "object",
-      "required": [
-        "text"
+        "key", "addressScheme", "assertionId", "signatureSuite",
+        "createdByNodeId", "createdBy", "createdTimestamp", "room", "to",
+        "lineage", "sigAlg", "sig"
       ],
       "additionalProperties": false,
       "properties": {
-        "text": {
+        "key": { "type": "string", "pattern": "^cmb-[0-9a-f]{64}$" },
+        "addressScheme": { "const": "mmp-cmb-merkle-v2" },
+        "assertionId": { "type": "string", "pattern": "^asrt-[0-9a-f]{64}$" },
+        "signatureSuite": { "const": "mmp-sig-v2.0" },
+        "createdByNodeId": { "type": "string", "format": "uuid" },
+        "createdBy": {
           "type": "string",
-          "description": "The category's content. TEXT IS THE NORMATIVE CONTENT — an embedding vector is receiver-local and MUST NOT be emitted in a record (§9.2.1): a foreign vector is not comparable in the receiver's own encoder, so a receiver re-encodes from text and never uses a transmitted vector for admission."
+          "minLength": 1,
+          "description": "Signed display label. Never used for identity resolution or routing."
+        },
+        "createdTimestamp": { "type": "integer", "minimum": 0 },
+        "room": { "type": "string", "minLength": 1 },
+        "to": {
+          "anyOf": [
+            { "type": "string", "format": "uuid" },
+            { "type": "null" }
+          ]
+        },
+        "lineage": {
+          "anyOf": [
+            { "$ref": "#/$defs/lineage" },
+            { "type": "null" }
+          ]
+        },
+        "application": {
+          "anyOf": [
+            { "$ref": "application.schema.json" },
+            { "type": "null" }
+          ]
+        },
+        "sigAlg": { "const": "ed25519" },
+        "sig": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9_-]{86}$",
+          "description": "Unpadded base64url Ed25519 signature over mmp-sig-v2.0."
+        },
+        "extensions": {
+          "type": "object",
+          "description": "Negotiated extension data. Core readers ignore unsupported extension members only when their extension was negotiated.",
+          "additionalProperties": true
         }
+      }
+    }
+  },
+  "$defs": {
+    "categoryMeta": {
+      "type": "object",
+      "required": ["key", "parents"],
+      "additionalProperties": false,
+      "properties": {
+        "key": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "parents": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "category": {
+      "type": "object",
+      "required": ["text", "meta"],
+      "additionalProperties": false,
+      "properties": {
+        "text": { "type": "string" },
+        "meta": { "$ref": "#/$defs/categoryMeta" }
+      }
+    },
+    "moodCategory": {
+      "type": "object",
+      "required": ["text", "meta"],
+      "additionalProperties": false,
+      "properties": {
+        "text": { "type": "string" },
+        "meta": { "$ref": "#/$defs/categoryMeta" },
+        "valence": { "type": "number", "minimum": -1, "maximum": 1 },
+        "arousal": { "type": "number", "minimum": -1, "maximum": 1 }
+      }
+    },
+    "lineage": {
+      "type": "object",
+      "required": ["parents", "method"],
+      "additionalProperties": false,
+      "properties": {
+        "parents": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^cmb-[0-9a-f]{64}$" }
+        },
+        "method": { "type": "string", "minLength": 1 }
       }
     }
   }
