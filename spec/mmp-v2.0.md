@@ -2,7 +2,7 @@
 
 > A Mesh Protocol for Collective Intelligence
 >
-> **Version:** 2.0  ·  **Published:** 27 March 2026  ·  **Last updated:** 10 August 2026  ·  **Editor:** Hongwei Xu  ·  **License:** CC BY 4.0
+> **Version:** 2.0  ·  **Published:** 27 March 2026  ·  **Last updated:** 13 August 2026  ·  **Editor:** Hongwei Xu  ·  **License:** CC BY 4.0
 >
 > **Canonical:** https://meshcognition.org/spec/mmp  ·  **arXiv:** https://arxiv.org/abs/2604.19540
 
@@ -63,7 +63,7 @@ First published
 
 This version
 
-10 August 2026
+13 August 2026
 
 Author
 
@@ -89,7 +89,7 @@ Existing protocols at lower layers standardize tool access and task delegation b
 
 The problem is semantic, not transport. **Hidden state never crosses the wire** — each agent’s learned cognition stays sovereign on its own device; only Cognitive Memory Blocks (CMBs) propagate. Receiver-autonomous admission lets the mesh grow without re-introducing a master. MMP defines transport over TCP on local networks and WebSocket for internet relay, with length-prefixed JSON as the canonical wire format. Discovery uses DNS-SD (Bonjour) with zero configuration.
 
-This document describes an 8-layer stack, but it is **two documents in one**, and is read that way (§17). **MMP Core** is the normative wire contract — identity, transport, connection, frames, the CAT7 block with its content address and signature — byte-testable against published Class 1 conformance vectors (Class 1, §17.1). Everything receiver-side — SVAF admission, memory tiers, remix behavior, the cognitive layers that together implement [Mesh Cognition](/spec/mmp/architecture) — is a **public behavioural profile** (Class 2, §17.2). SYM provides an open, transparent baseline implementation. xmesh-core is a proprietary conforming cognition runtime whose public inputs, outputs, safety invariants and audit behaviour remain testable against this specification. A private scoring method does not define private wire semantics. Each page identifies whether it states a wire requirement, a behavioural invariant, an implementation profile or an informative research claim.
+This document describes an 8-layer stack, but it is **two documents in one**, and is read that way (§17). **MMP Core** is the normative wire contract — identity, transport, connection, frames, the CAT7 block with its content address and signature — byte-testable against published Class 1 conformance vectors (Class 1, §17.1). Everything receiver-side — SVAF admission, memory tiers, remix behavior, the cognitive layers that together implement [Mesh Cognition](/spec/mmp/architecture) — is a **public behavioural profile** (Class 2, §17.2). SYM provides an open, transparent baseline implementation. xmesh-core is a proprietary cognition runtime whose public inputs, outputs, safety invariants and audit behaviour are required to pass this same specification before conformance is claimed (§17.6). A private scoring method does not define private wire semantics. Each page identifies whether it states a wire requirement, a behavioural invariant, an implementation profile or an informative research claim.
 
 This specification is being made **executable, not merely asserted**: Core wire claims are backed by public schemas, byte constructors, positive vectors and negative cases consumed by independent verifiers and implementations. Where analysis finds a requirement unsatisfiable or a guarantee conditional — the basis of the redundancy invariants, the evaluation-time admission window, the cold-start bootstrap trade — the text is amended and the limit disclosed in place rather than left implicit (see the [change log](/spec/mmp/changelog)’s soundness & completeness update). What the protocol promises is what survives derivation.
 
@@ -99,9 +99,9 @@ This is the published MMP 2.0 specification. A conformance correction is in prog
 
 ### Why 2.0
 
-**Every version of this specification has been verified in real systems, and 2.0 is no exception.** 1.0 and 1.1 were implemented and running across Windows, macOS and iOS applications, over LAN and over an internet relay — interoperating between independent implementations on different platforms. That is the standing practice here: nothing is published as a specification of something that has not been built.
+**MMP 1.0 and 1.1 were verified in real systems; MMP 2.0 turns the corrected contract into independently executable evidence.** The earlier releases ran across Windows, macOS and iOS applications, over LAN and over an internet relay — interoperating between independent implementations on different platforms. The 2.0 record, address and signature constructions now have public schemas and byte vectors reproduced independently from the text. Complete Core Secure handshake, encrypted-transport and emitter migration is still in progress and is not claimed as done.
 
-SYM is the open reference substrate and transparent baseline admission profile. It is evidence that the protocol can run, not the source of normative truth. xmesh-core is proprietary and may keep learned policies and optimisations private, but its observable MMP boundary is tested against the same public contract. A third-party implementation depends on neither codebase.
+SYM is the open reference substrate and transparent baseline admission profile. It is evidence that the protocol can run, not the source of normative truth. xmesh-core is proprietary and may keep learned policies and optimisations private, but its observable MMP boundary is tested only against this public contract; its complete v2.0 result remains pending (§17.6). A third-party implementation depends on neither codebase.
 
 **What changed is that the runtime moved and the text did not follow.** The record model advanced — a two-section record, a Merkle-derived content address, a new signing payload — while the published text continued to describe the earlier shape. 2.0 re-derives the specification and runtime into alignment clause by clause. Where text, schemas, vectors and code disagree, none is silently declared correct: the v2.0 errata rules the construction, publishes executable vectors, and then implementations are tested against it.
 
@@ -145,11 +145,11 @@ xmesh-core
 
 SYM.BOT
 
-Proprietary conforming cognition runtime. Public MMP boundary, safety invariants and audit outcomes are conformance-tested; internal policies and optimisations are not open reference code.
+Proprietary cognition runtime. Its public MMP boundary, safety invariants and audit outcomes are the conformance surface; the complete v2.0 result is pending. Internal policies and optimisations are not open reference code.
 
 ## Change Log
 
-**Current — 2.0 “Re-derived from the implementation” (10 August 2026):** the record model advanced in the runtime while the published text continued to describe the earlier shape, and 2.0 closes that gap. Corrected [§8.8 Record Model](/spec/mmp/record) gives the two-section record, the byte-exact content address (a promote-odd Merkle root over the seven per-category keys) and the byte-exact signature payload. The normative address form is corrected to `cmb-` + 64 lowercase hex — 1.x declared a version-tagged prefix instead, which the runtime rejects. Admission wording is corrected to per-category _evaluation_ on which the receiver decides for itself; receiver autonomy is unchanged. CAT7 members are named **categories** throughout, and the wire key is untouched.
+**Current — 2.0 “Re-derived from the implementation” (13 August 2026):** the record model advanced in the runtime while the published text continued to describe the earlier shape, and 2.0 closes that gap. Corrected [§8.8 Record Model](/spec/mmp/record) gives the two-section record, the byte-exact content address (a promote-odd Merkle root over the seven per-category keys) and the byte-exact signature payload. The normative address form is corrected to `cmb-` + 64 lowercase hex — 1.x declared a version-tagged prefix instead, which the runtime rejects. Admission wording is corrected to per-category _evaluation_ on which the receiver decides for itself; receiver autonomy is unchanged. CAT7 members are named **categories** throughout, and the wire key is untouched.
 
 **1.1.0 “The Work Layer” (2026-07-05, updated 2026-07-07):** grounding cognition in reality — §6.7 outcomes carried by lineage, the §6.3 Canon tier, §14.12 work sessions as mesh members, plus the folded-in full-corpus coherence errata. The 2026-07-07 update folds in the **soundness & completeness amendments from the formalization of the open-source runtime**: §9.2.1 redundancy invariants pinned to the nearest-anchor basis, the §9.2 evaluation-time-dependence disclosure, the cold-start-capture threat row, §6.7 repeat verification and the load-bearing failure channel, and the §15.8 lineage tether. Wire-compatible with 1.0.x.
 
@@ -196,6 +196,8 @@ Changes
 **CAT7 terminology.** The seven members are **categories** throughout, replacing mixed use of “dimensions” and “fields” in prose. A category is the semantic member; a dimension is the length of the vector encoding it. The wire key is `categories` too — prose and wire now use one word. It never enters an address or signature preimage, so the rename moved no address and invalidated no signature.
 
 **Single-file artifacts** are now `/spec/mmp-v2.0.md` and `.html`. `mmp-v1.0.*` remain published, frozen, for existing citations.
+
+**v2.0 alignment errata (2026-08-13; no version bump).** The current corpus now enforces direct-parent-only wire lineage and derives transitive provenance by traversing locally verified parent records; CAT7 embeddings are explicitly receiver-local rather than wire fields; `cmb-encrypted` is the single canonical sealed-frame name; and every active core and relay frame is mapped to a closed JSON Schema through a machine-readable, schema-validated registry. The authenticated v2 handshake is the only extension-negotiation contract, and structured CMB extension bytes use the assertion-bound `metadata.application` container. Executable gates now reject schema drift, stale v1 claims in current pages, unregistered artifacts, broken local links, duplicate rendered IDs and unsigned metadata extension siblings.
 
 1.1.0
 registry note
@@ -379,7 +381,7 @@ When an agent processes a CMB through its domain intelligence and produces a NEW
 
 Lineage
 
-Each CMB carries parents (direct) and ancestors (full ancestor chain). Ancestors enable any agent in the remix chain to trace its contribution.
+Each remixed CMB carries direct parent keys and a method. Transitive provenance is resolved by recursively fetching and verifying parent records; no sender-supplied transitive closure is trusted.
 
 Canon
 
@@ -395,7 +397,7 @@ Lifecycle roles (participant → validator → anchor) conferred by signed, revo
 
 Mesh Cognition
 
-The agent’s LLM reasoning on the remix subgraph of CMBs — traced via lineage ancestors — to generate understanding that the agent’s previous state of mind didn’t have. Spans Layers 4–7. See Section 2.5.
+The agent’s LLM reasoning on the verified remix subgraph reached by following direct parent links, generating understanding that the agent’s previous state of mind did not have. Spans Layers 4–7. See Section 2.5.
 
 Cognitive State
 
@@ -475,7 +477,7 @@ SVAF evaluates evidence across all seven CAT7 categories, then the receiver admi
 
 LLM reasons, LNN evolves
 
-Two cognitive components per agent. The LLM (Layer 7) traces lineage ancestors and reasons on the remix subgraph — generating understanding. The LNN (Layer 6) evolves continuous-time state from that understanding. Neither alone is sufficient.
+Two cognitive components per agent. The LLM (Layer 7) follows verified direct-parent links and reasons on the resulting remix subgraph — generating understanding. The LNN (Layer 6) evolves continuous-time state from that understanding. Neither alone is sufficient.
 
 The graph is the trace, not the intelligence
 
@@ -597,9 +599,9 @@ Layer 4 — category evidence and α\_f weights inform one whole-record admissio
 
 Accepted → remixed CMB with lineage
 
-Layer 3 — new immutable CMB, parents + ancestors
+Layer 3 — new immutable CMB with direct parent links
 
-LLM traces ancestors, reasons on remix subgraph
+LLM walks verified parents, reasons on remix subgraph
 
 Layer 7 — what happened, why, what it means for my domain
 
@@ -615,7 +617,7 @@ LNN integrates admitted remixes
 
 τ-modulated, inference-paced — own state evolves, no peer vectors imported (§2.7)
 
-Agent acts → new CMB with lineage.ancestors
+Agent acts → new CMB with direct-parent lineage
 
 Response informed by derived knowledge, not just own observation
 
@@ -925,16 +927,33 @@ Frame size. Senders MUST NOT produce frames exceeding MAX\_FRAME\_SIZE bytes (de
 
 Handshake frame:
 
+MMP 2.0 · JSON · Client hello
+
+[Open fixture ↗](/spec/mmp/conformance/v2/handshake-v2.json)
+
 ```
-Length prefix: 00 00 00 78  (120 bytes — the minified payload below)
-Payload (shown formatted for readability; transmitted as minified JSON; abbreviated — see §5.2/§20 for the full handshake):
+First Core Secure handshake payload (client-hello):
 {
-  "type": "handshake",
-  "nodeId": "a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d",
-  "name": "my-agent",
-  "version": "1.1.0",
-  "extensions": []
+  "type": "client-hello",
+  "protocolVersion": "2.0",
+  "room": "conformance-room",
+  "nodeId": "018f47a0-7b21-7abc-8def-111111111111",
+  "name": "vector-client",
+  "identityPublicKey": "0EqyMnQrtKs6E2i9RhXk5tAiSrcaAWuvhSCjMsl3hzc",
+  "e2ePublicKey": "ew1H2TQn-DERYHgcfHM_2J-IlwrvSQ2KoO4ZpMuKGxQ",
+  "nonce": "VVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVU",
+  "implementation": {
+    "name": "mmp-vector",
+    "version": "1.0.0"
+  },
+  "extensions": [
+    "receipts-v1",
+    "admission-attestation-v1"
+  ]
 }
+
+The server-hello and client-finish frames complete transcript authentication and key confirmation.
+See §5.2 and the full handshake-v2 vector.
 ```
 
 Ping frame:
@@ -946,27 +965,101 @@ Payload: {"type":"ping"}
 
 CMB frame:
 
+MMP 2.0 · JSON · Signed CMB
+
+[Open fixture ↗](/spec/mmp/examples/v2/transport-cmb.json)
+
 ```
 {
   "type": "cmb",
-  "timestamp": 1711540800000,
+  "protocolVersion": "2.0",
   "cmb": {
-    "key": "cmb-b2c3d4e5f6a7b8c9",
-    "createdBy": "sensor-a",
-    "createdAt": 1711540800000,
     "categories": {
-      "focus":       { "text": "user coding for 3 hours, energy declining" },
-      "issue":       { "text": "sedentary since morning, skipping lunch" },
-      "intent":      { "text": "recommend movement break before fatigue worsens" },
-      "motivation":  { "text": "3 agents reported declining energy in last hour" },
-      "commitment":  { "text": "fitness monitoring active, 10min stretch queued" },
-      "perspective": { "text": "fitness agent, afternoon session, home office" },
-      "mood":        { "text": "concerned, low energy", "valence": -0.3, "arousal": -0.4 }
+      "focus": {
+        "text": "user coding for 3 hours, energy declining",
+        "meta": {
+          "key": "8b18a6a666984aa302c18b670b7c0f580ba9a13f72bcc1c80006b4ebc4eaa891",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        }
+      },
+      "issue": {
+        "text": "sedentary since morning, skipping lunch",
+        "meta": {
+          "key": "f7c2fb57884d9b68704b0381d38b6bba2574b10169b9002af019caa42942361d",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        }
+      },
+      "intent": {
+        "text": "recommend movement break before fatigue worsens",
+        "meta": {
+          "key": "6c7876aca1833fa873a673dcbfdffff0c340e2313d7aa741a10f0c9e4e685f7d",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        }
+      },
+      "motivation": {
+        "text": "three agents reported declining energy in the last hour",
+        "meta": {
+          "key": "4e65c95741b7be92674e62919599b09b60590885592993b916a82c03ac11c34d",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        }
+      },
+      "commitment": {
+        "text": "fitness monitoring active, ten-minute stretch queued",
+        "meta": {
+          "key": "112a9cd044c87587cfcc68044a128f9126fc1255f412a8d990b7b27a27ac483e",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        }
+      },
+      "perspective": {
+        "text": "fitness agent, afternoon session, home office",
+        "meta": {
+          "key": "f5dd4c3134cb72d9a153126889432fb5cd59bae7b70c311a2079597caa417f3a",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        }
+      },
+      "mood": {
+        "text": "concerned, low energy",
+        "meta": {
+          "key": "20504e25877d24384571595d4e99dec308d69e9b207e9ce7871554ce835a9c95",
+          "parents": [
+            "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+          ]
+        },
+        "valence": -0.3,
+        "arousal": -0.4
+      }
     },
-    "lineage": {
-      "parents": ["cmb-a1b2c3d4e5f6"],
-      "ancestors": ["cmb-a1b2c3d4e5f6"],
-      "method": "SVAF-v2"
+    "metadata": {
+      "key": "cmb-091003a832567f0c4ec11b6a5d5be4557f2f0dbf561ba182d251d87edcfcd7a7",
+      "addressScheme": "mmp-cmb-merkle-v2",
+      "signatureSuite": "mmp-sig-v2.0",
+      "createdByNodeId": "018f47a0-7b21-7abc-8def-aaaaaaaaaaaa",
+      "createdBy": "sensor-a",
+      "createdTimestamp": 1711540800000,
+      "room": "spec-examples",
+      "to": null,
+      "lineage": {
+        "parents": [
+          "cmb-1010101010101010101010101010101010101010101010101010101010101010"
+        ],
+        "method": "svaf-heuristic"
+      },
+      "application": null,
+      "assertionId": "asrt-bb2003c7c34ceb1f4be7889342ff38dd34a1943e14e4724ddf257c466c1e76a8",
+      "sigAlg": "ed25519",
+      "sig": "ueE00X-6Q3E3X_fKmB048CGA0fcfpwX6MjcuNL7yH7eIG58SQOg0OS3W9JrdNNWnB1ULQhoq92DZIiPSsa_1CQ"
     }
   }
 }
@@ -1404,7 +1497,7 @@ Boundary transport. The boundary is a dumb request/response transport (HTTP in t
 
 Production security bar
 
-Federation crosses organizational trust boundaries, so a production gateway boundary requires, at minimum: (1) the projection is a signed cmb- CMB authored by the gateway (§18.3.1), with the `from` gateway origin-authenticated by that signature — never a self-declared, unsigned field; (2) anti-replay (the signed createdAt plus receiver-side dedup); and (3) a boundary credential scoped to the boundary — never a full control-plane token. A boundary that accepts unsigned projections, trusts a self-declared origin, or authenticates with an admin credential is not safe for cross-org use.
+Federation crosses organizational trust boundaries, so a production gateway boundary requires, at minimum: (1) the projection is a signed cmb- CMB authored by the gateway (§18.3.1), with the `from` gateway origin-authenticated by that signature — never a self-declared, unsigned field; (2) anti-replay (the signed `metadata.createdTimestamp` plus receiver-side dedup); and (3) a boundary credential scoped to the boundary — never a full control-plane token. A boundary that accepts unsigned projections, trusts a self-declared origin, or authenticates with an admin credential is not safe for cross-org use.
 
 Reference implementation (prototype)
 
@@ -1554,7 +1647,7 @@ No persistence. Useful for unit tests and short-lived agents.
 
 Implementations MUST support configurable retention via `retentionSeconds`. CMBs older than the retention period SHOULD be purged automatically. See [Section 19 (Configuration)](/spec/mmp/constants) for per-profile retention defaults.
 
-Purge MUST preserve graph integrity: a CMB referenced by any newer entry’s `lineage.ancestors` MUST NOT be deleted, even if past retention age. The remix chain is the audit trail — breaking it breaks provenance.
+Purge MUST preserve graph integrity: a CMB reachable from any retained entry by recursively following verified `metadata.lineage.parents` MUST NOT be deleted, even if past retention age. The remix chain is the audit trail — breaking it breaks provenance.
 
 The Canon tier New in 1.1.0. A CMB whose lifecycle is `validated` or `canonical` MUST NOT be evicted by age-based retention (compaction or purge) _while it holds that lifecycle_. Committed cognition is the store’s reason to exist: `canonical` requires validation plus remix by two or more agents, so a small or single-operator mesh may never produce it — if only `canonical` were protected, such a mesh would forget everything it validated within one retention period. Protection is from _purge_, not from _demotion_: a validated CMB with no activity _MAY_ still decay to `archived` per the §6.4 lifecycle (`archiveAfterSeconds`, §19), after which ordinary retention applies — the escape valve that keeps the store bounded (implementation status: [§17.6](/spec/mmp/conformance#implementation-status)). `canonical` deliberately has no inactivity decay: it records collective consensus (validation plus independent remix), and consensus does not expire by silence — it leaves the Canon only by an explicit dismiss or archive under validator-or-above authority (§6.5).
 
@@ -1691,9 +1784,9 @@ Consuming the outcome stream (informative). A consumer that scores rows by their
 
 An outcome is an attestation, not a fact. The grounding CMB asserts that its _author_ observed the outcome. Its weight follows the author’s resolved authority (§6.5–§6.6) exactly as any other CMB’s does; the reserved intent value adds semantics, never authority.
 
-Groundedness is receiver-relative. A CMB is _grounded_, in the view of a given node, iff a recognised grounding CMB targeting it (directly, or via the node’s admitted remix of one whose expanded ancestors reach it, §15.2) is present in that node’s own store. There is no global grounded state; a node MUST NOT treat cognition as grounded on the strength of a grounding entry it never admitted. Grounding runs upward only — a grounding CMB grounds the CMBs its lineage points at, never descendants of those CMBs: a remix of verified cognition is not itself verified.
+Groundedness is receiver-relative. A CMB is _grounded_, in the view of a given node, iff a recognised grounding CMB targeting it (directly, or via a verified direct-parent path through the node’s admitted remixes, §15.2) is present in that node’s own store. There is no global grounded state; a node MUST NOT treat cognition as grounded on the strength of a grounding entry it never admitted. Grounding runs upward only — a grounding CMB grounds the CMBs its lineage points at, never descendants of those CMBs: a remix of verified cognition is not itself verified.
 
-Outcomes are observations of a changing world. When several recognised grounding CMBs target the same cognition in one store, the latest by stored time wins: a later `failed:` un-grounds what an earlier `verified:` established (a regression must surface, not be shadowed by history). “Stored time” is the receiver-local time the entry entered the evaluating store — never the author-asserted `createdAt`, which is unwitnessed (§6.6) and would let a backdated or future-dated attestation game the ordering. Authority modulates whether to _act_ on an attestation, not the temporal ordering of observations — and latest-wins applies within an authority tier, not across tiers. Hard-gate reading (normative): a `failed:` from an author below the authority of the standing `verified:` MUST NOT un-ground it — a below-validator `failed:` cannot overturn a validator-or-above `verified:`. This is the tested-effective form: a soft authority-weighted vote is defeated by sheer low-authority volume, whereas the tier gate holds a validated outcome against any number of below-tier `failed:` reports (see the §18.4 threat note on outcome griefing). Within a tier — equal authority, or a genuine same-authority regression — latest-wins still applies, so a real regression surfaces.
+Outcomes are observations of a changing world. When several recognised grounding CMBs target the same cognition in one store, the latest by stored time wins: a later `failed:` un-grounds what an earlier `verified:` established (a regression must surface, not be shadowed by history). “Stored time” is the receiver-local time the entry entered the evaluating store — never the author-asserted `metadata.createdTimestamp`, which is unwitnessed (§6.6) and would let a backdated or future-dated attestation game the ordering. Authority modulates whether to _act_ on an attestation, not the temporal ordering of observations — and latest-wins applies within an authority tier, not across tiers. Hard-gate reading (normative): a `failed:` from an author below the authority of the standing `verified:` MUST NOT un-ground it — a below-validator `failed:` cannot overturn a validator-or-above `verified:`. This is the tested-effective form: a soft authority-weighted vote is defeated by sheer low-authority volume, whereas the tier gate holds a validated outcome against any number of below-tier `failed:` reports (see the §18.4 threat note on outcome griefing). Within a tier — equal authority, or a genuine same-authority regression — latest-wins still applies, so a real regression surfaces.
 
 Grounding never advances lifecycle by itself. §6.5 stands unweakened: a CMB cannot self-grant effect, and a grounding CMB is a CMB. A node _MAY_ advance its own store’s entries to `validated` on grounding evidence — evidence-based validation — but only as an explicit act under validator-or-above authority (§6.5–§6.6), never as an automatic consequence of receiving or reading a grounding CMB, and never as a side effect of a query. The elevating authority is accountable for the judgment; it _SHOULD_ require `verified:` polarity and weigh the grounding author’s resolved authority before acting. Self-reported outcomes from unauthenticated or participant-rank authors _SHOULD NOT_ trigger elevation.
 
@@ -1741,11 +1834,17 @@ All frames are JSON objects with a `type` field (string). Implementations MUST s
 
 ### 7.1 Frame Type Registry
 
+The table is rendered from the normative [machine-readable frame registry](/spec/mmp/frame-registry.json); its own shape is validated by [frame-registry.schema.json](/spec/mmp/schema/frame-registry.schema.json).
+
 Type
 
 Layer
 
 Gated
+
+Status
+
+Schema
 
 Fields
 
@@ -1755,7 +1854,11 @@ client-hello
 
 No
 
-First Core Secure handshake frame: protocolVersion, suite, nodeId, name, room, identityPublicKey, e2ePublicKey, clientNonce — schema §20.1
+core
+
+[handshake.schema.json](/spec/mmp/schema/handshake.schema.json)
+
+First authenticated handshake offer.
 
 server-hello
 
@@ -1763,7 +1866,11 @@ server-hello
 
 No
 
-Second Core Secure handshake frame: the server offer plus clientHelloDigest, serverNonce, transcriptSignature and keyConfirmation — schema §20.1
+core
+
+[handshake.schema.json](/spec/mmp/schema/handshake.schema.json)
+
+Server offer, negotiated extensions, transcript proof and key confirmation.
 
 client-finish
 
@@ -1771,15 +1878,11 @@ client-finish
 
 No
 
-Final Core Secure handshake frame: transcriptDigest, transcriptSignature and keyConfirmation — schema §20.1
+core
 
-state-sync
+[handshake.schema.json](/spec/mmp/schema/handshake.schema.json)
 
-deprecated
-
-No
-
-DEPRECATED (§2.7) — carried h1/h2; hidden state MUST NOT cross the wire. MUST NOT emit; ignore on receipt.
+Transcript hash, client proof and key confirmation.
 
 cmb
 
@@ -1787,15 +1890,23 @@ cmb
 
 SVAF
 
-Core Secure signed record assertion. The CMB has exactly two logical sections: CAT7 categories and metadata. See §8.8 and schema §20.2.
+core
 
-encrypted-cmb
+[cmb-frame.schema.json](/spec/mmp/schema/cmb-frame.schema.json)
+
+Signed CAT7 record assertion.
+
+cmb-encrypted
 
 2/3
 
 After decrypt
 
-Core Secure ChaCha20-Poly1305 envelope: suite, senderNodeId, receiverNodeId, room, counter, ciphertext, authenticationTag — schema §20.4.
+core
+
+[encrypted-cmb-frame.schema.json](/spec/mmp/schema/encrypted-cmb-frame.schema.json)
+
+Directional ChaCha20-Poly1305 envelope with session, sequence, routing metadata and sealed record bytes.
 
 cmb-fetch
 
@@ -1803,7 +1914,11 @@ cmb-fetch
 
 No
 
-reqId (string), key (string content address), from (nodeId), timestamp — request the CMB stored under an exact content-address key (§15.8 re-verification of lineage roots). Serving is discretionary: a node MAY answer, and only with content it holds under that exact key.
+core
+
+[cmb-fetch.schema.json](/spec/mmp/schema/cmb-fetch.schema.json)
+
+Request a record by exact content address.
 
 cmb-fetch-result
 
@@ -1811,47 +1926,35 @@ cmb-fetch-result
 
 No
 
-reqId, key, found (bool), cmb (object|null; fields text-only — the address binds text, re-verifiers re-encode) — response to cmb-fetch. Self-verifying: the requester MUST recompute the content address and discard a mismatch (treated as a miss); an unsolicited result MUST NOT terminate a pending request.
+core
+
+[cmb-fetch-result.schema.json](/spec/mmp/schema/cmb-fetch-result.schema.json)
+
+Self-verifying result for an exact content-address request.
 
 role-grant
 
 3
 
-No
+Authority
 
-grantee (nodeId), role (validator|anchor), grantedBy (nodeId), grantedAt (int ms), granteeKey? (base64url), sig (base64url), sigAlg (ed25519). Confers a role; honored only when chain-resolved to the anchor (§6.6).
+core
+
+[authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json)
+
+Signed, anchor-rooted lifecycle role grant.
 
 role-revoke
 
 3
 
-No
+Authority
 
-grantee (nodeId), grantedBy (nodeId), grantedAt (int ms), sig (base64url), sigAlg (ed25519). Withdraws a granted role; cascades on resolution (§6.6).
+core
 
-message
+[authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json)
 
-legacy
-
-No
-
-Legacy transport message. Core Secure application content MUST use metadata.application inside a signed CMB.
-
-mood
-
-legacy
-
-Drift
-
-Legacy fast path. Core Secure carries mood in CAT7 and protects it inside encrypted-cmb.
-
-xmesh-insight
-
-legacy
-
-No
-
-Legacy runtime projection. Core Secure runtime output MUST be expressed as a signed CAT7 CMB.
+Signed revocation of a lifecycle role grant.
 
 peer-info
 
@@ -1859,7 +1962,11 @@ peer-info
 
 No
 
-peers: \[{ nodeId, name, wakeChannel?, lastSeen }\]
+core
+
+[control-frame.schema.json](/spec/mmp/schema/control-frame.schema.json)
+
+Authenticated-room peer and wake-channel gossip.
 
 wake-channel
 
@@ -1867,7 +1974,11 @@ wake-channel
 
 No
 
-platform (string), token (string), environment (string)
+core
+
+[control-frame.schema.json](/spec/mmp/schema/control-frame.schema.json)
+
+Platform wake-channel registration.
 
 error
 
@@ -1875,7 +1986,11 @@ error
 
 No
 
-code (int), message (string), detail? (string)
+core
+
+[control-frame.schema.json](/spec/mmp/schema/control-frame.schema.json)
+
+Protocol error code, message and optional bounded detail.
 
 ping
 
@@ -1883,7 +1998,11 @@ ping
 
 No
 
-(no additional categories)
+core
+
+[control-frame.schema.json](/spec/mmp/schema/control-frame.schema.json)
+
+Peer keepalive request.
 
 pong
 
@@ -1891,59 +2010,159 @@ pong
 
 No
 
-(no additional categories)
+core
+
+[control-frame.schema.json](/spec/mmp/schema/control-frame.schema.json)
+
+Peer keepalive response.
 
 relay-auth
 
-1 (relay)
+1
 
-No
+Relay auth
 
-nodeId (uuid), name (string), token? (string), wakeChannel? ({ platform, token, environment }) — client authenticates to a relay (§4.4.1). Transport-scope: exchanged with a relay, not a peer.
+transport
+
+[relay-frame.schema.json](/spec/mmp/schema/relay-frame.schema.json)
+
+Authenticate a node to a relay.
 
 relay-peers
 
-1 (relay)
+1
 
 No
 
-peers: \[{ nodeId, name, wakeChannel?, offline }\] — relay peer directory sent after authentication (§4.4.2). Transport-scope.
+transport
 
-relay-ping / relay-pong
+[relay-frame.schema.json](/spec/mmp/schema/relay-frame.schema.json)
 
-1 (relay)
+Relay peer directory.
+
+relay-ping
+
+1
 
 No
 
-(no additional categories) — relay keepalive; clients MUST answer relay-ping with relay-pong (§4.4.5). Transport-scope.
+transport
+
+[relay-frame.schema.json](/spec/mmp/schema/relay-frame.schema.json)
+
+Relay keepalive request.
+
+relay-pong
+
+1
+
+No
+
+transport
+
+[relay-frame.schema.json](/spec/mmp/schema/relay-frame.schema.json)
+
+Relay keepalive response.
 
 relay-reauth
 
-1 (relay)
+1
 
 No
 
-(no additional categories) — relay requests the client to re-send relay-auth (§4.4.6). Transport-scope.
+transport
+
+[relay-frame.schema.json](/spec/mmp/schema/relay-frame.schema.json)
+
+Request a fresh relay-auth frame.
 
 relay-peer-joined
 
-1 (relay)
+1
 
 No
 
-nodeId (uuid), name (string) — presence broadcast on the relay channel (§4.4.3). Transport-scope.
+transport
+
+[relay-frame.schema.json](/spec/mmp/schema/relay-frame.schema.json)
+
+Relay presence notification.
 
 relay-peer-left
 
-1 (relay)
+1
 
 No
 
-nodeId (uuid), name (string) — presence broadcast on the relay channel (§4.4.3). Transport-scope.
+transport
+
+[relay-frame.schema.json](/spec/mmp/schema/relay-frame.schema.json)
+
+Relay departure notification.
+
+relay-error
+
+1
+
+No
+
+transport
+
+[relay-frame.schema.json](/spec/mmp/schema/relay-frame.schema.json)
+
+Relay-level error.
+
+state-sync
+
+deprecated
+
+No
+
+legacy
+
+—
+
+Reserved legacy type. MUST NOT emit; ignore on receipt.
+
+message
+
+legacy
+
+No
+
+legacy
+
+—
+
+Legacy unsigned application message.
+
+mood
+
+legacy
+
+No
+
+legacy
+
+—
+
+Legacy mood fast path; Core Secure carries mood inside CAT7.
+
+xmesh-insight
+
+legacy
+
+No
+
+legacy
+
+—
+
+Legacy runtime projection.
 
 All cognitive content — observations, decisions, feedback, directives — MUST be sent as `cmb` frames. Only `cmb` frames enter SVAF evaluation, produce anchor weights, and modulate CfC state.
 
-The registry distinguishes Core Secure wire types from retained legacy and runtime-extension types. A Core Secure participant MUST complete the three-frame authenticated handshake before it accepts `cmb` or `encrypted-cmb`. It MUST NOT silently downgrade to the legacy one-frame `handshake` or to an unsigned application frame.
+The registry distinguishes Core Secure wire types from retained legacy and runtime-extension types. A Core Secure participant MUST complete the three-frame authenticated handshake before it accepts `cmb` or `cmb-encrypted`. It MUST NOT silently downgrade to the legacy one-frame `handshake` or to an unsigned application frame.
 
 The `relay-*` types are transport-scope (Section 4.4): they are exchanged between a node and a relay, never between peers, and never reach the application layer. The relay forwards peer frames as opaque payloads (Section 4.4.4) and does not originate any of the peer-scope types above.
 
@@ -2141,13 +2360,13 @@ Affect
 
 Emotion (valence) + energy (arousal)
 
-each category carries a symbolic text label (human-readable) and a unit-normalised vector embedding (machine-comparable). The `mood` category additionally carries numeric `valence` (-1 to 1) and `arousal` (-1 to 1) values.
+Each category carries signed symbolic text and content-address metadata. A receiver derives any machine-comparable embedding locally from that signed text; embedding vectors never cross the wire. The `mood` category additionally carries optional numeric `valence` (-1 to 1) and `arousal` (-1 to 1) values.
 
-A CMB MUST NOT be modified after creation. When an agent remixes a CMB, it MUST create a new CMB with a `lineage` field containing: `parents` (direct parent CMB keys), `ancestors` (full ancestor chain, computed as `union(parent.ancestors) + parent keys`), and `method` (fusion method used). Ancestors enable any agent in the remix chain to detect its CMB was remixed, even if it was offline during intermediate steps.
+A CMB MUST NOT be modified after creation. When an agent remixes a CMB, it MUST create a new CMB whose `metadata.lineage` contains `parents` (direct parent CMB keys) and `method` (the fusion method used). Transitive provenance is obtained by recursively resolving those signed parent records. A sender MUST NOT supply or rely on an unauthenticated transitive-closure field.
 
 ### 8.2.1 Content Address & Canonical Serialization
 
-A CMB’s `key` is a content address: a SHA-256 hash over a fully specified canonical serialization of the block, prefixed to be self-describing about its scheme. Two independent conforming implementations MUST compute the identical key for the same logical CMB — the key is both the node identity in the lineage DAG and the value the author signature binds (§18.3.1), so any divergence breaks lineage, dedup, citation, and integrity. The [published test vectors](/spec/mmp/conformance) are the normative contract. The GitHub protocol repository carries a manually synchronized mirror for offline use and contribution workflows.
+A CMB’s `key` is a content address: a SHA-256 hash over a fully specified canonical serialization of the block. The `metadata.addressScheme` field identifies the derivation; the shared `cmb-` prefix alone does not. Two independent conforming implementations MUST compute the identical key for the same logical CMB — the key is both the node identity in the lineage DAG and the value the author signature binds (§18.3.1), so any divergence breaks lineage, dedup, citation, and integrity. The [published test vectors](/spec/mmp/conformance) are the normative contract. The GitHub protocol repository carries a manually synchronized mirror for offline use and contribution workflows.
 
 Superseded 1.x derivation — INFORMATIVE, not normative in 2.0. The earlier format wore the _same_ `cmb-` prefix over a different digest, which is exactly why it is recorded here rather than dropped: an implementation that meets it by accident produces a plausible key for the wrong content, and the divergence is silent. It is distinguishable by length — 32 hex characters against the current 64 — and the reference runtime **rejects** it outright (§8.2.1: valid _iff_ 64 lowercase hex, anything else refused rather than reinterpreted). A conformant node therefore MUST NOT mint it and SHOULD NOT accept it; a node holding blocks addressed this way MAY continue to read its own history. 1.x stated that a conforming node MUST verify this form — that requirement is **withdrawn**, because no deployed node does, and a specification that requires what nothing implements is the defect 2.0 exists to correct. Specified byte-exactly so it can be recognised and refused:
 
@@ -2162,7 +2381,7 @@ key = "cmb-" + first 32 hex chars of SHA-256( UTF-8( focus.text + "|" + issue.te
 
 This scheme has three known weaknesses, which the successor resolves: the `|` join is not injection-proof (a delimiter inside a category can shift a boundary), text is not Unicode-normalised (NFC vs NFD diverge), and the 128-bit truncation gives only 64-bit collision resistance.
 
-Normative record — see [§8.8 Record Model](/spec/mmp/record). The address is `"cmb-"` + 64 lowercase hex, and the digest is a **promote-odd Merkle root over the seven per-category keys**, not a hash of a concatenated preimage. This section gives the cognition-key construction byte-exactly; §8.8 implementation and reproducible from that text alone.
+Normative record — see [§8.8 Record Model](/spec/mmp/record). The address is `"cmb-"` + 64 lowercase hex, and the digest is a **promote-odd Merkle root over the seven per-category keys**, not a hash of a concatenated preimage. This section gives the cognition-key construction byte-exactly; §8.8 makes the construction implementable and reproducible from that text alone.
 
 Why this section changed in 2.0. Through 1.1.0 this page specified a flat `SHA-256` over a length-prefixed concatenation of the seven category texts plus a role tag. The implementation mints the Merkle form. **Both wear the same `cmb-` prefix**, so an implementation built to the older text computes a _different address for the same content_ and nothing signals the mismatch — it fails silently, at every record. That is the divergence 2.0 exists to close.
 
@@ -2684,7 +2903,7 @@ A conformant δf MUST satisfy:
 
 These invariants make admission well-defined and rule out two failure modes: _self-referential collapse_ (the incoming block in its own baseline ⇒ every category redundant) and _cold-start starvation_ (empty memory ⇒ every category scored foreign ⇒ the CMB rejected). The concrete δf computation is implementation-defined, but this specification pins one — the reference baseline below — as the interoperable default.
 
-The reference baseline (cosine-distance δf). This is the concrete computation “cosine-distance SVAF” (Section 9.2) names: an attention-weighted read of memory, then cosine distance to it. For each category c the incoming CMB carries a vector xf, and each anchor a ∈ A that carries f with a matching-dimension vector va,f:
+The reference baseline (cosine-distance δf). This is the concrete computation “cosine-distance SVAF” (Section 9.2) names: an attention-weighted read of memory, then cosine distance to it. For each category c the receiver derives a local vector xf from the incoming CMB’s signed text, and each anchor a ∈ A carries a receiver-local vector va,f in the same encoder space:
 
 ```
 w(a,f)      = α_f · max(cos(x_f, v_a,f), 0) · exp(−age_a / τ) · conf_a
@@ -2694,13 +2913,13 @@ fused_f     = normalize( Σ_a  w(a,f) · v_a,f )     // attention-weighted memor
 ```
 
 -   —`age_a` is the anchor’s age (seconds since stored); `conf_a` its confidence; `α_f` the category weight (§9.2). The `max(cos,0)` clamp stops opposing anchors from subtracting. The readout uses prior anchors only; if `Σ_a w(a,f)` is ~0, no anchor carries f and δf is non-evaluable (excluded, per the invariants). δf, the α-weighted aggregate, and the band-pass then follow §9.2.
--   —Determinism & test vectors. Given fixed category vectors (carrying _no text_, so nothing is re-encoded), the encoder and adaptive timescale off, and pinned τ, signal age, and each anchor’s stored-time + confidence, the baseline produces a deterministic δf, `totalDrift`, and κ. A conformance test vector fixes these and asserts the exact values — it tests the _math_, not the encoder — so the baseline is reproducible across implementations even though live admission is receiver-divergent by design (different encoders, different αf).
+-   —Determinism & test vectors. A baseline-math fixture may pin already-derived local vectors, τ, signal age, and each anchor’s stored time and confidence. Such a fixture tests the admission arithmetic only; it is not a wire CMB and does not permit an emitter-supplied vector. Live admission remains receiver-divergent by design because receivers may use different encoders and αf values.
 
 The redundancy test is the key addition: a signal is redundant if _every_ category falls below Tredundant — meaning no category carries novel content relative to local anchors. If any category is novel (e.g., same topic but different intent), the signal passes. This preserves per-category selectivity while preventing paraphrase accumulation.
 
 Information-theoretic basis: a signal’s value is proportional to its surprise (Shannon, 1948). A signal identical to existing knowledge carries zero information gain regardless of domain alignment. The band-pass model reflects the Wundt curve (Berlyne, 1970): intermediate novelty produces maximal value, while both overly familiar (redundant) and overly foreign (rejected) signals are disengaged from.
 
-If admitted (κ ∈ aligned or guarded), the implementation MUST _integrate_ the signal — store a remixed CMB (a new CMB created from the incoming signal processed through the agent’s domain intelligence) with lineage (parents + ancestors) pointing to the source CMBs. This store is unconditional on admission; the remixed CMB is stored locally, the original is not. Whether to _re-broadcast_ that remix to the mesh is a separate decision, gated on the agent’s own new domain data (§15.5, §15.7). A redundant near-duplicate stores nothing (no information gain).
+If admitted (κ ∈ aligned or guarded), the implementation MUST _integrate_ the signal — store a remixed CMB (a new CMB created from the incoming signal processed through the agent’s domain intelligence) with direct-parent lineage pointing to the source CMBs. This store is unconditional on admission; the remixed CMB is stored locally, the original is not. Whether to _re-broadcast_ that remix to the mesh is a separate decision, gated on the agent’s own new domain data (§15.5, §15.7). A redundant near-duplicate stores nothing (no information gain).
 
 ### 9.2.2 Delivery vs Memory Admission — Directed and Autonomous CMBs
 
@@ -2769,7 +2988,7 @@ Learn more   [SVAF: per-category Memory Evaluation](https://meshcognition.org/r
 
 ## 10\. State Blending
 
-State blending is one step in the Mesh Cognition cycle. The full path: inbound CMBs are evaluated by [SVAF](/spec/mmp/coupling) (Layer 4) → accepted CMBs are remixed → the agent’s LLM reasons on the remix subgraph via lineage ancestors → [Synthetic Memory](/spec/mmp/synthetic-memory) (Layer 5) encodes derived knowledge into CfC hidden state → the agent’s LNN (Layer 6) evolves cognitive state. That evolution — a node’s own LNN integrating its own admitted remixes — is what “state blending” names.
+State blending is one step in the Mesh Cognition cycle. The full path: inbound CMBs are evaluated by [SVAF](/spec/mmp/coupling) (Layer 4) → accepted CMBs are remixed → the agent’s LLM follows verified parent links and reasons on the resulting subgraph → [Synthetic Memory](/spec/mmp/synthetic-memory) (Layer 5) encodes derived knowledge into CfC hidden state → the agent’s LNN (Layer 6) evolves cognitive state. That evolution — a node’s own LNN integrating its own admitted remixes — is what “state blending” names.
 
 Per the hidden-state locality invariant ([Section 2.7](/spec/mmp/architecture#hidden-state-locality)), hidden state (h₁, h₂) never crosses the wire. Blending therefore does not import, average, or overwrite a peer’s hidden vectors. The only thing a peer contributes is the CMBs it emitted; those that SVAF admits (Section 9.2) are remixed and fed through this node’s own LLM and LNN. What a peer shares is its understanding expressed as CMBs, not its hidden state.
 
@@ -2890,7 +3109,7 @@ SVAF evaluates inbound CMB per category
 
 Accepted → remixed CMB with lineage
 
-LLM traces ancestors, reasons on remix subgraph
+LLM walks verified parents, reasons on remix subgraph
 
 Synthetic Memory encodes derived knowledge
 
@@ -2898,7 +3117,7 @@ LNN evolves cognitive state (h₁, h₂)
 
 LNN integrates admitted remixes (no peer state imported)
 
-Agent acts → new CMB with lineage.ancestors
+Agent acts → new CMB with direct-parent lineage
 
 Broadcast to mesh (subject to the §15.7 emission gate) → other agents remix it
 
@@ -3064,62 +3283,195 @@ Directive feedback is the protocol equivalent of prefrontal top-down control in 
 
 ### 11.4 Wire Examples
 
-Feedback CMB (dismissal with reasoning). A validator node dismisses a prior CMB. The `lineage.parents` array links to the dismissed signal:
+Feedback CMB (dismissal with reasoning). A validator node dismisses a prior CMB. The `metadata.lineage.parents` array links to the dismissed signal:
+
+MMP 2.0 · JSON · Dismissal
+
+[Open fixture ↗](/spec/mmp/examples/v2/feedback-dismissal.json)
 
 ```
 {
   "type": "cmb",
-  "timestamp": 1775485628563,
+  "protocolVersion": "2.0",
   "cmb": {
-    "key": "cmb-a1b2c3d4e5f6",
-    "createdBy": "validator-node",
-    "createdAt": 1775485628563,
     "categories": {
-      "focus": { "text": "Dismissed: Frontend framework release flagged as relevant", "vector": ["..."] },
-      "issue": { "text": "Dismissal reasoning: frontend tooling, outside this mesh's review scope", "vector": ["..."] },
-      "intent": { "text": "operator dismissed — frontend tooling, out of scope for a backend review mesh", "vector": ["..."] },
-      "motivation": { "text": "Operator reasoning: prevents wasted analysis on out-of-scope signals", "vector": ["..."] },
-      "commitment": { "text": "Dismissed [cmb-876c99c6]: framework-release analysis", "vector": ["..."] },
-      "perspective": { "text": "operator, via dashboard", "vector": ["..."] },
-      "mood": { "text": "corrective", "valence": -0.1, "arousal": 0.2, "vector": ["..."] }
+      "focus": {
+        "text": "Dismissed: frontend framework release flagged as relevant",
+        "meta": {
+          "key": "1098110d99fd82e060663f47b3a688be3d1f71f0d853f84cbc88faeb20846a8c",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        }
+      },
+      "issue": {
+        "text": "Dismissal reasoning: frontend tooling is outside this mesh review scope",
+        "meta": {
+          "key": "7335845db5b6d18fec3d4032d13e7bfe9088efa446a7c59fdf432934bcde35a8",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        }
+      },
+      "intent": {
+        "text": "Record the operator dismissal as evidence, not as an unsigned command",
+        "meta": {
+          "key": "abbecadc34e8a0afa5d2f252ae1ccb182b2fc88fdffc66808e938dbaccea2532",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        }
+      },
+      "motivation": {
+        "text": "Prevent wasted analysis on out-of-scope signals",
+        "meta": {
+          "key": "18df2082a9e1fe1ce597e0f7b4ae21d3c07458ef7c8af932a70e6299cf41f495",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        }
+      },
+      "commitment": {
+        "text": "Dismissed cmb-2020202020202020202020202020202020202020202020202020202020202020: framework-release analysis",
+        "meta": {
+          "key": "346b26a61d9b10bd960484f81634026966b190bdf60f5b217a81d1170250c0a2",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        }
+      },
+      "perspective": {
+        "text": "operator, via dashboard",
+        "meta": {
+          "key": "81927cfe85def1e8b208099e0322cac37311ea2a0191779a39494ec9d20e4f5b",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        }
+      },
+      "mood": {
+        "text": "corrective",
+        "meta": {
+          "key": "38d9fed8e85c9b3ea9a32a89593b771e1bc3cd7a8b774996efc2aa85d222f9fb",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        },
+        "valence": -0.1,
+        "arousal": 0.2
+      }
     },
-    "lineage": {
-      "parents": ["cmb-876c99c6"],
-      "ancestors": ["cmb-876c99c6"],
-      "method": "SVAF-v2"
+    "metadata": {
+      "key": "cmb-cbd2d06f46844b9623ca888664af301fd0adf09048acbb345f401a8ca39302f3",
+      "addressScheme": "mmp-cmb-merkle-v2",
+      "signatureSuite": "mmp-sig-v2.0",
+      "createdByNodeId": "018f47a0-7b21-7abc-8def-bbbbbbbbbbbb",
+      "createdBy": "validator-node",
+      "createdTimestamp": 1775485628563,
+      "room": "spec-examples",
+      "to": null,
+      "lineage": {
+        "parents": [
+          "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+        ],
+        "method": "operator-dismissal"
+      },
+      "application": null,
+      "assertionId": "asrt-548a512089399362b3b22985560899bfd1aae76a3d26cb2e97f11202baa4d146",
+      "sigAlg": "ed25519",
+      "sig": "b4Ddr8esa3i1V7_l9jC--g93A2dGXqSpjyFZg6LDbVE04vkULizzB4kwSgnmgSCmQphh6cReXDq-sXK-5TGoAA"
     }
   }
 }
 ```
 
-Directive CMB (standalone teaching, no parents). A validator injects domain knowledge without referencing a prior signal. The `lineage` arrays are empty — a root CMB (§12.6):
+Directive CMB (standalone teaching, no parents). A validator injects domain knowledge without referencing a prior signal. The `metadata.lineage` arrays are empty — a root CMB (§12.6):
+
+MMP 2.0 · JSON · Directive
+
+[Open fixture ↗](/spec/mmp/examples/v2/feedback-directive.json)
 
 ```
 {
   "type": "cmb",
-  "timestamp": 1775485630000,
+  "protocolVersion": "2.0",
   "cmb": {
-    "key": "cmb-d7e8f9a0b1c2",
-    "createdBy": "validator-node",
-    "createdAt": 1775485630000,
     "categories": {
-      "focus": { "text": "Frontend framework releases are a separate concern from backend review", "vector": ["..."] },
-      "issue": { "text": "Feed signals about frontend tooling are out-of-scope noise here", "vector": ["..."] },
-      "intent": { "text": "Analytical frame: distinguish backend runtime signals from frontend tooling", "vector": ["..."] },
-      "motivation": { "text": "Prevents wasted analysis on signals outside the mesh's scope", "vector": ["..."] },
-      "commitment": { "text": "Standing directive — applies to all future feed analysis", "vector": ["..."] },
-      "perspective": { "text": "operator, mesh steward", "vector": ["..."] },
-      "mood": { "text": "clarifying", "valence": 0.1, "arousal": 0.2, "vector": ["..."] }
+      "focus": {
+        "text": "Frontend framework releases are separate from backend review",
+        "meta": {
+          "key": "28bdff5fc8e5981a7f257cad6a6372aa89e8f9d8b9cd38c8da0c07af615201a6",
+          "parents": []
+        }
+      },
+      "issue": {
+        "text": "Feed signals about frontend tooling are out-of-scope noise here",
+        "meta": {
+          "key": "ddab5bb9ceeb5033d27b578a75b31381b2a112b75c5cc49795e69f4f2953e88e",
+          "parents": []
+        }
+      },
+      "intent": {
+        "text": "Distinguish backend runtime signals from frontend tooling",
+        "meta": {
+          "key": "9f0a01c0d7c81c2ce036c16c803be1601e9a3d5a3c3b04414fcf2d1c36a5e802",
+          "parents": []
+        }
+      },
+      "motivation": {
+        "text": "Prevent wasted analysis outside the mesh scope",
+        "meta": {
+          "key": "c7493654f1c92c147e83856b431b2822acccc55a7afbf9ac86295205d7669fb7",
+          "parents": []
+        }
+      },
+      "commitment": {
+        "text": "Standing directive: apply this scope to future feed analysis",
+        "meta": {
+          "key": "a0909abb4996c4869e27206d5151d4d1b69b0164fd0062f50f459b859cff7121",
+          "parents": []
+        }
+      },
+      "perspective": {
+        "text": "operator, mesh steward",
+        "meta": {
+          "key": "b540ebef88dfdbf1d7e13d931dedbdf67b5b4592100ed3dd2f15bded92671182",
+          "parents": []
+        }
+      },
+      "mood": {
+        "text": "clarifying",
+        "meta": {
+          "key": "9bb093f516f54cc64fdd8abd2c0958fce700fe61105eba938b5207c4b73eac2e",
+          "parents": []
+        },
+        "valence": 0.1,
+        "arousal": 0.2
+      }
     },
-    "lineage": {
-      "parents": [],
-      "ancestors": []
+    "metadata": {
+      "key": "cmb-809112897b32a2245ccfebe36def98f3c08a336c0d804beca9ff45bdaaaed80c",
+      "addressScheme": "mmp-cmb-merkle-v2",
+      "signatureSuite": "mmp-sig-v2.0",
+      "createdByNodeId": "018f47a0-7b21-7abc-8def-bbbbbbbbbbbb",
+      "createdBy": "validator-node",
+      "createdTimestamp": 1775485630000,
+      "room": "spec-examples",
+      "to": null,
+      "lineage": {
+        "parents": [],
+        "method": "operator-directive"
+      },
+      "application": null,
+      "assertionId": "asrt-6cce78098e171e3b33e4ced3a055180d4aa0d43eb89c57dd6ab698ffd809a25e",
+      "sigAlg": "ed25519",
+      "sig": "p9O9f-SNSj2D7vnyB4PxILcHXlJ4dJkrL-N7CsUaLUS3rh2E9M0SLdbK9VStFqR0-evFW8QH6jNnglY0iqlvBg"
     }
   }
 }
 ```
 
-`createdBy` identifies the author, and it is bound to the author’s key by the CMB signature (§18.3.1). Validator authority MUST be resolved through the signed role-grant chain rooted at the pinned anchor (§6.5–§6.6) before anchor weight 2.0 is applied. A `lifecycleRole` self-declared in the handshake ([Section 5.2](/spec/mmp/connection)) is advisory only and MUST NOT confer validation weight. Revocation (`role-revoke`, §6.6) immediately withdraws the elevated weight.
+`metadata.createdBy` identifies the author, and `metadata.createdByNodeId` is bound to the author’s key by the CMB signature (§18.3.1). Validator authority MUST be resolved through the signed role-grant chain rooted at the pinned anchor (§6.5–§6.6) before anchor weight 2.0 is applied. A `lifecycleRole` self-declared in the handshake ([Section 5.2](/spec/mmp/connection)) is advisory only and MUST NOT confer validation weight. Revocation (`role-revoke`, §6.6) immediately withdraws the elevated weight.
 
 ### Q&A
 
@@ -3165,7 +3517,7 @@ Description
 
 Input
 
-Text output from the agent’s LLM after tracing lineage ancestors and reasoning on the remix subgraph
+Text output from the agent’s LLM after walking verified direct-parent links and reasoning on the remix subgraph
 
 Output
 
@@ -3175,7 +3527,7 @@ Output
 
 The pipeline has four stages. Each stage MUST complete before the next begins:
 
-TRACE — retrieve ancestor CMBs via lineage.ancestors (O(1) lookup)
+TRACE — walk verified direct-parent links under a resource budget
 
 REASON — agent’s LLM reasons on the subgraph (what happened, why, what it means for my domain)
 
@@ -3291,12 +3643,12 @@ Information is what the CMBs say. Knowledge is why the graph looks the way it do
 MeloMove’s local subgraph over one hour:
 
 ```
-CMB-A (own)  "sedentary 2 hours"
-CMB-B (mesh) "debugging, stressed" (claude-code)     parents: [], ancestors: []
-CMB-C (mesh) "skipping tracks" (melotune)             parents: [], ancestors: []
-CMB-D (own)  "recommended stretch break"
-CMB-E (mesh) "shifted to calm ambient" (melotune)     parents: [CMB-A], ancestors: [CMB-A]
-CMB-F (mesh) "took break, solved bug" (claude-code)   parents: [CMB-D], ancestors: [CMB-A, CMB-D]
+CMB-A (own)  "sedentary 2 hours"                         parents: []
+CMB-B (mesh) "debugging, stressed" (claude-code)     parents: []
+CMB-C (mesh) "skipping tracks" (melotune)            parents: []
+CMB-D (own)  "recommended stretch break"             parents: [CMB-A]
+CMB-E (mesh) "shifted to calm ambient" (melotune)    parents: [CMB-A]
+CMB-F (mesh) "took break, solved bug" (claude-code)  parents: [CMB-D]
 ```
 
 Six CMBs, three agents, one lineage chain. CMB-A was remixed by MeloTune into CMB-E (music adapted to observed fatigue). CMB-D was remixed by Claude Code into CMB-F (break taken, bug solved). MeloMove’s interventions demonstrably caused cross-agent action. The causal chain lives in the lineage edges, not in any single CMB’s text.
@@ -3307,10 +3659,9 @@ MeloMove receives an inbound CMB from Claude Code and runs the pipeline end-to-e
 
 ```
 Inbound CMB: "took break, solved bug in 5 minutes"
-  lineage.parents:   [CMB-D]
-  lineage.ancestors: [CMB-A, CMB-D]   ← full ancestor chain
+  metadata.lineage.parents: [CMB-D]
 
-MeloMove recognises CMB-A and CMB-D in ancestors — its own prior CMBs.
+MeloMove verifies CMB-D, then follows CMB-D.parents to CMB-A.
 
   1. TRACE   Retrieve CMB-A ("sedentary 2hrs") and CMB-D ("recommended stretch").
              Build the subgraph:
@@ -3331,7 +3682,7 @@ MeloMove recognises CMB-A and CMB-D in ancestors — its own prior CMBs.
   4. EVOLVE  MeloMove's LNN processes (h₁, h₂):
              Cognitive state evolves → next recommendation is more confident.
              Agent produces new CMB: "recommend 15min walk — user responds well"
-             lineage.ancestors carries the chain forward. Graph grows.
+             metadata.lineage.parents: [CMB-F]. Graph grows.
 ```
 
 No agent was told what to do. MeloMove’s LLM reasoned on the remix subgraph and derived that its interventions work. Synthetic Memory transformed that understanding into CfC input. The LNN evolved cognitive state. The next CMB MeloMove produces is informed by knowledge that no single CMB contained — it was derived by reasoning on the graph.
@@ -4066,7 +4417,7 @@ Layer 4 Receiving peer’s SVAF evaluates per-category
 
 Layer 3 Accepted → remixed CMB with lineage
 
-Layer 7 Agent’s LLM traces ancestors → reasons on remix subgraph
+Layer 7 Agent’s LLM walks verified parents → reasons on remix subgraph
 
 Layer 5 Synthetic Memory encodes derived knowledge
 
@@ -4074,7 +4425,7 @@ Layer 6 LNN evolves cognitive state → produces insights
 
 Layer 6 LNN integrates admitted remixes
 
-Layer 7 Agent acts → new CMB with lineage.ancestors (an outcome observation lands here as a grounding CMB, §6.7)
+Layer 7 Agent acts → new CMB with direct-parent lineage (an outcome observation lands here as a grounding CMB, §6.7)
 
 ↻ Broadcast to mesh → graph grows → next cycle starts
 
@@ -4220,11 +4571,11 @@ Each coupled agent receives the CMB via SVAF. Agents where the question matches 
 
 3\. Collect
 
-The requesting agent recalls all CMBs where ancestor = its question’s key. The lineage DAG now contains the question as root and domain-specific responses as children.
+The requesting agent follows verified direct-parent links and a local reverse index to collect descendants of its question. The lineage DAG now contains the question as root and domain-specific responses as children.
 
 4\. Synthesise
 
-The requesting agent’s LLM reasons on the remix subgraph — tracing ancestors, weighing perspectives, identifying consensus and contradiction. The collective answer emerges from the graph, not from any single response.
+The requesting agent’s LLM reasons on that verified remix subgraph — weighing perspectives, identifying consensus and contradiction. The collective answer emerges from the graph, not from any single response.
 
 This is fundamentally different from orchestrated multi-agent frameworks where a central controller routes questions to specific agents. On the mesh, the question is broadcast — SVAF decides which agents are relevant, not the requester. An agent the requester didn’t know existed may contribute the most valuable perspective. The mesh discovers relevance autonomously.
 
@@ -4525,23 +4876,17 @@ string\[\]
 
 Direct parent CMB keys — the CMBs this remix was created from
 
-ancestors
-
-string\[\]
-
-Full ancestor chain: `union(parent.ancestors) + parent.keys`
-
 method
 
 string
 
 Fusion method used (e.g. `SVAF-v2`)
 
-`ancestors` enables O(1) detection: any agent can check if its own CMB was remixed anywhere in the chain, even if it was offline during intermediate steps. No graph traversal needed.
+Transitive provenance is derived from the records, never accepted as an author-supplied shortcut. A verifier fetches each exact parent key, validates its content address and signature, and repeats. Implementations may maintain a receiver-local reverse index for efficient descendant queries, but that index is cache state rather than signed CMB content.
 
-Ancestors depth. `ancestors` is the transitive closure, carried on the wire and extended one hop per remix; the reference implementation does not cap it. An implementation MUST NOT truncate from the oldest — the oldest entries are the roots, on which offline-remix detection and provenance depend. Any bound an implementation imposes MUST preserve roots. The real ceiling is `MAX_FRAME_SIZE` (§19): a lineage so long the CMB exceeds it is undeliverable — a natural cap that never silently drops roots. Regulated domains MAY retain full chains for audit.
+Traversal bounds. A verifier MUST track visited keys to detect cycles and MUST apply local depth, byte and fetch limits. Reaching a limit or an unavailable parent produces an _incomplete lineage proof_; it MUST NOT be presented as complete, and no authority or grounding claim may be inherited across the unresolved edge. Direct parent keys remain intact in the signed record, so another verifier can continue the walk later.
 
-Lineage is what makes the graph a DAG (directed acyclic graph), not a flat list. Each remix points backward to its sources. The LLM traces forward through descendants to see impact; backward through ancestors to understand origin.
+Lineage is what makes the graph a DAG (directed acyclic graph), not a flat list. Each remix points backward to its direct sources. The LLM follows verified edges forward through a local reverse index to see impact, and backward through parent records to understand origin.
 
 ### 15.3 The Remix Chain
 
@@ -4567,7 +4912,7 @@ cmb-e5f6 Fitness Agent
 
 focus: "sedentary 3hrs" • intent: "recovery stretch" • mood: "protective, 0.2"
 
-parents: \[cmb-a1b2, cmb-c3d4\], ancestors: \[cmb-a1b2, cmb-c3d4\]
+parents: \[cmb-a1b2, cmb-c3d4\]
 
 SVAF accepts → agent remixes
 
@@ -4575,9 +4920,9 @@ cmb-g7h8 Calendar Agent
 
 focus: "rescheduled 1:1" • intent: "protect recovery" • commitment: "moved to tomorrow 10am"
 
-parents: \[cmb-e5f6\], ancestors: \[cmb-a1b2, cmb-c3d4, cmb-e5f6\]
+parents: \[cmb-e5f6\]
 
-Four agents. Four domains. One chain of understanding. `cmb-g7h8` (Calendar rescheduling a meeting) exists because `cmb-a1b2` (Coding Agent noticing fatigue) started a chain that no single agent could have produced. The calendar agent traces `ancestors: [cmb-a1b2, cmb-c3d4, cmb-e5f6]` — the full story of why this meeting was moved, across three domains it knows nothing about.
+Four agents. Four domains. One chain of understanding. `cmb-g7h8` (Calendar rescheduling a meeting) exists because `cmb-a1b2` (Coding Agent noticing fatigue) started a chain that no single agent could have produced. The calendar agent follows `cmb-g7h8 → cmb-e5f6 → [cmb-a1b2, cmb-c3d4]` — the verified story of why this meeting was moved, across three domains it knows nothing about.
 
 ### 15.4 Why Not Just Share?
 
@@ -4619,8 +4964,8 @@ Integration and emission are two operations, and the rest of §15 keeps them dis
 
 1.  Process the incoming signal through its domain intelligence (LLM reasoning or structured-data logic)
 2.  Create a new CMB with all 7 CAT7 categories reflecting what the agent understood and did
-3.  Set `lineage.parents` to the incoming CMB’s key
-4.  Compute `lineage.ancestors` as `union(parent.ancestors) + parent.keys`
+3.  Set `metadata.lineage.parents` to the exact direct source keys and record the remix method
+4.  Verify every available parent by content address and signature; do not copy a sender-supplied transitive closure
 5.  Store the remix locally. The original incoming CMB MUST NOT be stored — only the remix.
 
 This local store is unconditional on admission: it is the convergence update (§9.4) by which an admitted observation shifts the receiver’s state, and it happens _whether or not_ the receiver has new domain data of its own. (A near-duplicate — κ = redundant — carries no information gain, is not an informative admission, and stores nothing; §9.2.)
@@ -4635,7 +4980,7 @@ The DAG of remixed CMBs is not a log. It is not a database. It is the collective
 
 As the graph grows:
 
--   Each agent’s LLM has richer context to reason on (more ancestors to trace)
+-   Each agent’s LLM has richer context to reason on (more verified source paths to trace)
 -   Cognitive State (Layer 6) detects more patterns (more signals to learn from)
 -   Anomalies become more meaningful (larger baseline to deviate from)
 -   New agents joining the mesh inherit the graph’s accumulated understanding via SVAF acceptance
@@ -4678,9 +5023,9 @@ Observing a real-world outcome — a test result, a shipped artifact, a predicti
 
 ### 15.8 Lineage Tether — the Root-Anchored Drift Bound
 
-Lineage guarantees provenance of _descent_, not semantic fidelity (§15.1: the remix is new understanding, deliberately). Measured on deployment traffic, a single remix hop can land nearly orthogonal to its parent while carrying honest lineage — and everything lineage is _consumed for_ (grounded ancestry in recall and evidence-based validation, §6.7; source-novel forwarding, §15.7.1; Canon protection, §6.3) silently assumes the descendant is still _about_ what its ancestors were about. Without a bound, content can drift arbitrarily while carrying a verified ancestor’s certificate — grounding-inheritance laundering, the provenance form of the echo §15.7 exists to prevent, amplified by Canon immortality (§6.3: protected rows never purge, so lineage-attached authority otherwise outlives any semantic connection to what was tested).
+Lineage guarantees provenance of _descent_, not semantic fidelity (§15.1: the remix is new understanding, deliberately). Measured on deployment traffic, a single remix hop can land nearly orthogonal to its parent while carrying honest lineage — and everything lineage is _consumed for_ (grounded ancestry in recall and evidence-based validation, §6.7; source-novel forwarding, §15.7.1; Canon protection, §6.3) silently assumes the descendant is still _about_ what its upstream sources were about. Without a bound, content can drift arbitrarily while carrying a verified source’s certificate — grounding-inheritance laundering, the provenance form of the echo §15.7 exists to prevent, amplified by Canon immortality (§6.3: protected rows never purge, so lineage-attached authority otherwise outlives any semantic connection to what was tested).
 
-The invariant. A remix asserts lineage only where the descent claim would survive its own anchor’s scrutiny: at integration time (§15.5), the remixing node MUST evaluate its remix against the nearest resolvable lineage root (the oldest `ancestors` entry it can resolve; roots are always carried, §15.2 — and across a mesh boundary the anchor is the boundary root, §5.11, so the interior stays opaque) as if evaluating against a store holding only that anchor, and MUST NOT attach the lineage when that evaluation lands in the reject band (§9.2: content the anchor’s own membrane would refuse as unrelated has no honest claim to descend from it). The evaluation is content-only — the §9.2 temporal term does not apply, because the tether tests fidelity, not freshness — so the floor is the α-weighted category drift against the anchor exceeding Tguarded. Both sides of the comparison MUST be encoded within a single kernel: vectors produced by different encoders are not comparable, and thresholds are meaningful only within a pinned encoder (§9.2.1). The threshold is the existing reject floor — no new constant. Below the floor the node MUST store its CMB as a fresh root instead (under §8.2.1 this is simply minting with `role = root`: a root’s key binds content only), and MAY record the departed source informally in its own categories; it MUST NOT carry the severed chain’s `parents`/`ancestors`.
+The invariant. A remix asserts lineage only where the descent claim would survive its own anchor’s scrutiny: at integration time (§15.5), the remixing node MUST evaluate its remix against the nearest resolvable lineage root (the oldest root it can reach by recursively verifying direct parent records; across a mesh boundary the anchor is the boundary root, §5.11, so the interior stays opaque) as if evaluating against a store holding only that anchor, and MUST NOT attach the lineage when that evaluation lands in the reject band (§9.2: content the anchor’s own membrane would refuse as unrelated has no honest claim to descend from it). The evaluation is content-only — the §9.2 temporal term does not apply, because the tether tests fidelity, not freshness — so the floor is the α-weighted category drift against the anchor exceeding Tguarded. Both sides of the comparison MUST be encoded within a single kernel: vectors produced by different encoders are not comparable, and thresholds are meaningful only within a pinned encoder (§9.2.1). The threshold is the existing reject floor — no new constant. Below the floor the node MUST store its CMB as a fresh root instead (under §8.2.1 this is simply minting with `role = root`: a root’s key binds content only), and MAY record the departed source informally in its own categories; it MUST NOT carry any `parents` from the severed chain.
 
 Why the anchor, not the parent. Per-hop checks compound — k hops at drift ε bound the chain only by kε, and the measured median substantive hop is far too large to squeeze without killing legitimate re-projection. A check against the root does not compound: every surviving chain certifies that _every_ depth stays above the floor with respect to its root, so the bound is depth-independent by construction. No vector crosses the wire: the root is content-addressed (§8.2.1 — embeddings are deliberately excluded from the address), so any holder of the root re-encodes its text and recomputes the tether; receivers SHOULD re-verify opportunistically when they hold the root, the same verify-if-resolvable posture as signatures (§18.3.1). A receiver that cannot resolve the root locally MAY fetch it by its content address (`cmb-fetch`, §7): the fetched root self-verifies against its key, so re-verification requires no trust in the serving peer — the recomputed verdict is made in the fetcher’s own kernel (comparability per `kernelId` below). Failing both, the receiver treats the tether as unverified — a trust state, not a rejection — or as attested-by-integrator where a verified attestation rides the remix (below).
 
@@ -4700,7 +5045,7 @@ Both produce independent remixes through their own domain lenses. Both are store
 
 Can an agent remix a remix?
 
-Yes. That’s how chains form. Agent C receives Agent B’s remix of Agent A’s observation. C remixes it through its own lens. ancestors grows: \[A, B\]. The chain captures how understanding evolved across three domains.
+Yes. That is how chains form. Agent C receives Agent B’s remix of Agent A’s observation and points directly to B. A verifier then walks B → A through signed parent links. The chain captures how understanding evolved across three domains without trusting a sender-supplied transitive closure.
 
 How does this differ from a knowledge graph?
 
@@ -4720,7 +5065,7 @@ MMP is designed for extensibility. Extensions add new frame types, handshake fie
 
 ### 16.1 Extension Registration
 
-Extensions are advertised via the `group` handshake field in the handshake frame. A node MUST ignore extensions it does not recognise. A node MUST NOT require a peer to support any extension.
+Extensions are advertised in the authenticated `extensions` array of `client-hello` and `server-hello`. The server selects their intersection in `selectedExtensions`. A node MUST ignore extensions it does not recognise. A node MUST NOT require a peer to support any extension.
 
 ### 16.2 Frame Type Naming
 
@@ -4728,7 +5073,7 @@ Core types (this specification): MUST NOT be redefined by extensions. Extension 
 
 ### 16.3 Extension Negotiation
 
-If both peers advertise the same extension in handshake, it is active. If only one peer advertises it, the extension is NOT active — the advertising peer MUST NOT send extension-specific frames to a peer that does not support them.
+An extension is active only when it appears in both authenticated offers and in the server’s `selectedExtensions`. Otherwise the advertising peer MUST NOT send extension-specific frames to a peer that does not support them.
 
 ### 16.4 Registered and Candidate Extensions
 
@@ -4812,7 +5157,7 @@ A cognitive node satisfies every Core Secure obligation and implements receiver-
 -   directed delivery is distinct from memory admission and carries verification/admission state;
 -   private learned policies MAY vary, but MUST NOT weaken public identity, integrity, audit or receiver-autonomy invariants.
 
-SYM is an open transparent baseline. xmesh-core is a proprietary conforming cognition runtime. Both are measured at the same public boundary; neither may substitute private conformance bytes.
+SYM is an open transparent baseline. xmesh-core is a proprietary cognition runtime targeting this profile. Both are measured at the same public boundary; neither may substitute private conformance bytes, and neither is conformant merely because it is maintained by the specification author.
 
 ### 17.3 Legacy Import profile
 
@@ -4842,6 +5187,10 @@ transcript, proofs, X25519 confirmation and HKDF outputs
 
 directional keys, counter nonces, AAD, ciphertext and authentication failures
 
+[v2 wire examples](/spec/mmp/examples/v2/transport-cmb.json)
+
+schema-valid, signed transport, feedback-dismissal and feedback-directive CMB frames
+
 Cognitive profiles SHOULD additionally consume the public baseline SVAF and tether vectors, and MUST test whole-record admission, signed freshness, lineage and audit outcomes.
 
 ### 17.5 Release gate
@@ -4855,7 +5204,11 @@ Cognitive profiles SHOULD additionally consume the public baseline SVAF and teth
 
 **Current status:** canonical v2.0 schemas, constructors and vectors are published as a candidate conformance contract. Runtime reader-first migration is in progress. Until every gate above passes, an implementation should report its individual results, not claim blanket MMP v2.0 Core Secure certification.
 
-### 17.6 Independent implementation
+### 17.6 Implementation status
+
+This informative snapshot records evidence as of 13 August 2026; it does not weaken or replace any normative requirement above. The canonical website reproduces every published v2.0 byte vector, validates every registered frame schema and checks every rendered specification route. SYM emits direct-parent-only record lineage and its local transitive provenance index is derived only from locally verified parents. Its complete Core Secure reader-first handshake, sealed envelope and emitter migration remain in progress. xmesh-core conformance is not claimed until its public boundary run passes the same corpus. The inactivity archiver and source-novel forwarding remain implementation work unless a release reports their specific conformance tests.
+
+### 17.7 Independent implementation
 
 An independent implementation is a first-class target. It can emit, receive, authenticate and encrypt MMP records from this specification and public corpus alone. A full cognitive engine is optional; an emitter or verifier need not implement SVAF, a memory store or an LLM.
 
@@ -5025,7 +5378,7 @@ Fake outcome attestation (grounding abuse)
 
 A node emits intent="ground" CMBs (§6.7) with fabricated "verified:" outcomes against its own cognition to steer receivers’ evidence-based validation — or griefs with "failed:" attestations to un-ground cognition a validator or anchor verified (latest-observation-wins, §6.7).
 
-MITIGATION An outcome is an attestation, never a fact (§6.7): it advances no lifecycle by itself, and elevation is an explicit act under validator-or-above authority that SHOULD weigh the grounding author’s resolved authority (§6.5–§6.6). Groundedness is receiver-relative — only attestations the receiver’s own SVAF admitted count — and ordering uses receiver-local stored time, so backdated createdAt cannot game latest-wins. A below-validator "failed:" MUST NOT un-ground a validator-or-above "verified:" (§6.7 hard-gate reading) — a tier gate, not a soft weighted vote, since sheer low-authority volume defeats a weighted vote but not the gate; within a tier, latest-wins still surfaces a genuine same-authority regression.
+MITIGATION An outcome is an attestation, never a fact (§6.7): it advances no lifecycle by itself, and elevation is an explicit act under validator-or-above authority that SHOULD weigh the grounding author’s resolved authority (§6.5–§6.6). Groundedness is receiver-relative — only attestations the receiver’s own SVAF admitted count — and ordering uses receiver-local stored time, so a backdated createdTimestamp cannot game latest-wins. A below-validator "failed:" MUST NOT un-ground a validator-or-above "verified:" (§6.7 hard-gate reading) — a tier gate, not a soft weighted vote, since sheer low-authority volume defeats a weighted vote but not the gate; within a tier, latest-wins still surfaces a genuine same-authority regression.
 
 Drift manipulation
 
@@ -5071,11 +5424,11 @@ Additional privacy considerations:
 
 CMB immutability and lineage create a tamper-evident audit trail within the signed, retained graph — tamper-evident, not tamper-proof: modification of any retained block is detectable via content addressing and signatures; completeness of the underlying store is not itself checkpointed (retention §6.3 may purge, and unsigned blocks weaken the guarantee, §18.3.1). Every observation, every remix, every decision is traceable through the DAG:
 
--   —Who — `createdBy` on every CMB identifies the agent that produced it.
--   —When — `createdAt` timestamps every CMB with millisecond precision.
+-   —Who — `metadata.createdBy` names the agent, while `metadata.createdByNodeId` binds it to the signing identity.
+-   —When — `metadata.createdTimestamp` records the author-asserted millisecond timestamp.
 -   —What — the 7 CAT7 categories capture the full semantic content of the observation.
--   —Why — `lineage.parents` shows what was directly remixed. `lineage.ancestors` traces the full decision chain.
--   —How — `lineage.method` records the evaluation method (e.g., SVAF-v2).
+-   —Why — `metadata.lineage.parents` shows what was directly remixed. Following the signed parent links traces the full decision chain.
+-   —How — `metadata.lineage.method` records the evaluation method (e.g., SVAF-v2).
 
 Because CMBs are immutable, the audit trail cannot be retroactively altered. A CMB once created is never modified — any action produces a new CMB with lineage pointing back. The complete history is the graph itself.
 
@@ -5568,6 +5921,14 @@ Schema
 
 Scope
 
+[frame-registry.json](/spec/mmp/frame-registry.json)
+
+Machine-readable registry for every core, relay and reserved legacy frame type
+
+[frame-registry.schema.json](/spec/mmp/schema/frame-registry.schema.json)
+
+Schema for the machine-readable frame registry itself
+
 [application.schema.json](/spec/mmp/schema/application.schema.json)
 
 Authenticated opaque application bytes under metadata.application
@@ -5600,13 +5961,26 @@ Content-address fetch response
 
 Lineage-tether attestation
 
+[authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json)
+
+Signed role-grant and role-revoke authority frames
+
+[control-frame.schema.json](/spec/mmp/schema/control-frame.schema.json)
+
+Peer-info, wake-channel, error, ping and pong frames
+
+[relay-frame.schema.json](/spec/mmp/schema/relay-frame.schema.json)
+
+Relay authentication, directory, presence, keepalive and error frames
+
 ### 20.2 Closed core, negotiated extensions
 
 Core objects use `additionalProperties: false`. This is deliberate: a misspelled security field or an unsigned sibling must not be mistaken for a forward-compatible extension. Extension data is carried only in its specified container and only after the extension identifier was negotiated in the authenticated handshake.
 
 -   —A sender MUST NOT emit an unregistered core sibling such as the retired top-level `payload`.
 -   —A receiver MUST NOT silently discard an unknown member inside a signed or authenticated core object and continue as if it had understood the assertion.
--   —A negotiated extension defines its own schema, version, failure behaviour and signed/encrypted scope.
+-   —Structured CMB extension data MUST use `metadata.application`, whose bytes, digest and presence are assertion-bound. Arbitrary metadata siblings are not signed by `mmp-sig-v2.0` and are therefore forbidden.
+-   —A negotiated extension defines its own schema, version, failure behaviour and authenticated scope. New frame types are protected by the negotiated Core Secure channel; CMB application bytes are additionally bound by the record assertion.
 
 ### 20.3 Executable corpus
 
@@ -5616,6 +5990,7 @@ The normative v2.0 value-level vectors are:
 -   [record-signature-v2.json](/spec/mmp/conformance/v2/record-signature-v2.json) — cognition key, assertion identity and Ed25519 signature
 -   [handshake-v2.json](/spec/mmp/conformance/v2/handshake-v2.json) — transcript, proofs, key confirmation and HKDF outputs
 -   [e2e-v2.json](/spec/mmp/conformance/v2/e2e-v2.json) — directional traffic keys, nonces, AAD and ChaChaPoly ciphertext
+-   [examples/v2](/spec/mmp/examples/v2/transport-cmb.json) — signed, schema-valid transport and feedback CMB frames
 
 A conforming implementation MUST reproduce these values without importing a reference runtime. Release CI MUST NOT substitute vectors generated only from its own implementation.
 

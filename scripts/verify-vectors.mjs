@@ -26,14 +26,16 @@ import {
 } from '../conformance/lib.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const read = (name) => JSON.parse(fs.readFileSync(path.join(root, 'conformance', 'v2', name), 'utf8'));
+const artifactRoot = root;
+const read = (name) => JSON.parse(fs.readFileSync(path.join(artifactRoot, 'conformance', 'v2', name), 'utf8'));
+const readExample = (name) => JSON.parse(fs.readFileSync(path.join(artifactRoot, 'examples', 'v2', name), 'utf8'));
 const b64u = (value) => Buffer.from(value, 'base64url');
 const hex = (value) => Buffer.from(value).toString('hex');
-const schema = (name) => JSON.parse(fs.readFileSync(path.join(root, 'schema', name), 'utf8'));
+const schema = (name) => JSON.parse(fs.readFileSync(path.join(artifactRoot, 'schema', name), 'utf8'));
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
-const schemaNames = fs.readdirSync(path.join(root, 'schema')).filter((name) => name.endsWith('.schema.json')).sort();
+const schemaNames = fs.readdirSync(path.join(artifactRoot, 'schema')).filter((name) => name.endsWith('.schema.json')).sort();
 for (const name of schemaNames) {
   ajv.addSchema(schema(name));
 }
@@ -42,8 +44,52 @@ for (const name of schemaNames) {
   assert.ok(ajv.getSchema(id), `${name}: schema must compile`);
 }
 const validateCMB = ajv.getSchema('https://meshcognition.org/spec/mmp/schema/cmb.schema.json');
+const validateCMBFrame = ajv.getSchema('https://meshcognition.org/spec/mmp/schema/cmb-frame.schema.json');
 const validateHandshake = ajv.getSchema('https://meshcognition.org/spec/mmp/schema/handshake.schema.json');
 const validateEncrypted = ajv.getSchema('https://meshcognition.org/spec/mmp/schema/encrypted-cmb-frame.schema.json');
+const validateControl = ajv.getSchema('https://meshcognition.org/spec/mmp/schema/control-frame.schema.json');
+const validateAuthority = ajv.getSchema('https://meshcognition.org/spec/mmp/schema/authority-frame.schema.json');
+const validateRelay = ajv.getSchema('https://meshcognition.org/spec/mmp/schema/relay-frame.schema.json');
+const validateFrameRegistry = ajv.getSchema('https://meshcognition.org/spec/mmp/schema/frame-registry.schema.json');
+
+const registry = JSON.parse(fs.readFileSync(path.join(artifactRoot, 'frame-registry.json'), 'utf8'));
+assert.ok(validateFrameRegistry(registry), `frame registry schema ${JSON.stringify(validateFrameRegistry.errors)}`);
+assert.equal(registry.protocolVersion, '2.0', 'frame registry protocol version');
+assert.equal(new Set(registry.frames.map(({ type }) => type)).size, registry.frames.length, 'frame types must be unique');
+for (const frame of registry.frames) {
+  if (frame.status === 'legacy') {
+    assert.equal(frame.schema, null, `${frame.type}: legacy types do not define a v2 schema`);
+  } else {
+    assert.ok(frame.schema, `${frame.type}: active frame must name a schema`);
+    assert.ok(schemaNames.includes(frame.schema), `${frame.type}: missing ${frame.schema}`);
+  }
+}
+
+const nodeA = '018f47a0-7b21-7abc-8def-111111111111';
+const nodeB = '018f47a0-7b21-7abc-8def-222222222222';
+const wake = { platform: 'apns', token: 'fixture-token', environment: 'development' };
+for (const frame of [
+  { type: 'peer-info', peers: [{ nodeId: nodeA, name: 'fixture-node', wakeChannel: wake, lastSeen: 1786611600000 }] },
+  { type: 'wake-channel', ...wake },
+  { type: 'error', code: 1001, message: 'version mismatch' },
+  { type: 'ping' },
+  { type: 'pong' },
+]) assert.ok(validateControl(frame), `${frame.type}: control schema ${JSON.stringify(validateControl.errors)}`);
+
+const grantBase = { grantee: nodeB, grantedBy: nodeA, grantedAt: 1786611600000, sigAlg: 'ed25519', sig: 'A'.repeat(86) };
+for (const frame of [
+  { type: 'role-grant', grant: { type: 'role-grant', ...grantBase, role: 'validator', granteeKey: 'A'.repeat(43) } },
+  { type: 'role-revoke', grant: { type: 'role-revoke', ...grantBase } },
+]) assert.ok(validateAuthority(frame), `${frame.type}: authority schema ${JSON.stringify(validateAuthority.errors)}`);
+
+for (const frame of [
+  { type: 'relay-auth', nodeId: nodeA, name: 'fixture-node', token: 'fixture-token', wakeChannel: wake },
+  { type: 'relay-peers', peers: [{ nodeId: nodeB, name: 'peer-node', offline: false }] },
+  { type: 'relay-ping' }, { type: 'relay-pong' }, { type: 'relay-reauth' },
+  { type: 'relay-peer-joined', nodeId: nodeB, name: 'peer-node' },
+  { type: 'relay-peer-left', nodeId: nodeB, name: 'peer-node' },
+  { type: 'relay-error', message: 'fixture error' },
+]) assert.ok(validateRelay(frame), `${frame.type}: relay schema ${JSON.stringify(validateRelay.errors)}`);
 
 const app = read('application-v2.json');
 for (const c of app.cases) assert.equal(applicationCommitmentV1(c.application), c.expectedCommitment, c.label);
@@ -69,6 +115,19 @@ assert.notEqual(records.cases[0].expectedAssertionId, records.cases[1].expectedA
 const wrongAddressScheme = structuredClone(records.cases[0].record);
 wrongAddressScheme.metadata.addressScheme = 'unknown-scheme';
 assert.throws(() => signingPayloadV2_0(wrongAddressScheme), /addressScheme/);
+
+for (const name of ['transport-cmb.json', 'feedback-dismissal.json', 'feedback-directive.json']) {
+  const frame = readExample(name);
+  assert.ok(validateCMBFrame(frame), `${name}: frame schema ${JSON.stringify(validateCMBFrame.errors)}`);
+  assert.equal(blockKeyV2(frame.cmb.categories), frame.cmb.metadata.key, `${name}: cognition key`);
+  assert.equal(assertionId(frame.cmb), frame.cmb.metadata.assertionId, `${name}: assertion id`);
+  assert.ok(crypto.verify(
+    null,
+    signingPayloadV2_0(frame.cmb),
+    signingPublic,
+    b64u(frame.cmb.metadata.sig),
+  ), `${name}: signature`);
+}
 
 const hv = read('handshake-v2.json');
 for (const [name, frame] of Object.entries(hv.fixture.frames)) {

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meshcognition.org/spec/mmp/schema/frame-registry.schema.json",
+  "title": "MMP v2.0 Frame Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "protocolVersion", "frames"],
+  "properties": {
+    "$schema": { "const": "https://meshcognition.org/spec/mmp/schema/frame-registry.schema.json" },
+    "protocolVersion": { "const": "2.0" },
+    "frames": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "scope", "layer", "gated", "status", "schema", "fields"],
+        "properties": {
+          "type": { "type": "string", "pattern": "^[a-z][a-z0-9-]{0,63}$" },
+          "scope": { "enum": ["peer", "relay"] },
+          "layer": { "type": "string", "minLength": 1, "maxLength": 32 },
+          "gated": { "type": "string", "minLength": 1, "maxLength": 32 },
+          "status": { "enum": ["core", "transport", "legacy"] },
+          "schema": {
+            "anyOf": [
+              { "type": "string", "pattern": "^[a-z0-9-]+\\.schema\\.json$" },
+              { "type": "null" }
+            ]
+          },
+          "fields": { "type": "string", "minLength": 1, "maxLength": 240 }
+        }
+      }
+    }
+  }
+}

@@ -23,7 +23,7 @@ for the synchronized revision.
 ## What this repository hosts
 
 - **[`spec/`](./spec/)** — the single-page specification (Markdown + HTML), mirrored from the canonical site for history, offline reading and GitHub rendering.
-- **[`schema/`](./schema/)** and **[`conformance/`](./conformance/)** — a mirror of the machine-readable MMP v2.0 contract owned by the website source repository.
+- **[`frame-registry.json`](./frame-registry.json)**, **[`schema/`](./schema/)**, **[`conformance/`](./conformance/)** and **[`examples/`](./examples/)** — a digest-pinned mirror of the machine-readable MMP v2.0 contract owned by the website source repository.
 - **[`scripts/verify-vectors.mjs`](./scripts/verify-vectors.mjs)** — mirrored implementation-neutral verifier for the published byte constructions and negative cases. Run `npm ci && npm test`.
 - **[`extensions/`](./extensions/)** — community extension drafts, edited via pull request. Promoted to core MMP per the §16.5 lifecycle.
 - **[Issues](https://github.com/sym-bot/mesh-memory-protocol/issues)** — public RFC discussion forum for spec changes. File proposals here with `[spec-rfc]` in the title.
@@ -37,8 +37,9 @@ for the synchronized revision.
 | Swift | [`sym-bot/sym-swift`](https://github.com/sym-bot/sym-swift) | Apple-platform implementation |
 | Node.js | [`sym-bot/sym-mesh-channel`](https://github.com/sym-bot/sym-mesh-channel) | MCP channel using the MMP/SYM substrate |
 
-`xmesh-core` is a proprietary conforming cognition runtime. It is tested at the
-public MMP boundary but is not represented as an open reference implementation.
+`xmesh-core` is a proprietary cognition runtime targeting MMP v2.0. Its public
+MMP boundary is the conformance surface; a complete v2.0 result is not claimed
+until it passes the same public corpus. It is not represented as an open reference implementation.
 
 The published specification and artifacts generated from the website source define conformance.
 This mirror makes them convenient to consume; it does not independently define alternative bytes.

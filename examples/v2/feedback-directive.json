@@ -1,0 +1,77 @@
+{
+  "type": "cmb",
+  "protocolVersion": "2.0",
+  "cmb": {
+    "categories": {
+      "focus": {
+        "text": "Frontend framework releases are separate from backend review",
+        "meta": {
+          "key": "28bdff5fc8e5981a7f257cad6a6372aa89e8f9d8b9cd38c8da0c07af615201a6",
+          "parents": []
+        }
+      },
+      "issue": {
+        "text": "Feed signals about frontend tooling are out-of-scope noise here",
+        "meta": {
+          "key": "ddab5bb9ceeb5033d27b578a75b31381b2a112b75c5cc49795e69f4f2953e88e",
+          "parents": []
+        }
+      },
+      "intent": {
+        "text": "Distinguish backend runtime signals from frontend tooling",
+        "meta": {
+          "key": "9f0a01c0d7c81c2ce036c16c803be1601e9a3d5a3c3b04414fcf2d1c36a5e802",
+          "parents": []
+        }
+      },
+      "motivation": {
+        "text": "Prevent wasted analysis outside the mesh scope",
+        "meta": {
+          "key": "c7493654f1c92c147e83856b431b2822acccc55a7afbf9ac86295205d7669fb7",
+          "parents": []
+        }
+      },
+      "commitment": {
+        "text": "Standing directive: apply this scope to future feed analysis",
+        "meta": {
+          "key": "a0909abb4996c4869e27206d5151d4d1b69b0164fd0062f50f459b859cff7121",
+          "parents": []
+        }
+      },
+      "perspective": {
+        "text": "operator, mesh steward",
+        "meta": {
+          "key": "b540ebef88dfdbf1d7e13d931dedbdf67b5b4592100ed3dd2f15bded92671182",
+          "parents": []
+        }
+      },
+      "mood": {
+        "text": "clarifying",
+        "meta": {
+          "key": "9bb093f516f54cc64fdd8abd2c0958fce700fe61105eba938b5207c4b73eac2e",
+          "parents": []
+        },
+        "valence": 0.1,
+        "arousal": 0.2
+      }
+    },
+    "metadata": {
+      "key": "cmb-809112897b32a2245ccfebe36def98f3c08a336c0d804beca9ff45bdaaaed80c",
+      "addressScheme": "mmp-cmb-merkle-v2",
+      "signatureSuite": "mmp-sig-v2.0",
+      "createdByNodeId": "018f47a0-7b21-7abc-8def-bbbbbbbbbbbb",
+      "createdBy": "validator-node",
+      "createdTimestamp": 1775485630000,
+      "room": "spec-examples",
+      "to": null,
+      "lineage": {
+        "parents": [],
+        "method": "operator-directive"
+      },
+      "application": null,
+      "assertionId": "asrt-6cce78098e171e3b33e4ced3a055180d4aa0d43eb89c57dd6ab698ffd809a25e",
+      "sigAlg": "ed25519",
+      "sig": "p9O9f-SNSj2D7vnyB4PxILcHXlJ4dJkrL-N7CsUaLUS3rh2E9M0SLdbK9VStFqR0-evFW8QH6jNnglY0iqlvBg"
+    }
+  }
+}

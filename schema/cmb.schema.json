@@ -65,11 +65,6 @@
           "type": "string",
           "pattern": "^[A-Za-z0-9_-]{86}$",
           "description": "Unpadded base64url Ed25519 signature over mmp-sig-v2.0."
-        },
-        "extensions": {
-          "type": "object",
-          "description": "Negotiated extension data. Core readers ignore unsupported extension members only when their extension was negotiated.",
-          "additionalProperties": true
         }
       }
     }

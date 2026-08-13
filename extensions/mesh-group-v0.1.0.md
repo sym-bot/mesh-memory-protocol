@@ -1,3 +1,9 @@
+---
+layout: ../../../../layouts/SpecMdLayout.astro
+title: 'MMP Extension: Mesh Group — Mesh Memory Protocol'
+description: 'Generic transient subgroup primitive for the Mesh Memory Protocol — application-layer convention formalising MMP §5.8 mesh groups.'
+---
+
 # MMP Extension: Mesh Group
 
 **Generic Transient Subgroup Primitive for the Mesh Memory Protocol**
@@ -8,7 +14,7 @@
 | Status | Draft — Candidate Extension |
 | Date | 15 April 2026 |
 | Author | Hongwei Xu &lt;hongwei@sym.bot&gt;, SYM.BOT |
-| Extends | [MMP v1.0](/spec/mmp) — formalises §5.8 (Mesh Groups) without changes to the wire format |
+| Extends | [MMP v2.0](/spec/mmp) — formalises §5.8 (Mesh Groups) without changes to the core wire format |
 | Canonical URL | https://meshcognition.org/spec/mmp/extensions/mesh-group |
 | Licence | CC BY 4.0 (specification text) |
 
@@ -16,7 +22,7 @@
 
 ## Status
 
-This document is a **Draft Candidate Extension**. It defines an application-layer convention over MMP v1.0; it does not change the MMP wire format and does not require an MMP version bump.
+This document is a **Draft Candidate Extension**. It defines an application-layer convention over MMP v2.0; it does not change the core MMP wire format and does not require an MMP version bump.
 
 Promotion to **Published** status in the MMP §16 Extensions registry requires a second independent implementer to ship interoperable software per the criteria in §10. Until promotion, this document is published for community visibility and review; it is not yet a registered MMP §16 Extension.
 
@@ -28,7 +34,7 @@ This status discipline preserves the SYMBit whitepaper §4.1 commitment: SYMBit 
 
 This extension defines a generic application-layer convention for a **mesh group** — a small set of MMP nodes that have explicitly joined a shared, named group within the broader mesh — and the canonical CMB conventions members use to broadcast state to the group.
 
-The convention does not change MMP wire format. CMBs remain MMP v1.0 CMBs. This convention specifies how members agree on group identity, how they discover each other, how they tag CMBs as group-scoped, and how they bound group lifetime.
+The convention does not change the core MMP wire format. CMBs remain schema-valid, signed MMP v2.0 records. This convention specifies how members agree on group identity, discover each other, bind group context inside authenticated application bytes, and bound group lifetime.
 
 The convention is the protocol primitive that real-world co-located group experiences are built on. The first use case (§9) is MeloTune's "Mood Room" feature; the convention is intentionally generic so that other applications — group meditation, collaborative work sessions, multiplayer co-located experiences — can adopt it and interoperate at the protocol layer.
 
@@ -36,17 +42,17 @@ The convention is the protocol primitive that real-world co-located group experi
 
 ## Introduction
 
-MMP v1.0 §5.8 (Mesh Groups) names mesh groups as a structural concept but does not specify how a group is identified, discovered, or membership-managed. Implementers have adopted ad-hoc conventions, which has prevented cross-application interoperability.
+MMP v2.0 §5.8 (Mesh Groups) names mesh groups as a structural concept but does not specify how a group is identified, discovered, or membership-managed. Implementers have adopted ad-hoc conventions, which has prevented cross-application interoperability.
 
 This extension formalises the conventions that §5.8 leaves underspecified:
 
-- A canonical `group_id` carried in CMB metadata.
+- A canonical `groupId` committed inside `metadata.application` bytes.
 - A Bonjour service type for LAN discovery and a relay channel pattern for WAN.
 - A focus-prefix convention so multiple applications can share group infrastructure without colliding on state semantics.
 - A receiver-side filtering rule for group-scoped CMBs.
 - A membership lifecycle (join, heartbeat, leave, expire) covered by short, optional CMBs.
 
-Nothing in this extension changes MMP wire format. Implementers conforming to MMP v1.0 already have everything they need at the transport layer; this document specifies the application-layer agreement that lets two MMP implementations form an interoperable group.
+Nothing in this extension changes the MMP v2.0 core wire format. The application payload is covered by the record assertion through §8.8&rsquo;s application commitment, so a relay or peer cannot substitute group context without invalidating the signature.
 
 ---
 
@@ -54,7 +60,7 @@ Nothing in this extension changes MMP wire format. Implementers conforming to MM
 
 ### 1.1 The §5.8 Gap
 
-MMP v1.0 §5.8 introduces "mesh groups" but treats them as an opaque concept. Two implementers reading §5.8 cannot independently produce code that joins each other's groups. The §5.8 text describes the semantic intent without specifying:
+MMP v2.0 §5.8 introduces "mesh groups" but treats them as an opaque concept. Two implementers reading §5.8 cannot independently produce code that joins each other's groups. The §5.8 text describes the semantic intent without specifying:
 
 - The wire format of the group identifier.
 - The discovery mechanism for finding co-members.
@@ -82,10 +88,10 @@ The mesh group is **not** a long-lived addressable entity. It does not have a pe
 | Term | Definition |
 |---|---|
 | mesh group | A named, transient subgroup of the broader MMP mesh whose members have explicitly joined and are mutually discoverable. |
-| `group_id` | Stable string identifier for a mesh group. UUIDv4 RECOMMENDED. Carried in CMB metadata. |
+| `groupId` | Stable UUID identifier for a mesh group, carried in authenticated `metadata.application` bytes. |
 | group token | OPTIONAL bearer token shared out-of-band among joiners; REQUIRED for WAN relay-mediated groups, OPTIONAL for Bonjour-LAN groups. |
 | member | An MMP node with a joined session in the group. Identified by its standard MMP identity (Ed25519 public key per MMP §3.2). |
-| group-scoped CMB | A CMB whose `meta.group_id` field equals the group's `group_id`; receivers MAY filter on this. |
+| group-scoped CMB | A CMB whose decoded, digest-verified application object names this extension and the group&rsquo;s `groupId`. |
 | lifetime | A group exists from the moment its first member joins until either the last member leaves OR the optional `expires_at` timestamp passes. |
 
 This document uses [RFC 2119](https://datatracker.ietf.org/doc/html/rfc2119) keywords (MUST, SHOULD, MAY) as written in capital letters.
@@ -119,7 +125,7 @@ Members MUST advertise the group via Bonjour service type `_mmp-mesh-group._tcp`
 ```
 group_id        = <UUIDv4>
 group_label     = <optional, ≤64 bytes>
-mmp_version     = 0.2.2
+mmp_version     = 2.0
 member_identity = <Ed25519 public-key fingerprint, first 16 hex chars>
 ```
 
@@ -130,7 +136,7 @@ A node joining the group browses for `_mmp-mesh-group._tcp`, filters by matching
 ```
 group_id        = 550e8400-e29b-41d4-a716-446655440000
 group_label     = Living Room Sunday
-mmp_version     = 0.2.2
+mmp_version     = 2.0
 member_identity = a1b2c3d4e5f6a7b8
 ```
 
@@ -146,11 +152,11 @@ When a relay is used, members register membership with the SYM relay by:
 2. Presenting `group_token` as a bearer credential in the connection handshake (`Authorization: Bearer <group_token>` header).
 3. Subscribing to the per-group channel named by `group_id`.
 
-The relay enforces token-based authorisation and forwards group-scoped CMBs (those whose `meta.group_id` matches the channel) only among members holding a valid token for that `group_id`.
+The relay enforces token-based authorisation and forwards opaque peer frames only among members holding a valid token for that `group_id`. Endpoints, not the relay, decrypt and verify that the signed application bytes name the same group.
 
 Members SHOULD reconnect on disconnection with exponential backoff (default: 1 second initial, 60 seconds maximum).
 
-The relay protocol's wire format is anchored in MMP v1.0 §4 transport conventions; a normative public-spec reference will be added at promotion time per §10.
+The relay protocol's wire format is anchored in MMP v2.0 §4 transport conventions; a normative public-spec reference will be added at promotion time per §10.
 
 ---
 
@@ -158,22 +164,24 @@ The relay protocol's wire format is anchored in MMP v1.0 §4 transport conventio
 
 ### 5.1 Group-Scoped CMBs
 
-A member's CMB is "group-scoped" when its `meta.group_id` field equals the group's `group_id`.
+A member's CMB is "group-scoped" when its decoded `metadata.application` bytes are JSON containing
+`{"extension":"mesh-group-v0.1.0","groupId":"<UUID>"}` and the application byte length, digest and
+data verify under §8.7–§8.8. The group object MAY add `event`, `groupLabel` and application-owned state.
 
 Members MAY emit:
 
-- **Group-scoped CMBs** — `meta.group_id` set, intended for delivery to other group members.
-- **Un-scoped CMBs** — no `meta.group_id`, intended for the broader mesh per existing MMP rules.
+- **Group-scoped CMBs** — authenticated application bytes name this extension and a `groupId`.
+- **Un-scoped CMBs** — application bytes do not name this extension, and ordinary MMP routing applies.
 
-A member MAY filter inbound CMBs by `meta.group_id` to restrict processing to group-scoped traffic. Receivers are NOT REQUIRED to filter; this convention only specifies the tagging semantics.
+A member MAY filter inbound CMBs by the verified application `groupId`. It MUST verify the application digest and record signature before acting on that value. Receivers are not required to support this candidate convention.
 
 ### 5.2 Application Focus-Prefix Convention
 
-For inter-application interoperability, group members MAY use a CMB `focus` field prefix to indicate the kind of group state being broadcast. The prefix format is `<app>:<state-type>`. Examples:
+For inter-application interoperability, group members MAY use a `categories.focus.text` prefix to indicate the kind of group state being broadcast. The prefix format is `<app>:<state-type>`. Examples:
 
-- MeloTune Mood Room: `focus: "melotune-room:state"`, `"melotune-room:peer"`
-- (hypothetical) Group meditation: `focus: "meditation:phase"`
-- (hypothetical) Collaborative work: `focus: "cowork:status"`
+- MeloTune Mood Room: `categories.focus.text: "melotune-room:state"`, `"melotune-room:peer"`
+- (hypothetical) Group meditation: `categories.focus.text: "meditation:phase"`
+- (hypothetical) Collaborative work: `categories.focus.text: "cowork:status"`
 
 This is a RECOMMENDED convention, not a requirement. Applications MAY use any focus content. Inter-application namespace registration is deferred to a future version of this extension (§11).
 
@@ -183,9 +191,9 @@ This is a RECOMMENDED convention, not a requirement. Applications MAY use any fo
 
 | Event | Behaviour |
 |---|---|
-| Join | Member begins advertising via Bonjour AND/OR registering with relay. Member SHOULD emit one group-scoped CMB with `focus: "mesh-group:join"` and `mood: { valence: 0, arousal: 0 }` (neutral presence). |
+| Join | Member begins advertising via Bonjour AND/OR registering with relay. Member SHOULD emit one group-scoped CMB with `categories.focus.text: "mesh-group:join"`, application `event: "join"`, and neutral mood. |
 | Heartbeat | Member SHOULD re-advertise Bonjour at default mDNS cadence. No required heartbeat CMB; absence-of-CMB is detected at the application layer per receiver policy. |
-| Leave | Member ceases Bonjour advertisement and unregisters from relay. Member SHOULD emit one group-scoped CMB with `focus: "mesh-group:leave"` and `mood: { valence: 0, arousal: 0 }`. |
+| Leave | Member ceases Bonjour advertisement and unregisters from relay. Member SHOULD emit one group-scoped CMB with `categories.focus.text: "mesh-group:leave"`, application `event: "leave"`, and neutral mood. |
 | Expire | At `expires_at` if set, members SHOULD treat the group as terminated and stop emitting group-scoped CMBs. Receivers SHOULD discard group-scoped CMBs received after `expires_at`. |
 
 The recommended `mesh-group:join` and `mesh-group:leave` CMBs are convention-level; applications MAY detect membership changes via Bonjour churn alone.
@@ -207,7 +215,7 @@ A node MAY accept group-scoped CMBs from unknown senders if the application cont
 
 | Failure | RECOMMENDED Behaviour |
 |---|---|
-| `expires_at` passes during active broadcasts | Members SHOULD stop emitting group-scoped CMBs at the timestamp; receivers SHOULD discard group-scoped CMBs received with `meta.received_at > expires_at`. Active media playback or application sessions are NOT terminated by this specification — applications decide their own response. |
+| `expires_at` passes during active broadcasts | Members SHOULD stop emitting group-scoped CMBs at the timestamp; receivers compare it with their own authenticated-session receive clock, never an author-asserted timestamp. Active media playback or application sessions are not terminated by this specification — applications decide their own response. |
 | `group_token` rejected by relay mid-session | Member SHOULD treat as a group-leave event and surface the failure to the application layer. Reconnection policy is application-defined. |
 | Bonjour advertisement fails (mDNS error, sandbox rejection) | Member MAY fall back to relay-only registration if `group_token` is available. If neither path works, the member is effectively isolated; the failure SHOULD be surfaced to the application layer rather than silently absorbed. |
 | Two members generate the same `group_id` independently | UUIDv4 collision probability is negligible; if observed, the second-joining member SHOULD detect via Bonjour (existing TXT record with the same `group_id` from a different `member_identity`) and refuse to join. |
@@ -225,7 +233,7 @@ MeloTune's "Mood Room" is the first use case of this extension. The MeloTune pro
 2. Sets `group_label` to the room's user-facing name (e.g., "Living Room Sunday").
 3. Sets `expires_at` to 24 hours after creation (configurable in MeloTune settings).
 4. Distributes `group_token` to invited listeners via the in-app share sheet (Bonjour-LAN rooms can omit token; relay-WAN rooms require it).
-5. Each MeloTune instance joins the group, advertises via Bonjour `_mmp-mesh-group._tcp` and registers with the relay, and emits group-scoped CMBs with `focus: "melotune-room:state"` carrying the listener's current music-agent state (mood, genre, current track).
+5. Each MeloTune instance joins the group, advertises via Bonjour `_mmp-mesh-group._tcp` and registers with the relay, and emits group-scoped CMBs with `categories.focus.text: "melotune-room:state"` plus authenticated application state.
 6. Each MeloTune instance receives the other listeners' `melotune-room:state` CMBs and feeds them into MeloTune's Personal Arousal Function for music curation.
 
 The MeloTune-product naming, UX, and music semantics are MeloTune-specific and are NOT part of this extension. Other applications adopting this extension would use their own focus prefixes and their own state semantics.
@@ -265,7 +273,7 @@ Items deferred past initial draft:
 
 - **Group token distribution is out-of-band.** Compromise of the token allows a third party to join the group and observe or inject CMBs. v0.1.0 does not protect against this; v0.2.0+ adds capability tokens.
 - **Bonjour discovery is unauthenticated.** Any node on the local network can browse `_mmp-mesh-group._tcp` and learn `group_id` values. Confidential group identity requires the WAN-relay path with `group_token`.
-- **CMB content is not encrypted at this layer.** Existing MMP transport-layer encryption (per MMP v1.0 §3.4) applies between adjacent peers; end-to-end encryption among group members requires the group key agreement deferred to v0.2.0+.
+- **CMB content is not encrypted at this layer.** Existing MMP transport security (per MMP §18.2) applies between adjacent peers; end-to-end encryption among group members requires the group key agreement deferred to v0.2.0+.
 - **No per-member access control.** All members see all group-scoped CMBs in v0.1.0. Per-member ACLs are out of scope.
 
 These limitations are documented openly because this is a Draft Candidate Extension. They will be addressed in subsequent versions before this extension is recommended for safety-critical or high-confidentiality deployments.
@@ -276,9 +284,9 @@ These limitations are documented openly because this is a Draft Candidate Extens
 
 A conforming implementation MUST:
 
-1. Support `group_id` as a UUIDv4 string carried in CMB `meta`.
+1. Support `groupId` as a UUID string inside digest-verified, assertion-bound `metadata.application` bytes.
 2. Advertise group membership via Bonjour service type `_mmp-mesh-group._tcp` with the TXT record format in §4.1.
-3. Filter group-scoped CMBs by matching `meta.group_id` if filtering is performed at all.
+3. Verify the CMB and application commitment before filtering group-scoped CMBs by `groupId`.
 4. Honour `expires_at` if set: cease emitting group-scoped CMBs after the timestamp; discard inbound group-scoped CMBs received after the timestamp.
 
 A conforming implementation SHOULD:
@@ -304,7 +312,7 @@ A conforming implementation MAY:
 
 ## 15. References
 
-1. [MMP v1.0 — Mesh Memory Protocol Specification](/spec/mmp). Particularly §3 (Identity), §4 (Transport), §5.8 (Mesh Groups), §16 (Extensions).
+1. [MMP v2.0 — Mesh Memory Protocol Specification](/spec/mmp). Particularly §3 (Identity), §4 (Transport), §5.8 (Mesh Groups), §8.8 (record assertions), and §16 (Extensions).
 2. [RFC 2119 — Key words for use in RFCs to Indicate Requirement Levels](https://datatracker.ietf.org/doc/html/rfc2119).
 4. [RFC 6335 — IANA Procedures for Service Name and Transport Protocol Port Number Registry](https://datatracker.ietf.org/doc/html/rfc6335). Cited in §11 for the IANA service-type registration future-work item.
 5. Xu, H. (2026). *Symbolic-Vector Attention Fusion for Collective Intelligence.* arXiv:[2604.03955](https://arxiv.org/abs/2604.03955) [cs.MA, cs.AI]. The cognitive-coupling layer that consumes CMBs delivered via this convention.

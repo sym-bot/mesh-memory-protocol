@@ -1,0 +1,93 @@
+{
+  "type": "cmb",
+  "protocolVersion": "2.0",
+  "cmb": {
+    "categories": {
+      "focus": {
+        "text": "Dismissed: frontend framework release flagged as relevant",
+        "meta": {
+          "key": "1098110d99fd82e060663f47b3a688be3d1f71f0d853f84cbc88faeb20846a8c",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        }
+      },
+      "issue": {
+        "text": "Dismissal reasoning: frontend tooling is outside this mesh review scope",
+        "meta": {
+          "key": "7335845db5b6d18fec3d4032d13e7bfe9088efa446a7c59fdf432934bcde35a8",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        }
+      },
+      "intent": {
+        "text": "Record the operator dismissal as evidence, not as an unsigned command",
+        "meta": {
+          "key": "abbecadc34e8a0afa5d2f252ae1ccb182b2fc88fdffc66808e938dbaccea2532",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        }
+      },
+      "motivation": {
+        "text": "Prevent wasted analysis on out-of-scope signals",
+        "meta": {
+          "key": "18df2082a9e1fe1ce597e0f7b4ae21d3c07458ef7c8af932a70e6299cf41f495",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        }
+      },
+      "commitment": {
+        "text": "Dismissed cmb-2020202020202020202020202020202020202020202020202020202020202020: framework-release analysis",
+        "meta": {
+          "key": "346b26a61d9b10bd960484f81634026966b190bdf60f5b217a81d1170250c0a2",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        }
+      },
+      "perspective": {
+        "text": "operator, via dashboard",
+        "meta": {
+          "key": "81927cfe85def1e8b208099e0322cac37311ea2a0191779a39494ec9d20e4f5b",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        }
+      },
+      "mood": {
+        "text": "corrective",
+        "meta": {
+          "key": "38d9fed8e85c9b3ea9a32a89593b771e1bc3cd7a8b774996efc2aa85d222f9fb",
+          "parents": [
+            "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+          ]
+        },
+        "valence": -0.1,
+        "arousal": 0.2
+      }
+    },
+    "metadata": {
+      "key": "cmb-cbd2d06f46844b9623ca888664af301fd0adf09048acbb345f401a8ca39302f3",
+      "addressScheme": "mmp-cmb-merkle-v2",
+      "signatureSuite": "mmp-sig-v2.0",
+      "createdByNodeId": "018f47a0-7b21-7abc-8def-bbbbbbbbbbbb",
+      "createdBy": "validator-node",
+      "createdTimestamp": 1775485628563,
+      "room": "spec-examples",
+      "to": null,
+      "lineage": {
+        "parents": [
+          "cmb-2020202020202020202020202020202020202020202020202020202020202020"
+        ],
+        "method": "operator-dismissal"
+      },
+      "application": null,
+      "assertionId": "asrt-548a512089399362b3b22985560899bfd1aae76a3d26cb2e97f11202baa4d146",
+      "sigAlg": "ed25519",
+      "sig": "b4Ddr8esa3i1V7_l9jC--g93A2dGXqSpjyFZg6LDbVE04vkULizzB4kwSgnmgSCmQphh6cReXDq-sXK-5TGoAA"
+    }
+  }
+}
