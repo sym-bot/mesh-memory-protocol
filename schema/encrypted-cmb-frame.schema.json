@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://meshcognition.org/spec/mmp/schema/encrypted-cmb-frame.schema.json",
+  "title": "MMP v2.0 Core Secure encrypted CMB transport envelope",
+  "type": "object",
+  "required": ["type", "protocolVersion", "suite", "sessionId", "sequence", "direction", "metadata", "sealed"],
+  "additionalProperties": false,
+  "properties": {
+    "type": { "const": "cmb-encrypted" },
+    "protocolVersion": { "const": "2.0" },
+    "suite": { "const": "X25519-HKDF-SHA256-ChaCha20-Poly1305" },
+    "sessionId": { "type": "string", "pattern": "^[0-9a-f]{32}$" },
+    "sequence": { "type": "string", "pattern": "^(0|[1-9][0-9]*)$" },
+    "direction": { "enum": ["client-to-server", "server-to-client"] },
+    "metadata": {
+      "type": "object",
+      "description": "Clear routing and verification metadata. metadata.application omits data; all members are AEAD-bound and record-signed.",
+      "required": ["key", "assertionId", "createdByNodeId", "room", "to"],
+      "properties": {
+        "key": { "type": "string", "pattern": "^cmb-[0-9a-f]{64}$" },
+        "assertionId": { "type": "string", "pattern": "^asrt-[0-9a-f]{64}$" },
+        "createdByNodeId": { "type": "string", "format": "uuid" },
+        "room": { "type": "string", "minLength": 1 },
+        "to": { "anyOf": [{ "type": "string", "format": "uuid" }, { "type": "null" }] }
+      }
+    },
+    "sealed": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_-]+$",
+      "description": "Unpadded base64url ciphertext concatenated with the 16-byte Poly1305 tag."
+    }
+  }
+}

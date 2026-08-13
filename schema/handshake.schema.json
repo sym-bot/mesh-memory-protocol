@@ -1,58 +1,105 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "required": [
-    "type",
-    "nodeId",
-    "name",
-    "version",
-    "publicKey"
+  "$id": "https://meshcognition.org/spec/mmp/schema/handshake.schema.json",
+  "title": "MMP v2.0 authenticated handshake frames",
+  "oneOf": [
+    { "$ref": "#/$defs/clientHello" },
+    { "$ref": "#/$defs/serverHello" },
+    { "$ref": "#/$defs/clientFinish" }
   ],
-  "additionalProperties": true,
-  "properties": {
-    "type": {
-      "const": "handshake"
-    },
-    "nodeId": {
-      "type": "string",
-      "format": "uuid"
-    },
-    "name": {
-      "type": "string",
-      "minLength": 1,
-      "maxLength": 64
-    },
-    "version": {
-      "type": "string",
-      "pattern": "^\\d+\\.\\d+\\.\\d+$"
-    },
-    "publicKey": {
-      "type": "string",
-      "description": "base64url raw Ed25519 identity key (32 bytes); verifies this node's CMB signatures (\u00a718.3.1)"
-    },
-    "e2ePublicKey": {
-      "type": "string",
-      "description": "base64 X25519 key for end-to-end field encryption (\u00a718.2.1)"
-    },
-    "group": {
-      "type": "string",
-      "description": "The node's mesh group; the \u00a75.8 isolation boundary. Absent \u21d2 'default' (\u00a75.2)."
-    },
-    "lifecycleRole": {
-      "enum": [
-        "participant",
-        "validator",
-        "anchor"
+  "$defs": {
+    "nodeOffer": {
+      "type": "object",
+      "required": [
+        "protocolVersion", "room", "nodeId", "name", "identityPublicKey",
+        "e2ePublicKey", "nonce", "implementation", "extensions"
       ],
-      "description": "Senders MUST include it (\u00a75.2); receivers treat absence as participant. Self-declared: an elevated role is honored only with a signed role-grant (\u00a76.6)."
+      "properties": {
+        "protocolVersion": { "const": "2.0" },
+        "room": { "type": "string", "minLength": 1 },
+        "nodeId": { "type": "string", "format": "uuid" },
+        "name": { "type": "string", "minLength": 1 },
+        "identityPublicKey": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },
+        "e2ePublicKey": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },
+        "nonce": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },
+        "implementation": {
+          "type": "object",
+          "required": ["name", "version"],
+          "additionalProperties": false,
+          "properties": {
+            "name": { "type": "string", "minLength": 1 },
+            "version": { "type": "string", "minLength": 1 }
+          }
+        },
+        "extensions": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" }
+        }
+      }
     },
-    "extensions": {
-      "type": "array",
-      "items": {
-        "type": "string"
+    "clientHello": {
+      "allOf": [
+        { "$ref": "#/$defs/nodeOffer" },
+        {
+          "type": "object",
+          "required": ["type"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "client-hello" },
+            "protocolVersion": true,
+            "room": true,
+            "nodeId": true,
+            "name": true,
+            "identityPublicKey": true,
+            "e2ePublicKey": true,
+            "nonce": true,
+            "implementation": true,
+            "extensions": true
+          }
+        }
+      ]
+    },
+    "serverHello": {
+      "allOf": [
+        { "$ref": "#/$defs/nodeOffer" },
+        {
+          "type": "object",
+          "required": ["type", "clientNonce", "selectedExtensions", "proof", "keyConfirmation"],
+          "additionalProperties": false,
+          "properties": {
+            "type": { "const": "server-hello" },
+            "protocolVersion": true,
+            "room": true,
+            "nodeId": true,
+            "name": true,
+            "identityPublicKey": true,
+            "e2ePublicKey": true,
+            "nonce": true,
+            "implementation": true,
+            "extensions": true,
+            "clientNonce": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },
+            "selectedExtensions": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$" }
+            },
+            "proof": { "type": "string", "pattern": "^[A-Za-z0-9_-]{86}$" },
+            "keyConfirmation": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" }
+          }
+        }
+      ]
+    },
+    "clientFinish": {
+      "type": "object",
+      "required": ["type", "transcriptHash", "proof", "keyConfirmation"],
+      "additionalProperties": false,
+      "properties": {
+        "type": { "const": "client-finish" },
+        "transcriptHash": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+        "proof": { "type": "string", "pattern": "^[A-Za-z0-9_-]{86}$" },
+        "keyConfirmation": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" }
       }
     }
-  },
-  "$id": "https://meshcognition.org/spec/mmp/schema/handshake.schema.json",
-  "title": "MMP handshake frame (\u00a720.1)"
+  }
 }
