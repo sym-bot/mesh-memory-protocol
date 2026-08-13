@@ -3163,6 +3163,11 @@ The protected plaintext contains <code class="text-purple-300/80">categories</co
       receiver reconstructs the logical two-section record and follows &sect;8.8.5 verification order.
       Exact outputs are published in the
 <a href="/spec/mmp/conformance/v2/e2e-v2.json" class="text-purple-400 hover:text-purple-300">E2E vector</a>.
+</p> <p class="mb-6 text-sm">
+When <code class="text-purple-300/80">metadata.application</code> is null, the protected plaintext
+<span class="text-red-400 font-mono text-xs">MUST</span> omit <code class="text-purple-300/80">applicationData</code> entirely. A present application
+      whose decoded data is zero bytes instead carries <code class="text-purple-300/80">applicationData: ""</code>.
+      The two states are distinct and <span class="text-red-400 font-mono text-xs">MUST NOT</span> be collapsed. Both byte shapes are pinned by the E2E vector.
 </p> </section> <section> <h3 class="font-display text-base text-white/90 mb-3">18.3 Node Identity &amp; Authentication</h3> <p class="mb-4 text-sm">
 Node identity is a UUID bound to an Ed25519 key through the authenticated transcript in
       &sect;5.2. An X25519 session key is separately generated but proven in the same transcript.

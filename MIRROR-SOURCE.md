@@ -6,7 +6,7 @@ This repository is a manually synchronized public mirror of the normative MMP so
 Current synchronization source for this branch:
 
 - source branch: `main`
-- source commit: `ed466501859d03c26d036d3eb931f914a3ef92d3`
-- accepted source PR: [sym-bot/meshcognition-website#15](https://github.com/sym-bot/meshcognition-website/pull/15)
+- source commit: `94022a2fcc9bf938ff101d50bf5df4f64387b58d`
+- accepted source PR: [sym-bot/meshcognition-website#16](https://github.com/sym-bot/meshcognition-website/pull/16)
 
 Differences are resolved from source to mirror, never from mirror to source.
