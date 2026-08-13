@@ -33,7 +33,7 @@
         "key": { "type": "string", "pattern": "^cmb-[0-9a-f]{64}$" },
         "addressScheme": { "const": "mmp-cmb-merkle-v2" },
         "assertionId": { "type": "string", "pattern": "^asrt-[0-9a-f]{64}$" },
-        "signatureSuite": { "const": "mmp-sig-v2.1" },
+        "signatureSuite": { "const": "mmp-sig-v2.0" },
         "createdByNodeId": { "type": "string", "format": "uuid" },
         "createdBy": {
           "type": "string",
@@ -64,7 +64,7 @@
         "sig": {
           "type": "string",
           "pattern": "^[A-Za-z0-9_-]{86}$",
-          "description": "Unpadded base64url Ed25519 signature over mmp-sig-v2.1."
+          "description": "Unpadded base64url Ed25519 signature over mmp-sig-v2.0."
         },
         "extensions": {
           "type": "object",

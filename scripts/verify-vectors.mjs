@@ -21,7 +21,7 @@ import {
   requireNextSequence,
   rawPublicKey,
   sha256,
-  signingPayloadV2_1,
+  signingPayloadV2_0,
   x25519PrivateKey,
 } from '../conformance/lib.mjs';
 
@@ -59,7 +59,7 @@ for (const c of records.cases) {
   assert.ok(validateCMB(c.record), `${c.label}: schema ${JSON.stringify(validateCMB.errors)}`);
   assert.equal(blockKeyV2(c.record.categories), c.record.metadata.key, `${c.label}: cognition key`);
   assert.equal(categoryParentsCommitment(c.record.categories), c.expectedCategoryParentsCommitment, `${c.label}: category parents`);
-  const payload = signingPayloadV2_1(c.record);
+  const payload = signingPayloadV2_0(c.record);
   assert.equal(hex(payload), c.expectedSigningPayloadHex, `${c.label}: payload`);
   assert.equal(assertionId(c.record), c.expectedAssertionId, `${c.label}: assertion id`);
   assert.ok(crypto.verify(null, payload, signingPublic, b64u(c.expectedSignature)), `${c.label}: signature`);
@@ -68,7 +68,7 @@ assert.equal(records.cases[0].record.metadata.key, records.cases[1].record.metad
 assert.notEqual(records.cases[0].expectedAssertionId, records.cases[1].expectedAssertionId, 'different application must not dedupe as one assertion');
 const wrongAddressScheme = structuredClone(records.cases[0].record);
 wrongAddressScheme.metadata.addressScheme = 'unknown-scheme';
-assert.throws(() => signingPayloadV2_1(wrongAddressScheme), /addressScheme/);
+assert.throws(() => signingPayloadV2_0(wrongAddressScheme), /addressScheme/);
 
 const hv = read('handshake-v2.json');
 for (const [name, frame] of Object.entries(hv.fixture.frames)) {

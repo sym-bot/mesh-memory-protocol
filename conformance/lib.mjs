@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 
 export const PROTOCOL_VERSION = '2.0';
-export const SIGNATURE_SUITE = 'mmp-sig-v2.1';
+export const SIGNATURE_SUITE = 'mmp-sig-v2.0';
 export const ADDRESS_SCHEME = 'mmp-cmb-merkle-v2';
 export const CAT7 = ['focus', 'issue', 'intent', 'motivation', 'commitment', 'perspective', 'mood'];
 
@@ -101,14 +101,14 @@ export function applicationCommitmentV1(application) {
   ]));
 }
 
-export function signingPayloadV2_1(record) {
+export function signingPayloadV2_0(record) {
   const m = record?.metadata;
   if (!m) throw new Error('metadata is required');
   if (m.signatureSuite !== SIGNATURE_SUITE) throw new Error(`signatureSuite must be ${SIGNATURE_SUITE}`);
   if (m.addressScheme !== ADDRESS_SCHEME) throw new Error(`addressScheme must be ${ADDRESS_SCHEME}`);
   const parents = sortedBytewise(m.lineage?.parents ?? []);
   return Buffer.concat([
-    Buffer.from('mmp-sig-v2.1\n', 'utf8'),
+    Buffer.from('mmp-sig-v2.0\n', 'utf8'),
     lp(PROTOCOL_VERSION),
     lp(ADDRESS_SCHEME),
     lp(m.key),
@@ -125,7 +125,7 @@ export function signingPayloadV2_1(record) {
 }
 
 export function assertionId(record) {
-  return `asrt-${sha256Hex(signingPayloadV2_1(record))}`;
+  return `asrt-${sha256Hex(signingPayloadV2_0(record))}`;
 }
 
 export function handshakeTranscriptV2(h) {

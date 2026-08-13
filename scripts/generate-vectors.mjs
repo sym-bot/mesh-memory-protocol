@@ -20,7 +20,7 @@ import {
   keyConfirmation,
   rawPublicKey,
   sha256,
-  signingPayloadV2_1,
+  signingPayloadV2_0,
   x25519PrivateKey,
 } from '../conformance/lib.mjs';
 
@@ -103,7 +103,7 @@ const records = [
 ];
 
 const signatureCases = records.map(({ label, record }) => {
-  const payload = signingPayloadV2_1(record);
+  const payload = signingPayloadV2_0(record);
   const id = assertionId(record);
   record.metadata.assertionId = id;
   const signature = b64u(crypto.sign(null, payload, signingPrivate));
