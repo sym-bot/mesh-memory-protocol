@@ -54,5 +54,37 @@
       "aadHex": "6d6d702d616561642d6161642d76320a333a322e3033323a663835333833653865626238383761316665393537386164616261653462356431363a7365727665722d746f2d636c69656e74313a3036383a636d622d3766376235353635336161393835343939396332656665623937353163653434323866396466653935383339653334653433353861623062653563646639386436393a617372742d3037636365646432656166353239376231393363353534623634663861643466303239303861646166663437383631386463396365623465656136336230313133363a30313866343761302d376232312d376162632d386465662d30313233343536373839616231363a636f6e666f726d616e63652d726f6f6d33363a30313866343761302d376232312d376162632d386465662d666564636261393837363534",
       "sealedBase64url": "KpqQYUAy4UjAHl9-52rOEiAh6F1r_hIKluP0uHIpOPgftvVZWtWBxJfbLQCsZqsJ1CdRFCIsv55yXSt2ZcLz9wTge16xfBBolTi71cGxGZmwVqhgVUmOxTQlhC-7enf9fG-IsNUqsvsuTicX4rHItVQjgR8NcnCpzeZ7C06AKsK29K3o4kisGb-AlAFk6MofdZALzD6Bv6WV1n6VUAdW2IUxHw8OIU4GWiW2BH6FBFiQsJFepq7jiRwipzjzdL1aXHiVkBEHL2EWQT7KBb9BGSyyeIA4PECkIM06BpujVwjkIo1aqOt4MmwQDLTXitd4t6GPo-vaVtXyAMCJZ1GDi1nTJHqcEjPt7z__ZVCTXz2sfDQB9yyd5A7V-WInrscqjYj74nFy52MkFvqUTVUTbpLu8bmc2xA2SeQ_1rtW3G82aPo8Jemx9-RJmOwQGxzne582gLbgMFMvA_2kANd1QvBEcIBRHuCWoe7uZZig6-MoWSJH-_kOuBI_BFa9fFbkzJCXqMLIqfdeuHvgGLmHRDUpZznM8Extt3-pwbYJhZggL1FTVYwaelgPYd0-lCegVkayXartTvxH7C7kpBiG8xL0uclonph3q5hYWhLk0aZEcqx-_WvA0od6M1w2EQW3DLfcD5pW6HZSV04FtvOATV8REmdH2PRUpc4U5VSkegdt83ffyz4mTob24x-4OO6qnGRWKYIHnK9oy6N-Gvs6jWQpTUXjZj6dJilqfTPw4R2-HbBkpYZSrGYdP9JaaMbDceuZvr29mjZ6tKopsZf6x3hKDvNDOkp1mSLwsndmfw0C-GA056CmFKWKVmTvqxAPSlCoOCvmA4cupUU9AcVo5mCl3jrEfHaQlmYUMOoAcOzanQdjXhiLcuLYqS4a9uCG5HqLqfJ3n3O7R5kbuuCifAba8yf5xrF6Mn_y4GdVIrQZcuZN6kk5DfpLZeJWvwgW8GTO_eSNgqTYFDZZEADb_SgH8jUr3aGir4OzCKm67mKhz_wEMuu8xovN-WvwsLQ2-QDBOkkxiykd2NqV95DvU9HYKMuBaL7Vxt5KIAN4FP4aEngWCfHx6aptJ-MmHwZqx2yqN2lIwAodw2v0WXzCGziM5WZijbruriIXaDJg8tOxOdNwz4MNvzI0LnVR5zqCfHWUiRvRF0JexHoENEdarJwWYwuHudWng_e1lq7v7y22R2uFtKPbrAMXrEMPYWzav3SbBVbPsIzYtfr1QzasAA65Ww3tGlDtPe0W8r6OcZ5hM2bpiqgqAV_JNK9ieotCsu0JSMPPok2JEvpDnwdzxqKOhSj1dsdiJ_yKh8ptS6suKWU4v9HhAE9CYIDEwgp2moXY4IwxxtnCZ90tFT1hn4qneWh7v-3GZlQUkEG52mT1A1KfCnXkhxq1UsoWzA_tMN3XhmM8FONMMtiXJU8NlHzmgFlUS_V98KToge4D6scK8JXz7kFw5XoH3og1jvP7Ywd2XXUbhioJUBTij0AfegCqLgmafgO8-e3445JjqQo1dW0oQUNC8dLhyDuPu3EQ0jVG6DOjKyaP-iOYMER2GYvLQLAaf_ftig-hsMSt2G6kZ-D37_uWqUfZG16aZYHF7mvouYVx6tFjQy9tJPsWNy4ELvkevsIkoDO3vL4"
     }
-  ]
+  ],
+  "noApplication": {
+    "rule": "metadata.application=null means applicationData is omitted; applicationData=\"\" is reserved for a present zero-byte application",
+    "protectedPlaintextUtf8": "{\"categories\":{\"focus\":{\"text\":\"publish corrected MMP conformance artifacts\",\"meta\":{\"key\":\"5016f1bd82f5ec8ad064f9fb0a47c10988190c407c9d534e76b366634bf2e268\",\"parents\":[]}},\"issue\":{\"text\":\"the public vectors and runtime disagree\",\"meta\":{\"key\":\"8f37da919d4165770650b6508b66af65f0710157209b10724e7cc4aab717da83\",\"parents\":[\"cmb-abababababababababababababababababababababababababababababababab\"]}},\"intent\":{\"text\":\"make independent implementations interoperate\",\"meta\":{\"key\":\"f47998bfc4aedee3ac20c485f9cd07caacccf622ceced426c02e178741718f67\",\"parents\":[]}},\"motivation\":{\"text\":\"a protocol claim must be executable\",\"meta\":{\"key\":\"9dfa469fab3eeb8c98f79df69c3b2f02f277a017f9cbe3bf0f32ccbf9a4f129d\",\"parents\":[]}},\"commitment\":{\"text\":\"one contract drives every implementation\",\"meta\":{\"key\":\"d3bbf94949feceaea72667efe8c43a4bf3aed557ecc632caf82b7c3f2447e3c8\",\"parents\":[]}},\"perspective\":{\"text\":\"protocol editor\",\"meta\":{\"key\":\"3e48fe2e89a1e02f5c17c08e853bd09d5355d18a491a1bd926568089626ffa35\",\"parents\":[]}},\"mood\":{\"text\":\"determined\",\"meta\":{\"key\":\"a515fb1d0492e7661b89c2b02d6bf81372ee07560bfca054863c76dec74880da\",\"parents\":[]}}}}",
+    "metadata": {
+      "key": "cmb-7f7b55653aa9854999c2efeb9751ce4428f9dfe95839e34e4358ab0be5cdf98d",
+      "addressScheme": "mmp-cmb-merkle-v2",
+      "signatureSuite": "mmp-sig-v2.0",
+      "createdByNodeId": "018f47a0-7b21-7abc-8def-0123456789ab",
+      "createdBy": "vector-author",
+      "createdTimestamp": 1786611600000,
+      "room": "conformance-room",
+      "to": "018f47a0-7b21-7abc-8def-fedcba987654",
+      "lineage": {
+        "parents": [
+          "cmb-abababababababababababababababababababababababababababababababab"
+        ],
+        "method": "svaf-heuristic"
+      },
+      "application": null,
+      "assertionId": "asrt-926d08932fe23abc3950001f80df80f93f9ae0942eb04329cd5d6c4748a0ff7e",
+      "sigAlg": "ed25519",
+      "sig": "ae5wP18m0_bGBxiqL4faj70eTjwK_nZL1FocG021xhwmHqmX1Ne3SlVZzdquOZiuh5haKtss6nGXWZdvXzVpCg"
+    },
+    "case": {
+      "direction": "client-to-server",
+      "sequence": "0",
+      "trafficKeyHex": "789c875b5646722f94938d29a7712fcab924873cf5df4c1cf44ac18836990130",
+      "nonceHex": "000000000000000000000000",
+      "aadHex": "6d6d702d616561642d6161642d76320a333a322e3033323a663835333833653865626238383761316665393537386164616261653462356431363a636c69656e742d746f2d736572766572313a3036383a636d622d3766376235353635336161393835343939396332656665623937353163653434323866396466653935383339653334653433353861623062653563646639386436393a617372742d3932366430383933326665323361626333393530303031663830646638306639336639616530393432656230343332396364356436633437343861306666376533363a30313866343761302d376232312d376162632d386465662d30313233343536373839616231363a636f6e666f726d616e63652d726f6f6d33363a30313866343761302d376232312d376162632d386465662d666564636261393837363534",
+      "sealedBase64url": "m-vr8KG0KdkC8zlHmPuApLwvANT7yU2qTFex3kOeiRqv1-159pL81nnRzBLrwUxCr2auJ_jgHi-7RRR-q1RL_o1U4q2Q86g9_4hgY2WeGTGhBUre4T6U5a5tHXn1jAl9ccv_JDQh7JBmInGX3HhnnSLGgVLr_K07ysvKby3662MulMwszNmFe1iXk_NPLWUxoRhPSpaFryVMV5_d6fV7VOxW4cTGDN2r-lv8mCZJ7KTHC31ERv7McdoSP8KkBojVHCbHY74lrtUy436Gao7a0l91dW-BnY98P7squVsO8R-DVgQ3aH5LUxdvrYowXrXmqhg9W6S3Y5OQYXH6hbOqPuWtWDgF8UUO2_tAK6H6xMYwThynPrxgBLOcmAgW_7CVt_HQCxo_vn0VXH2LE6fTlgaJA9RXGbe_BxrfxI-eErMADhH8zQvvimZJGzRhdhCSFfSWTFdqCny4sJsJXGK1FYsucliBmz9tI-WuAfD_IuU55ivxy9dbVwp2Z0bii9Dt1BcLM9m1TqBzHLIcpvnoEwExWl5y4R38xHIYY5Qf_M--kj96G5F0HDXscOW25jN3jwe4Z7UyuTGnamgJWQ9rKZBcnJQ1VN_W0IbmXPvOoDr099gHKU5rwluyeR-dT_Pwa0xRTdGh-UMLUbDHmstEoof3TaUF-0qIoCK53s6ZL0on2O6onLj0JvevcCYbrg2zyNk3oACbL_x09Jojm4NvqmeucpSNlMMyS3UXIX7QRY_DpHd7vnnlYqlGst0GWvy22fpEJl_dAvJNYl8aA8YM9hIzNXAVypLiwAiCWcwjpvy_aYM9nOWlh_ALRSNlyyii30LRhrz5rDayVKe9ntTQTQKg2l_bKhhqKJImKSUJ4g_wsZAItiytWz9RpbuSkRjmlHxemVnnqB6bojkbeTDY3iZSGBzXIhdNias98H4MxSO7FqQIFtrEsAeG4YEylnyZNBuCAGkJzYaRD9YHy475QDU0bt_aHeUglwi-WaKHRii2qVRndFglOW5o2VGl9vVA61SCK_5gWqxJln7qSGS1_ZjXe0EZNsE9un4q-FLkeyGw5LcTGZT09NaFBpglIGMfNklPNooFKyq_KrobLKe3h8rkxkVPKHCbVTnt0zjbWC8vRTzcbWe4GJFqC08-UBkOGRfxP3ot8etsQCR2JtqxZtQW6FlWeW84FUWQ5Q8j2asBka-vJp2r628DnNaYgjxq2z3TXu0LP_GKmomtVP_CCddOiOxIzEtVzVut--LisnR8qcecZa25pgrQfdmyeBmjiPGL_DOCVKtpl832cJjM4kEzme4Q2DS8uHiPFo7ZrzloA6RCYf0mdR5DQAJNhLnfAMbZvK4miFNLFtvTooBestapGaP8KzOQW04AKtOMBE_vASdZOKX183ta-Mc7RLzazHtnyiOd7U9sq8qIE8a9GGwxfX2MHqQ85BfqUIYlaaeHvVtX6eyd_eICpdjvje7Qr6Vss_dgZ-uQT7BHQMnzQuTANc_UspHLRiH3YJhOsb_J8qc1S3LxPytwtLf20w"
+    }
+  }
 }

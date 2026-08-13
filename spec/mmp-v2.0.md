@@ -5372,6 +5372,8 @@ Each direction has a distinct HKDF-derived 32-byte traffic key. The first sequen
 
 The protected plaintext contains `categories` and decoded application bytes. Associated data binds protocol version, session, direction, sequence, cognition key, assertion identity, author nodeId, room and recipient. After decrypting, the receiver reconstructs the logical two-section record and follows §8.8.5 verification order. Exact outputs are published in the [E2E vector](/spec/mmp/conformance/v2/e2e-v2.json).
 
+When `metadata.application` is null, the protected plaintext MUST omit `applicationData` entirely. A present application whose decoded data is zero bytes instead carries `applicationData: ""`. The two states are distinct and MUST NOT be collapsed. Both byte shapes are pinned by the E2E vector.
+
 ### 18.3 Node Identity & Authentication
 
 Node identity is a UUID bound to an Ed25519 key through the authenticated transcript in §5.2. An X25519 session key is separately generated but proven in the same transcript.
