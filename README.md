@@ -6,9 +6,14 @@
 [![arXiv](https://img.shields.io/badge/arXiv-2604.19540-b31b1b.svg)](https://arxiv.org/abs/2604.19540)
 [![License: CC BY 4.0](https://img.shields.io/badge/license-CC_BY_4.0-blue)](https://creativecommons.org/licenses/by/4.0/)
 
-## Canonical home
+## Canonical source and mirror status
 
 The Mesh Memory Protocol specification is published at **[meshcognition.org/spec/mmp](https://meshcognition.org/spec/mmp)**.
+Its normative source is
+[`sym-bot/meshcognition-website`](https://github.com/sym-bot/meshcognition-website).
+This repository is a manually synchronized public mirror for offline use, releases and RFC discussion.
+When the repositories differ, the website source controls. See [MIRROR-SOURCE.md](./MIRROR-SOURCE.md)
+for the synchronized revision.
 
 - Browse the spec by section: [meshcognition.org/spec/mmp](https://meshcognition.org/spec/mmp)
 - Single-page Markdown: [meshcognition.org/spec/mmp-v2.0.md](https://meshcognition.org/spec/mmp-v2.0.md) ([in this repo](./spec/mmp-v2.0.md))
@@ -18,8 +23,8 @@ The Mesh Memory Protocol specification is published at **[meshcognition.org/spec
 ## What this repository hosts
 
 - **[`spec/`](./spec/)** — the single-page specification (Markdown + HTML), mirrored from the canonical site for history, offline reading and GitHub rendering.
-- **[`schema/`](./schema/)** and **[`conformance/`](./conformance/)** — the canonical machine contract for MMP v2.0. Implementations consume these artifacts; the website renders the same constructions rather than maintaining a private copy.
-- **[`scripts/verify-vectors.mjs`](./scripts/verify-vectors.mjs)** — implementation-neutral verifier for the published byte constructions and negative cases. Run `npm test`.
+- **[`schema/`](./schema/)** and **[`conformance/`](./conformance/)** — a mirror of the machine-readable MMP v2.0 contract owned by the website source repository.
+- **[`scripts/verify-vectors.mjs`](./scripts/verify-vectors.mjs)** — mirrored implementation-neutral verifier for the published byte constructions and negative cases. Run `npm ci && npm test`.
 - **[`extensions/`](./extensions/)** — community extension drafts, edited via pull request. Promoted to core MMP per the §16.5 lifecycle.
 - **[Issues](https://github.com/sym-bot/mesh-memory-protocol/issues)** — public RFC discussion forum for spec changes. File proposals here with `[spec-rfc]` in the title.
 - License: [CC BY 4.0](./LICENSE) (specification text). Reference implementations are licensed Apache 2.0.
@@ -35,8 +40,9 @@ The Mesh Memory Protocol specification is published at **[meshcognition.org/spec
 `xmesh-core` is a proprietary conforming cognition runtime. It is tested at the
 public MMP boundary but is not represented as an open reference implementation.
 
-The specification and these published artifacts define conformance. A reference
-implementation is evidence of conformance, not the standard itself.
+The published specification and artifacts generated from the website source define conformance.
+This mirror makes them convenient to consume; it does not independently define alternative bytes.
+A reference implementation is evidence of conformance, not the standard itself.
 
 ## Foundational papers
 

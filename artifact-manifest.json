@@ -1,0 +1,22 @@
+{
+  "protocol": "MMP",
+  "specificationVersion": "2.0",
+  "suite": "mmp-sig-v2.0",
+  "sourceRepository": "https://github.com/sym-bot/meshcognition-website",
+  "sourcePath": "public/spec/mmp",
+  "hashAlgorithm": "sha256",
+  "files": {
+    "conformance/v2/application-v2.json": "28ef0e7a7a7f2fb1e85a8a35b2f899962a648193e61717165540e5f4b842eb30",
+    "conformance/v2/e2e-v2.json": "55580947281c61e669e34611b5d776f874d5f1e7e1c966b83806b3ca74840457",
+    "conformance/v2/handshake-v2.json": "47d954f732903b68e4c7d420b5630258444b9b7be0fdbbd8fa47eb3a86e4313e",
+    "conformance/v2/record-signature-v2.json": "bf337d4c62c22fba1833a095e8924f963bf4eee56f6cf38c5b26afe8c98f4f22",
+    "schema/application.schema.json": "b52d2a385cb7eb382a960dbdb4003f859edeb185c7d1ebd719dfe2eb71f8690e",
+    "schema/cmb-fetch-result.schema.json": "a17b908add6e44df4ec8d7407f51afc647c84d078f2d520c0c541f2ff78c247c",
+    "schema/cmb-fetch.schema.json": "2fcd688498dcaa27af9fd54cd4488eba73fa7afa931c38de22235d93ade0c357",
+    "schema/cmb-frame.schema.json": "f075902b6b84704fcd326b81667b0b945b1d2bb60bedc03753964d2d0180a4c0",
+    "schema/cmb.schema.json": "0afc3119fb54fc3d6059de35fa6c4e1dce02faba966f3e8d2a69e1b037223825",
+    "schema/encrypted-cmb-frame.schema.json": "0efea2cd4925bf207e96c85d5ee98d7efa701e296bc7f321f23ae93aa76bd033",
+    "schema/handshake.schema.json": "085fdbf1eba2ac0de916f741e9e2fab5b1ae95b7f538db7bda2dc57ab9b3d45d",
+    "schema/tether-attestation.schema.json": "9e039c5cfb9d99217dbc33169feaff0a799455a1cf6f395624172c9b64e25f53"
+  }
+}

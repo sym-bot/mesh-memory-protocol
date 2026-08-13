@@ -20,7 +20,7 @@
 8. [6. Memory (L3)](#6-memory-l3)
 9. [7. Frame Types](#7-frame-types)
 10. [8. CMBs (CAT7)](#8-cmbs-cat7)
-11. [8.2 Record Model](#8-2-record-model)
+11. [8.8 Record Model](#8-8-record-model)
 12. [9. Coupling & SVAF (L4)](#9-coupling-svaf-l4)
 13. [10. State Blending](#10-state-blending)
 14. [11. Feedback Modulation](#11-feedback-modulation)
@@ -55,7 +55,7 @@ Version
 
 Status
 
-Published
+Published · v2.0 conformance correction in progress
 
 First published
 
@@ -89,23 +89,23 @@ Existing protocols at lower layers standardize tool access and task delegation b
 
 The problem is semantic, not transport. **Hidden state never crosses the wire** — each agent’s learned cognition stays sovereign on its own device; only Cognitive Memory Blocks (CMBs) propagate. Receiver-autonomous admission lets the mesh grow without re-introducing a master. MMP defines transport over TCP on local networks and WebSocket for internet relay, with length-prefixed JSON as the canonical wire format. Discovery uses DNS-SD (Bonjour) with zero configuration.
 
-This document describes an 8-layer stack, but it is **two documents in one**, and is read that way (§17). **MMP Core** is the normative wire contract — identity, transport, connection, frames, the CAT7 block with its content address and signature — byte-testable against published Class 1 conformance vectors (Class 1, §17.1). Everything receiver-side — SVAF admission, memory tiers, remix behavior, the cognitive layers that together implement [Mesh Cognition](/spec/mmp/architecture) — is **documentation of the SYM reference runtime** (Class 2, §17.2): published for transparency and audit, versioned with the runtime, and not a conformance target. None of it is closed as knowledge: the mechanism is fully documented under CC BY 4.0, its reference implementation is open source (SYM, Apache 2.0), and the theory is published (§21). Each page carries its tier banner. The protocol is open; the science is open; the cognition layer is documented alongside its open-source reference runtime.
+This document describes an 8-layer stack, but it is **two documents in one**, and is read that way (§17). **MMP Core** is the normative wire contract — identity, transport, connection, frames, the CAT7 block with its content address and signature — byte-testable against published Class 1 conformance vectors (Class 1, §17.1). Everything receiver-side — SVAF admission, memory tiers, remix behavior, the cognitive layers that together implement [Mesh Cognition](/spec/mmp/architecture) — is a **public behavioural profile** (Class 2, §17.2). SYM provides an open, transparent baseline implementation. xmesh-core is a proprietary conforming cognition runtime whose public inputs, outputs, safety invariants and audit behaviour remain testable against this specification. A private scoring method does not define private wire semantics. Each page identifies whether it states a wire requirement, a behavioural invariant, an implementation profile or an informative research claim.
 
-This specification is **verified, not merely asserted**: its Core wire claims are vector-tested, and its runtime-tier claims are re-derived against a mathematical formalization of the deployed open-source runtime, and where analysis finds a requirement unsatisfiable or a guarantee conditional — the basis of the redundancy invariants, the evaluation-time admission window, the cold-start bootstrap trade — the text is amended and the limit disclosed in place rather than left implicit (see the [change log](/spec/mmp/changelog)’s soundness & completeness update). What the protocol promises is what survives derivation.
+This specification is being made **executable, not merely asserted**: Core wire claims are backed by public schemas, byte constructors, positive vectors and negative cases consumed by independent verifiers and implementations. Where analysis finds a requirement unsatisfiable or a guarantee conditional — the basis of the redundancy invariants, the evaluation-time admission window, the cold-start bootstrap trade — the text is amended and the limit disclosed in place rather than left implicit (see the [change log](/spec/mmp/changelog)’s soundness & completeness update). What the protocol promises is what survives derivation.
 
 ## Status of This Document
 
-This is a published specification, **stable, sound, and complete at version 2.0**.
+This is the published MMP 2.0 specification. A conformance correction is in progress to make its website text, machine schemas, cryptographic vectors and implementations one independently executable contract. The version remains 2.0; cryptographic suite identifiers evolve independently. Until the published conformance gates pass, implementations **must not infer “Core Secure” solely from a package version**.
 
 ### Why 2.0
 
 **Every version of this specification has been verified in real systems, and 2.0 is no exception.** 1.0 and 1.1 were implemented and running across Windows, macOS and iOS applications, over LAN and over an internet relay — interoperating between independent implementations on different platforms. That is the standing practice here: nothing is published as a specification of something that has not been built.
 
-What implements this specification is the open-source SDK and runtime — the reference substrate, available to anyone, and it is evidence of the one thing a specification cannot assert about itself: that a real system can be built on this and run. **The specification is verified against that open-source runtime**, so a third-party implementation depends on nothing proprietary.
+SYM is the open reference substrate and transparent baseline admission profile. It is evidence that the protocol can run, not the source of normative truth. xmesh-core is proprietary and may keep learned policies and optimisations private, but its observable MMP boundary is tested against the same public contract. A third-party implementation depends on neither codebase.
 
-**What changed is that the runtime moved and the text did not follow.** The record model advanced — a two-section record, a Merkle-derived content address, a new signing payload — while the published text continued to describe the earlier shape. 2.0 re-derives the specification from the open-source runtime as it now runs, clause by clause, and where text and code disagreed the code was taken as correct.
+**What changed is that the runtime moved and the text did not follow.** The record model advanced — a two-section record, a Merkle-derived content address, a new signing payload — while the published text continued to describe the earlier shape. 2.0 re-derives the specification and runtime into alignment clause by clause. Where text, schemas, vectors and code disagree, none is silently declared correct: the v2.0 errata rules the construction, publishes executable vectors, and then implementations are tested against it.
 
-That is checkable rather than assertable. The constructions in [§8.2 Record Model](/spec/mmp/record) — the content address and the signature payload — were re-implemented from the text of that section alone, with no access to the reference code, and reproduced the running system’s output **byte for byte**. A specification is worth the implementations it can produce, and §8.2 has been shown to produce one.
+That is checkable rather than assertable. The constructions in [§8.8 Record Model](/spec/mmp/record) — the content address and the signature payload — were re-implemented from the text of that section alone, with no access to the reference code, and reproduced the running system’s output **byte for byte**. A specification is worth the implementations it can produce, and §8.2 has been shown to produce one.
 
 **Why a major version, when the wire itself did not change.** Because conforming to the previous text no longer yields an interoperating implementation. 1.x declared a different, version-tagged address prefix as normative, which the current runtime rejects; it specified a flat record the runtime no longer emits; and it derived the content address by hashing a concatenation, where the runtime computes a Merkle root — the same `cmb-` prefix on a different digest, so the divergence is silent. Anything built against a running node is unaffected. Anything built from the 1.x record text would not interoperate today. **2.0 is the correction, and it is the version to build from.**
 
@@ -129,7 +129,7 @@ Node.js / TypeScript
 
 SYM.BOT
 
-Reference implementation — the open SYM substrate (Apache 2.0). Core + runtime tiers (Classes 1 and 2, §17).
+Open reference substrate and transparent baseline admission profile (Apache 2.0). Conformance is measured against the published artifacts, not defined by this code.
 
 Swift
 
@@ -137,19 +137,19 @@ Swift
 
 SYM.BOT
 
-Emitter SDK for macOS / iOS (Class 1 target). Speaks an earlier MMP revision; conformance with the current cmb- scheme is in progress.
+Apple-platform implementation. Core Secure v2.0 reader migration is in progress.
 
-Python
+Node.js
 
-[sym-bot/mesh-cognition](https://github.com/sym-bot/mesh-cognition)
+xmesh-core
 
 SYM.BOT
 
-Research library — coupling kernel only (Layer 4 per-category evaluation + Layer 6 for CfC networks); not a full MMP node. Pure Python, zero external dependencies. [pypi](https://pypi.org/project/mesh-cognition).
+Proprietary conforming cognition runtime. Public MMP boundary, safety invariants and audit outcomes are conformance-tested; internal policies and optimisations are not open reference code.
 
 ## Change Log
 
-**Current — 2.0 “Re-derived from the implementation” (10 August 2026):** the record model advanced in the runtime while the published text continued to describe the earlier shape, and 2.0 closes that gap. New [§8.2 Record Model](/spec/mmp/record) gives the two-section record, the byte-exact content address (a promote-odd Merkle root over the seven per-category keys) and the byte-exact signature payload. The normative address form is corrected to `cmb-` + 64 lowercase hex — 1.x declared a version-tagged prefix instead, which the runtime rejects. Admission wording is corrected to per-category _evaluation_ on which the receiver decides for itself; receiver autonomy is unchanged. CAT7 members are named **categories** throughout, and the wire key is untouched.
+**Current — 2.0 “Re-derived from the implementation” (10 August 2026):** the record model advanced in the runtime while the published text continued to describe the earlier shape, and 2.0 closes that gap. Corrected [§8.8 Record Model](/spec/mmp/record) gives the two-section record, the byte-exact content address (a promote-odd Merkle root over the seven per-category keys) and the byte-exact signature payload. The normative address form is corrected to `cmb-` + 64 lowercase hex — 1.x declared a version-tagged prefix instead, which the runtime rejects. Admission wording is corrected to per-category _evaluation_ on which the receiver decides for itself; receiver autonomy is unchanged. CAT7 members are named **categories** throughout, and the wire key is untouched.
 
 **1.1.0 “The Work Layer” (2026-07-05, updated 2026-07-07):** grounding cognition in reality — §6.7 outcomes carried by lineage, the §6.3 Canon tier, §14.12 work sessions as mesh members, plus the folded-in full-corpus coherence errata. The 2026-07-07 update folds in the **soundness & completeness amendments from the formalization of the open-source runtime**: §9.2.1 redundancy invariants pinned to the nearest-anchor basis, the §9.2 evaluation-time-dependence disclosure, the cold-start-capture threat row, §6.7 repeat verification and the load-bearing failure channel, and the §15.8 lineage tether. Wire-compatible with 1.0.x.
 
@@ -159,7 +159,7 @@ Research library — coupling kernel only (Layer 4 per-category evaluation + Lay
 
 This specification is published under the [Creative Commons Attribution 4.0 International Licence](https://creativecommons.org/licenses/by/4.0/) (CC BY 4.0). You may share, adapt, and build upon this specification for any purpose, including commercial use, provided you give appropriate credit.
 
-The reference implementations are published under the [Apache Licence 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+SYM and other named open reference components are published under the [Apache Licence 2.0](https://www.apache.org/licenses/LICENSE-2.0). xmesh-core is proprietary and is not covered by that statement.
 
 SYM and SYM.BOT are trademarks of SYM.BOT. The Mesh Memory Protocol is published under CC BY 4.0; the term "Mesh Cognition" is intentionally unmarked — the category name is free vocabulary.
 
@@ -185,19 +185,19 @@ Changes
 
 2026-08-09
 
-**Re-derived from the running implementation.** 1.0 and 1.1 were implemented and interoperating across Windows, macOS and iOS, over LAN and relay. What changed is that the runtime’s record model advanced — a two-section record, a Merkle-derived address, a new signing payload — while the published text continued to describe the earlier shape. Every normative clause below was re-checked against the **open-source runtime** — the reference substrate this protocol is implemented by. Where the two disagreed the code was taken as correct.  
-  
-**§8.2 Record Model — new, and the reason for the version.** The record is **two-section**: `categories` carries CAT7, `metadata` carries the address, author, timestamp, audience and descent. 1.x described a flat record with `createdAt` at the top level; the runtime has never emitted that shape. §8.2 gives the byte-exact **address** (per-category keys under a domain tag, combined by a _promote-odd_ Merkle root — never duplicate-the-last, which silently yields a different address) and the byte-exact **signature payload** (uniformly length-prefixed, audience-bound, with per-category descent committed alongside the root rather than inside it, so identical observations still collapse to one address).  
-  
-**Address form corrected.** 1.x declared a version-tagged address prefix as normative. The runtime _rejects_ that form: a key is valid _iff_ it is `cmb-` plus exactly 64 lowercase hex. An implementation built to the 1.x text would have minted keys every deployed node refuses — interoperation failure from following the specification.  
-  
-**Admission wording.** The receiver evaluates each of the seven categories against its own anchors and then decides locally what to accept. 1.x called this “per-field admission” and described an admission outcome per category; measured against the runtime, the per-category step is _evaluation_. **Receiver autonomy is unchanged and unqualified** — no sender and no coordinator can force admission of anything.  
-  
-**CAT7 terminology.** The seven members are **categories** throughout, replacing mixed use of “dimensions” and “fields” in prose. A category is the semantic member; a dimension is the length of the vector encoding it. The wire key is `categories` too — prose and wire now use one word. It never enters an address or signature preimage, so the rename moved no address and invalidated no signature.  
-  
+**Re-derived and corrected as an executable contract.** 1.0 and 1.1 were implemented and interoperating across Windows, macOS and iOS, over LAN and relay. What changed is that the runtime’s record model advanced — a two-section record, a Merkle-derived address, a new signing payload — while the published text continued to describe the earlier shape. Every normative clause below was re-checked against the public specification, schemas, vectors and running implementations. Where they disagreed, v2.0 now rules the construction explicitly and publishes executable evidence; no runtime is treated as normative merely because it shipped first.
+
+**§8.8 Record Model — corrected v2.0 contract.** The record is **two-section**: `categories` carries CAT7, `metadata` carries the address, author, timestamp, audience and descent. 1.x described a flat record with `createdAt` at the top level; the runtime has never emitted that shape. §8.8.2 gives the byte-exact **cognition address** (per-category keys under a domain tag, combined by a _promote-odd_ Merkle root — never duplicate-the-last, which silently yields a different address) and §8.8.4 gives the byte-exact **signature payload** (uniformly length-prefixed, audience-bound, with per-category descent committed alongside the root rather than inside it, so identical observations still collapse to one address).
+
+**Address form corrected.** 1.x declared a version-tagged address prefix as normative. The runtime _rejects_ that form: a key is valid _iff_ it is `cmb-` plus exactly 64 lowercase hex. An implementation built to the 1.x text would have minted keys every deployed node refuses — interoperation failure from following the specification.
+
+**Admission wording.** The receiver evaluates each of the seven categories against its own anchors and then decides locally what to accept. 1.x called this “per-field admission” and described an admission outcome per category; measured against the runtime, the per-category step is _evaluation evidence_ and the receiver makes one whole-record admission decision. **Receiver autonomy is unchanged and unqualified** — no sender and no coordinator can force admission of anything.
+
+**CAT7 terminology.** The seven members are **categories** throughout, replacing mixed use of “dimensions” and “fields” in prose. A category is the semantic member; a dimension is the length of the vector encoding it. The wire key is `categories` too — prose and wire now use one word. It never enters an address or signature preimage, so the rename moved no address and invalidated no signature.
+
 **Single-file artifacts** are now `/spec/mmp-v2.0.md` and `.html`. `mmp-v1.0.*` remain published, frozen, for existing citations.
 
-1.1.0  
+1.1.0
 registry note
 
 2026-07-13
@@ -206,23 +206,23 @@ registry note
 
 1.1.0
 
-2026-07-05  
+2026-07-05
 upd. 2026-07-07
 
-**Soundness & completeness update (2026-07-07), from the formalization of the deployed mechanism.** The mesh-cognition formalization re-derived this specification’s claims and the amendments are folded into 1.1.0 in place: §9.2.1 pins the **redundancy invariants to the nearest-anchor basis** (δfnear = 1 − maxa cos — the fused attention readout provably cannot satisfy them: a block identical to a stored anchor can score δ = 0.127 once other anchors pull the readout); §9.2 discloses that **admission is evaluation-time-dependent** with the derived flip window (aggregated category drift in (0.286, 0.714) at defaults admits fresh, rejects late); §9.2.1’s cold-start bootstrap-admit now discloses its **security consequence** (new §18.4 cold-start-capture threat row); §6.7 adds **repeat verification** (a recognised grounding is never refused _solely_ for redundancy — the redundancy band provably self-quenches the outcome stream otherwise), the **failure channel is load-bearing** clause (positive-only grounding provably locks onto stale favourites; observed failures must not be selectively suppressed), and an informative note on consuming the outcome stream (decay-half-life theory); §15.8 specifies the **lineage tether** — the root-anchored drift bound that closes grounding-inheritance laundering; §18.3.1 disclosed the **enforcement scope** of strict signature mode. Wire-compatible throughout: no new frames, no new categories.  
-  
-**The Work Layer — grounding cognition in reality.** Through 1.0.x, the mesh could observe, admit, remix, and validate — it could establish what its members _believe_. 1.1.0 adds the missing half: a way to record what _held up in practice_, and to make the cognition that survives both judgment and reality the durable substrate real work builds on. Everything below is normative as of this release; new sections are marked “New in 1.1.0” in place.  
-  
-[**§6.7 Grounding**](/spec/mmp/memory#grounding) — outcomes carried by lineage. A grounding CMB (`intent: "ground"`, commitment `verified:` / `failed:`, parents = the cognition it grounds) records a real-world result — tests passed, work shipped, a prediction resolved — as the evidence-based sibling of §6.4’s judgment-based validation. An outcome is an **attestation, never a fact**: its weight follows the author’s earned authority (§6.5–§6.6), groundedness is **receiver-relative** (only attestations a node’s own SVAF admitted count), conflicting observations resolve **latest-wins on receiver-local time** (a regression un-grounds; a backdated timestamp cannot game the ordering), and a grounding CMB **never advances lifecycle by itself** — elevation to the Canon is an explicit, accountable act under validator-or-above authority.  
-  
-**§6.3 The Canon tier** — committed cognition persists. `validated` and `canonical` CMBs are exempt from age-based retention while they hold that lifecycle, so a mesh’s earned knowledge compounds across sessions instead of evaporating with the retention window. Protection is from purge, not from demotion — inactive validated cognition may still decay to archived (§6.4, §19) — and the store stays bounded.  
-  
-[**§14.12 Work Sessions as Mesh Members**](/spec/mmp/application#session-capture) — the capture profile that closes the loop: a work session joins as an ordinary member; its charter is the intent root, its decisions chain by lineage, and completion emits an artifact grounded by the session’s _real_ outcome. Day two of a mesh starts ahead of day one because day one’s work is in the Canon. §14.11 remains reserved for Commissions (planned for 1.2.0).  
-  
-**Supporting sections:** §8.3.1 well-known intent values (informative, extensible registry — `charter`, `decision`, `artifact`, `ground`; unknown intents remain ordinary content and confer nothing); §15.7.2 outcomes are observations (observing a real outcome IS new domain data, so grounding remixes satisfy §15.7 with no intent-keyed exemption — the anti-echo invariant is untouched); §18.4 gains the fake-outcome-attestation threat model (fabricated `verified:` steering, low-authority `failed:` griefing) with its mitigation chain; §17.5 lists the draft conformance requirements.  
-  
-**Incorporates the 2026-07-05 coherence errata** — a full-corpus adversarial review (41 findings) folded into this release: §10 state blending re-grounded in CMB-admission influence, completing the 1.0.2 supersession (the deprecated hidden-vector blend’s coefficients now bound per-admission influence; §13.4’s formula corrected to match); §11.4 feedback authority resolved through the signed grant chain rather than self-declared handshake roles; group isolation re-derived as endpoint-enforced via §18.3.1 audience binding (the relay is a dumb pipe); the §7.1 frame-type registry completed (mood, relay frames); handshake schema reconciled (§20.1 `group` optional, `lifecycleRole` sender-MUST); §17 conformance refreshed with testable requirements; plus editorial corrections across citations, examples, and terminology.  
-  
+**Soundness & completeness update (2026-07-07), from the formalization of the deployed mechanism.** The mesh-cognition formalization re-derived this specification’s claims and the amendments are folded into 1.1.0 in place: §9.2.1 pins the **redundancy invariants to the nearest-anchor basis** (δfnear = 1 − maxa cos — the fused attention readout provably cannot satisfy them: a block identical to a stored anchor can score δ = 0.127 once other anchors pull the readout); §9.2 discloses that **admission is evaluation-time-dependent** with the derived flip window (aggregated category drift in (0.286, 0.714) at defaults admits fresh, rejects late); §9.2.1’s cold-start bootstrap-admit now discloses its **security consequence** (new §18.4 cold-start-capture threat row); §6.7 adds **repeat verification** (a recognised grounding is never refused _solely_ for redundancy — the redundancy band provably self-quenches the outcome stream otherwise), the **failure channel is load-bearing** clause (positive-only grounding provably locks onto stale favourites; observed failures must not be selectively suppressed), and an informative note on consuming the outcome stream (decay-half-life theory); §15.8 specifies the **lineage tether** — the root-anchored drift bound that closes grounding-inheritance laundering; §18.3.1 disclosed the **enforcement scope** of strict signature mode. Wire-compatible throughout: no new frames, no new categories.
+
+**The Work Layer — grounding cognition in reality.** Through 1.0.x, the mesh could observe, admit, remix, and validate — it could establish what its members _believe_. 1.1.0 adds the missing half: a way to record what _held up in practice_, and to make the cognition that survives both judgment and reality the durable substrate real work builds on. Everything below is normative as of this release; new sections are marked “New in 1.1.0” in place.
+
+[**§6.7 Grounding**](/spec/mmp/memory#grounding) — outcomes carried by lineage. A grounding CMB (`intent: "ground"`, commitment `verified:` / `failed:`, parents = the cognition it grounds) records a real-world result — tests passed, work shipped, a prediction resolved — as the evidence-based sibling of §6.4’s judgment-based validation. An outcome is an **attestation, never a fact**: its weight follows the author’s earned authority (§6.5–§6.6), groundedness is **receiver-relative** (only attestations a node’s own SVAF admitted count), conflicting observations resolve **latest-wins on receiver-local time** (a regression un-grounds; a backdated timestamp cannot game the ordering), and a grounding CMB **never advances lifecycle by itself** — elevation to the Canon is an explicit, accountable act under validator-or-above authority.
+
+**§6.3 The Canon tier** — committed cognition persists. `validated` and `canonical` CMBs are exempt from age-based retention while they hold that lifecycle, so a mesh’s earned knowledge compounds across sessions instead of evaporating with the retention window. Protection is from purge, not from demotion — inactive validated cognition may still decay to archived (§6.4, §19) — and the store stays bounded.
+
+[**§14.12 Work Sessions as Mesh Members**](/spec/mmp/application#session-capture) — the capture profile that closes the loop: a work session joins as an ordinary member; its charter is the intent root, its decisions chain by lineage, and completion emits an artifact grounded by the session’s _real_ outcome. Day two of a mesh starts ahead of day one because day one’s work is in the Canon. §14.11 remains reserved for Commissions (planned for 1.2.0).
+
+**Supporting sections:** §8.3.1 well-known intent values (informative, extensible registry — `charter`, `decision`, `artifact`, `ground`; unknown intents remain ordinary content and confer nothing); §15.7.2 outcomes are observations (observing a real outcome IS new domain data, so grounding remixes satisfy §15.7 with no intent-keyed exemption — the anti-echo invariant is untouched); §18.4 gains the fake-outcome-attestation threat model (fabricated `verified:` steering, low-authority `failed:` griefing) with its mitigation chain; §17.5 lists the draft conformance requirements.
+
+**Incorporates the 2026-07-05 coherence errata** — a full-corpus adversarial review (41 findings) folded into this release: §10 state blending re-grounded in CMB-admission influence, completing the 1.0.2 supersession (the deprecated hidden-vector blend’s coefficients now bound per-admission influence; §13.4’s formula corrected to match); §11.4 feedback authority resolved through the signed grant chain rather than self-declared handshake roles; group isolation re-derived as endpoint-enforced via §18.3.1 audience binding (the relay is a dumb pipe); the §7.1 frame-type registry completed (mood, relay frames); handshake schema reconciled (§20.1 `group` optional, `lifecycleRole` sender-MUST); §17 conformance refreshed with testable requirements; plus editorial corrections across citations, examples, and terminology.
+
 **Compatibility:** fully wire-compatible — no new frames, no new categories; a 1.0.x node interoperates unchanged and treats grounding CMBs as ordinary CMBs. **Reference-implementation status:** two §6.7-adjacent mechanisms are specified ahead of the reference implementation (the §15.7.1 convention): the §6.4 inactivity archiver, and elevation-authority resolution through the §6.6 grant chain — the shipping implementation performs elevation as an explicit operator act pending earned-authority activation. Both are runtime work, outside this final specification.
 
 1.0.6
@@ -457,9 +457,9 @@ Persistent UUID per node. Never changes. The foundation everything else builds o
 
 ### 2.2 Design Principles
 
-No servers
+No required cognitive centre
 
-There is no mesh without agents. Agents are the mesh. No central server, no orchestrator, no master node. Every participant is a peer.
+Agents are the cognitive participants. Relays, hosted-agent daemons and discovery services may exist, but they do not own receiver admission, memory or judgment. No central cognitive authority is required.
 
 Cognitive autonomy
 
@@ -469,9 +469,9 @@ Memory is remixed, not shared
 
 Agents don’t copy each other’s memory. They remix it — process it through their own domain intelligence and produce something new. The original is immutable. The remix is a new CMB with lineage.
 
-Per-category evaluation
+Whole-record admission, category evidence
 
-A signal is not accept-or-reject as a whole. SVAF evaluates each of 7 semantic categories independently. A signal with relevant mood but irrelevant focus is partially accepted — not ambiguously scored.
+SVAF evaluates evidence across all seven CAT7 categories, then the receiver admits or rejects the record as a whole. Category verdicts explain the decision; they do not create a partially stored record.
 
 LLM reasons, LNN evolves
 
@@ -511,7 +511,7 @@ None (all shared)
 
 Aggregation
 
-Per-category SVAF (7 categories)
+Whole-record SVAF admission with 7 category verdicts
 
 Intelligence
 
@@ -591,9 +591,9 @@ A node is more precisely a membrane over an arbitrary interior: its interior MAY
 
 The Mesh Cognition architecture closes into a loop across all layers. Each cycle, the remix graph grows and every agent understands more than it did before:
 
-SVAF evaluates inbound CMB per category
+SVAF evaluates the inbound CMB
 
-Layer 4 — per-category drift, α\_f weights, accept / guard / reject
+Layer 4 — category evidence and α\_f weights inform one whole-record admission decision
 
 Accepted → remixed CMB with lineage
 
@@ -720,15 +720,15 @@ On the wire, the nodeId MUST be encoded as a lowercase hexadecimal string with h
 
 ### 3.1.2 name
 
-The `createdBy` field MUST be valid UTF-8, between 1 and 64 bytes inclusive. The name MUST contain only printable characters (Unicode categories L, M, N, P, S, and Zs). Control characters (U+0000–U+001F, U+007F–U+009F), null bytes, and lone surrogates MUST NOT appear. The name is not required to be unique — nodeId is the sole unique identifier. The name is for human display only and MUST NOT be used for peer identification or routing.
+The `name` field MUST be valid UTF-8, between 1 and 64 bytes inclusive. The name MUST contain only printable characters (Unicode categories L, M, N, P, S, and Zs). Control characters (U+0000–U+001F, U+007F–U+009F), null bytes, and lone surrogates MUST NOT appear. The name is not required to be unique — nodeId is the sole unique identifier. The name is for human display only and MUST NOT be used for peer identification or routing.
 
 ### 3.1.3 keypair
 
 Each node MUST generate an Ed25519 keypair (RFC 8032) at first launch and persist it alongside the nodeId. The keypair serves three functions:
 
--   —Peer verification — the public key MUST be included in the handshake frame. Peers SHOULD challenge the node to sign a nonce to prove possession of the private key.
--   —Key exchange — Ed25519 keys are converted to X25519 for Diffie-Hellman shared secret derivation, used for end-to-end CMB encryption (Section 18.2.1).
--   —Message signing — implementations SHOULD sign every CMB with the Ed25519 identity key (Section 18.3.1, schema §20.2); a receiver holding the author’s key MUST verify the signature. Unsigned CMBs are accepted only from legacy 1.0.x emitters.
+-   —Peer verification — the Ed25519 public key MUST appear in the authenticated handshake offer. Both peers MUST sign the same transcript and verify the other signature before the connection becomes usable.
+-   —Key agreement — each node also generates an independent X25519 keypair for ephemeral Diffie–Hellman agreement. Implementations MUST NOT treat Ed25519-to-X25519 conversion as the Core Secure construction.
+-   —Record signing — every Core Secure record assertion MUST use the author’s Ed25519 identity key and the `mmp-sig-v2.0` preimage (§8.8.4). Unsigned records belong only to an explicitly selected Legacy Import profile.
 
 The public key MUST be encoded as base64url (RFC 4648 Section 5) in all wire formats (handshake frames, DNS-SD TXT records). The private key MUST NOT leave the node.
 
@@ -1217,26 +1217,30 @@ Relay-based discovery. On platforms where mDNS is unavailable (cloud VMs, Window
 
 ### 5.2 Handshake
 
-Upon connection, both sides MUST exchange the following frames in order:
+The TCP or WebSocket dialler is the **client**; the listener is the **server**. They MUST complete this authenticated exchange in order:
 
 ```
-1. handshake    { type: "handshake", nodeId: "<uuid>", name: "<name>",
-                  publicKey: "<base64url>", version: "1.1.0", extensions: [],
-                  lifecycleRole: "participant",               [sender MUST; absent → "participant"]
-                  group: "<group-id>" }                       [optional, default "default"]
-2. peer-info    { type: "peer-info", peers: [...] }           [if known]
-3. wake-channel { type: "wake-channel", platform, token, env } [if configured]
+client → server  client-hello  { protocolVersion: "2.0", room, nodeId, name,
+                                        identityPublicKey, e2ePublicKey, nonce,
+                                        implementation, extensions }
+server → client  server-hello  { same server offer, clientNonce, selectedExtensions,
+                                proof, keyConfirmation }
+client → server  client-finish { transcriptHash, proof, keyConfirmation }
+
+Only after client-finish verifies: CONNECTED
 ```
 
-Deprecated — `state-sync`. Earlier revisions exchanged a `state-sync` frame carrying the node’s hidden-state vectors (h₁, h₂) at this point in the handshake. Per the hidden-state locality invariant ([Section 2.7](/spec/mmp/architecture#hidden-state-locality)), hidden state MUST NOT cross the wire. Implementations MUST NOT emit `state-sync` and SHOULD ignore it on receipt; peer influence is mediated entirely by CMBs evaluated through SVAF ([Section 9.2](/spec/mmp/coupling#svaf)).
+-   —`protocolVersion` is exactly `2.0`. Product/package versions belong in the transcript-bound `implementation` object.
+-   —`room` is explicit and NFC-normalized. The default room is the literal `default`; room mismatch closes the connection before peer admission.
+-   —Identity and X25519 public keys are raw 32-byte values encoded as unpadded base64url. Each side contributes a fresh 32-byte random nonce.
+-   —The signed transcript binds both nonces, nodeIds, names, identity keys, E2E keys, implementation identifiers, room, protocol version, both extension offers and the selected extension set.
+-   —Ed25519 proofs establish identity-key possession. HMAC-SHA256 confirmations under X25519/HKDF-derived finished keys establish E2E private-key possession.
+-   —No peer identity, key, role or room membership MUST be pinned before both required proofs validate. Failure closes the connection without retained peer state.
+-   —The listener MUST require `client-hello` first and `client-finish` before any non-handshake frame. Timeout is 10,000 ms by default.
 
--   —The `group` field MUST be the MMP specification version the node implements (e.g., `"1.1.0"`). Nodes SHOULD accept peers with the same major version. Nodes MAY reject peers with incompatible versions.
--   —The `lifecycleRole` field SHOULD list supported protocol extensions (e.g., `["mesh-group-v0.1"]`). Nodes MUST ignore unrecognised extensions.
--   —The `group` field is OPTIONAL and identifies the mesh group the node wishes to join (Section 5.8). A handshake without `group` MUST be treated as `group = "default"`. When two nodes handshake and discover that their declared groups differ, the receiver MUST close the connection.
--   —The inbound node MUST wait for a `handshake` frame as the first frame. If any other frame type arrives first, or no handshake arrives within 10,000 ms, the connection MUST be closed.
--   —If a node receives a handshake with a nodeId that is already connected via the same transport type, the new connection MUST be closed (duplicate guard). If the existing connection uses a different transport type (e.g. peer connected via relay, new connection via LAN TCP), the new connection MUST be accepted as a secondary transport per Section 4.6.
+The byte-exact transcript, proof, HKDF and key-confirmation constructions are normative in [the handshake vector](/spec/mmp/conformance/v2/handshake-v2.json). Any lifecycle role advertised by an extension is a hint only. Authority is resolved from the signed role-grant chain, never self-declared handshake data.
 
-lifecycleRole. Senders MUST include a `extensions` field with value `participant` (default), `validator`, or `anchor`; a receiver MUST treat a handshake without it as `participant` (backward compatibility with older nodes). The declared role is a discovery hint only — authority to apply validator-origin anchor weight ([Section 6.4](/spec/mmp/memory)) or identify feedback CMBs ([Section 11](/spec/mmp/feedback)) is resolved through the signed role-grant chain (§6.5–§6.6), never from the handshake.
+Deprecated. The one-frame `handshake` that pins its own unproven keys is a Legacy Import/migration protocol and MUST NOT be accepted by Core Secure. `state-sync` is also retired: hidden state never crosses the wire.
 
 ### 5.3 Connection State Machine
 
@@ -1246,11 +1250,11 @@ initial state
 
 TCP connect / accept
 
-AWAITING\_HANDSHAKE
+AUTHENTICATING
 
 10s timeout
 
-valid handshake received
+client-finish + both proofs valid
 
 CONNECTED
 
@@ -1270,21 +1274,21 @@ Trigger
 
 DISCONNECTED
 
-AWAITING\_HANDSHAKE
+AUTHENTICATING
 
-TCP connect or accept
+TCP/WebSocket connect or accept
 
-AWAITING\_HANDSHAKE
+AUTHENTICATING
 
 CONNECTED
 
-Valid handshake within 10,000 ms
+Transcript, identity proofs and E2E key confirmations valid within 10,000 ms
 
-AWAITING\_HANDSHAKE
+AUTHENTICATING
 
 DISCONNECTED
 
-Timeout, invalid frame, or duplicate nodeId
+Timeout, malformed frame, proof failure, room/version mismatch or duplicate nodeId
 
 CONNECTED
 
@@ -1292,11 +1296,11 @@ DISCONNECTED
 
 Heartbeat timeout, TCP close, or error
 
-Implementations MUST NOT process cognitive frames (`cmb`, `xmesh-insight`) in the AWAITING\_HANDSHAKE state.
+Implementations MUST NOT process any non-handshake frame in the AUTHENTICATING state.
 
 ### 5.4 Heartbeat
 
-Nodes MUST send a `ping` frame to each peer if no frame has been received from that peer within the heartbeat interval (default: 5,000 ms). Upon receiving `ping`, a node MUST respond with `pong`. If no frame is received from a peer within the heartbeat timeout (default: 15,000 ms), the connection MUST be closed.
+Nodes MUST send a `ping` frame to each peer if no frame has been received from that peer within the heartbeat interval (SYM reference default: 10,000 ms). Upon receiving `ping`, a node MUST respond with `pong`. If no frame is received from a peer within the heartbeat timeout (SYM reference default: 120,000 ms), the connection MUST be closed. These defaults are local policy, not interoperability constants.
 
 ### 5.5 Connection Loss and Transport Failover
 
@@ -1317,17 +1321,17 @@ Nodes MAY register a wake channel (APNs, FCM, or other push mechanism) via the `
 
 ### 5.8 Mesh Groups
 
-A SYM node MAY declare membership in a mesh group at handshake time via the optional `version` field (Section 5.2). A mesh group is a named cohort of nodes that exchange application-layer frames only with each other. Mesh groups give an operator a way to host multiple mutually-isolated meshes on the same relay or LAN segment without per-agent application changes, and they give an application a way to constrain its peers to instances of itself rather than every node on the wire.
+A node MUST declare membership in one mesh room at handshake time via the explicit `room` field (Section 5.2). A room is a named cohort of nodes that exchange application-layer frames only with each other. Rooms let an operator host multiple mutually isolated meshes on the same relay or LAN segment.
 
-Group identifier syntax. A group identifier is a string of `[a-z0-9-_.]+`, max 64 characters, case-sensitive. The literal string `"default"` is reserved as the implicit group of every node that does not declare a group; this preserves backward compatibility with nodes that predate this section.
+Room identifier syntax. A room identifier is a string of `[a-z0-9-_.]+`, max 64 characters, case-sensitive. The literal string `default` is explicit; absence is invalid in Core Secure.
 
-Protocol guarantee. A node in group `G_A` MUST NOT exchange any application-layer MMP frames (handshake fields beyond identity and version, `cmb`, `mood`, `peer-info`, `xmesh-insight`) with a node in group `G_B` when `G_A ≠ G_B`. Transport-layer connection establishment and ping/pong heartbeats are out of scope and MAY remain active across groups.
+Protocol guarantee. A node in room `R_A` MUST NOT exchange application-layer MMP frames with a node in room `R_B` when `R_A ≠ R_B`. Room is part of the authenticated handshake transcript and every signed record assertion. A mismatch fails authentication; application traffic never begins.
 
-Layer placement. A mesh group is a Layer 2 (Connection) concept. The application layer SHOULD declare its group at SDK initialisation. The relay (Section 4.4) is a dumb pipe — `relay-auth` carries no group field and the relay MUST NOT inspect payloads (Section 4.4.4) — so it need not (and cannot) enforce group isolation. Isolation is enforced at the endpoints: the authoring group is bound into the signed CMB (§18.3.1 audience binding), and a receiver MUST reject a frame whose group does not match its own connection’s group, even if a relay misdelivers it. A relay MAY additionally scope rooms by a group-derived key as defense in depth. Nodes participating in LAN Bonjour discovery SHOULD enforce group isolation by checking the peer’s declared group at handshake and closing the connection on mismatch. The connection-level error frame for a group mismatch is described in Section 7.2.
+Layer placement. A mesh room is a Layer 2 (Connection) concept. The application layer SHOULD declare its room at SDK initialisation. A relay MAY scope routing by room as defense in depth, but endpoint authentication is authoritative: the room is signed in the handshake transcript and bound into each record signature. A receiver MUST reject a frame whose authenticated room differs from its own, even if a relay misdelivers it. LAN peers perform the same check during authentication and close on mismatch with `ROOM_MISMATCH`.
 
-Recommended naming convention (non-normative). The protocol does not parse group identifiers beyond the character set and length checks above. Operators of meshes with more than a handful of groups SHOULD adopt a hierarchical dotted-path convention `<app>[.<environment>][.<cohort>]`, e.g. `acme.prod`, `acme.dev`, `assistants.default`, `research.lab`. The dots are convention only; tooling MAY use them for prefix-based grouping but the protocol does not require this.
+Recommended naming convention (non-normative). The protocol does not parse room identifiers beyond the character set and length checks above. Operators of meshes with more than a handful of rooms SHOULD adopt a hierarchical dotted-path convention `<app>[.<environment>][.<cohort>]`, e.g. `acme.prod`, `acme.dev`, `assistants.default`, `research.lab`. The dots are convention only; tooling MAY use them for prefix grouping.
 
-SVAF and group filtering. SVAF (Layer 4, Section 9) per-category evaluation runs after group filtering: `cmb` frames from peers in different groups never reach the SVAF evaluator.
+SVAF and room filtering. Authentication and room filtering run before SVAF. A record from a different room never reaches the evaluator. For an authenticated same-room record, category verdicts inform one whole-record admission result (§9.2).
 
 The naming convention above is the complete normative surface; deeper design rationale is runtime documentation, not part of this specification.
 
@@ -1745,13 +1749,29 @@ Gated
 
 Fields
 
-handshake
+client-hello
 
 2
 
 No
 
-nodeId (uuid), name (string), version (string), publicKey (base64url Ed25519), e2ePublicKey (base64 X25519), group (string), lifecycleRole (participant|validator|anchor), extensions (string\[\]) — full schema §20.1
+First Core Secure handshake frame: protocolVersion, suite, nodeId, name, room, identityPublicKey, e2ePublicKey, clientNonce — schema §20.1
+
+server-hello
+
+2
+
+No
+
+Second Core Secure handshake frame: the server offer plus clientHelloDigest, serverNonce, transcriptSignature and keyConfirmation — schema §20.1
+
+client-finish
+
+2
+
+No
+
+Final Core Secure handshake frame: transcriptDigest, transcriptSignature and keyConfirmation — schema §20.1
 
 state-sync
 
@@ -1767,7 +1787,15 @@ cmb
 
 SVAF
 
-timestamp (int), cmb (object: { key, createdBy, createdAt, fields, lineage, sig?, sigAlg?, group?, to? }) — full schema §20.2
+Core Secure signed record assertion. The CMB has exactly two logical sections: CAT7 categories and metadata. See §8.8 and schema §20.2.
+
+encrypted-cmb
+
+2/3
+
+After decrypt
+
+Core Secure ChaCha20-Poly1305 envelope: suite, senderNodeId, receiverNodeId, room, counter, ciphertext, authenticationTag — schema §20.4.
 
 cmb-fetch
 
@@ -1803,27 +1831,27 @@ grantee (nodeId), grantedBy (nodeId), grantedAt (int ms), sig (base64url), sigAl
 
 message
 
-2
+legacy
 
 No
 
-from, fromName, content, timestamp
+Legacy transport message. Core Secure application content MUST use metadata.application inside a signed CMB.
 
 mood
 
-7
+legacy
 
 Drift
 
-mood (string), context? (string) — application-layer mood broadcast; the receiver gates delivery on mood drift (§9.3 mood fast-coupling). Group-isolated per §5.8.
+Legacy fast path. Core Secure carries mood in CAT7 and protects it inside encrypted-cmb.
 
 xmesh-insight
 
-6
+legacy
 
 No
 
-from, fromName, trajectory (float\[6\]), patterns (float\[8\]), anomaly (float), outcome (string), coherence (float), timestamp
+Legacy runtime projection. Core Secure runtime output MUST be expressed as a signed CAT7 CMB.
 
 peer-info
 
@@ -1915,6 +1943,8 @@ nodeId (uuid), name (string) — presence broadcast on the relay channel (§4.4.
 
 All cognitive content — observations, decisions, feedback, directives — MUST be sent as `cmb` frames. Only `cmb` frames enter SVAF evaluation, produce anchor weights, and modulate CfC state.
 
+The registry distinguishes Core Secure wire types from retained legacy and runtime-extension types. A Core Secure participant MUST complete the three-frame authenticated handshake before it accepts `cmb` or `encrypted-cmb`. It MUST NOT silently downgrade to the legacy one-frame `handshake` or to an unsigned application frame.
+
 The `relay-*` types are transport-scope (Section 4.4): they are exchanged between a node and a relay, never between peers, and never reach the application layer. The relay forwards peer frames as opaque payloads (Section 4.4.4) and does not originate any of the peer-scope types above.
 
 Deprecated — `state-sync`. The `state-sync` frame carried a node’s hidden-state vectors (h₁, h₂). Per the hidden-state locality invariant ([Section 2.7](/spec/mmp/architecture#hidden-state-locality)), hidden state MUST NOT cross the wire. Implementations MUST NOT emit `state-sync` and SHOULD ignore it on receipt. It is retained in this registry only to reserve the type and document the deprecation; all peer influence flows through `cmb` frames evaluated by SVAF.
@@ -1978,6 +2008,30 @@ SVAF\_REJECTED
 None
 
 Memory-share rejected by SVAF (informational)
+
+1006
+
+AUTHENTICATION\_FAILED
+
+Close
+
+Transcript signature or key confirmation failed
+
+1007
+
+ROOM\_MISMATCH
+
+Close
+
+Authenticated room does not match the local room
+
+1008
+
+REPLAY\_DETECTED
+
+Close
+
+Encrypted-frame counter repeated or moved backwards
 
 Codes 1xxx are connection-level (close connection). Codes 2xxx are evaluation-level (informational). Error frames MUST NOT contain sensitive information.
 
@@ -2093,9 +2147,9 @@ A CMB MUST NOT be modified after creation. When an agent remixes a CMB, it MUST 
 
 ### 8.2.1 Content Address & Canonical Serialization
 
-A CMB’s `key` is a content address: a SHA-256 hash over a fully specified canonical serialization of the block, prefixed to be self-describing about its scheme. Two independent conforming implementations MUST compute the identical key for the same logical CMB — the key is both the node identity in the lineage DAG and the value the author signature binds (§18.3.1), so any divergence breaks lineage, dedup, citation, and integrity. The [published test vectors](https://github.com/sym-bot/mesh-memory-protocol/tree/main/conformance) are the normative contract.
+A CMB’s `key` is a content address: a SHA-256 hash over a fully specified canonical serialization of the block, prefixed to be self-describing about its scheme. Two independent conforming implementations MUST compute the identical key for the same logical CMB — the key is both the node identity in the lineage DAG and the value the author signature binds (§18.3.1), so any divergence breaks lineage, dedup, citation, and integrity. The [published test vectors](/spec/mmp/conformance) are the normative contract. The GitHub protocol repository carries a manually synchronized mirror for offline use and contribution workflows.
 
-Superseded 1.x derivation — INFORMATIVE, not normative in 2.0. The earlier format wore the _same_ `cmb-` prefix over a different digest, which is exactly why it is recorded here rather than dropped: an implementation that meets it by accident produces a plausible key for the wrong content, and the divergence is silent. It is distinguishable by length — 32 hex characters against the current 64 — and the reference runtime **rejects** it outright (§8.2.3: valid _iff_ 64 lowercase hex, anything else refused rather than reinterpreted). A conformant node therefore MUST NOT mint it and SHOULD NOT accept it; a node holding blocks addressed this way MAY continue to read its own history. 1.x stated that a conforming node MUST verify this form — that requirement is **withdrawn**, because no deployed node does, and a specification that requires what nothing implements is the defect 2.0 exists to correct. Specified byte-exactly so it can be recognised and refused:
+Superseded 1.x derivation — INFORMATIVE, not normative in 2.0. The earlier format wore the _same_ `cmb-` prefix over a different digest, which is exactly why it is recorded here rather than dropped: an implementation that meets it by accident produces a plausible key for the wrong content, and the divergence is silent. It is distinguishable by length — 32 hex characters against the current 64 — and the reference runtime **rejects** it outright (§8.2.1: valid _iff_ 64 lowercase hex, anything else refused rather than reinterpreted). A conformant node therefore MUST NOT mint it and SHOULD NOT accept it; a node holding blocks addressed this way MAY continue to read its own history. 1.x stated that a conforming node MUST verify this form — that requirement is **withdrawn**, because no deployed node does, and a specification that requires what nothing implements is the defect 2.0 exists to correct. Specified byte-exactly so it can be recognised and refused:
 
 ```
 key = "cmb-" + first 32 hex chars of SHA-256( UTF-8( focus.text + "|" + issue.text + "|"
@@ -2108,7 +2162,7 @@ key = "cmb-" + first 32 hex chars of SHA-256( UTF-8( focus.text + "|" + issue.te
 
 This scheme has three known weaknesses, which the successor resolves: the `|` join is not injection-proof (a delimiter inside a category can shift a boundary), text is not Unicode-normalised (NFC vs NFD diverge), and the 128-bit truncation gives only 64-bit collision resistance.
 
-Normative derivation — see [§8.2 Record Model](/spec/mmp/record). The address is `"cmb-"` + 64 lowercase hex, and the digest is a **promote-odd Merkle root over the seven per-category keys**, not a hash of a concatenated preimage. §8.2.3 gives the construction byte-exactly, derived from the running implementation and reproducible from that text alone.
+Normative record — see [§8.8 Record Model](/spec/mmp/record). The address is `"cmb-"` + 64 lowercase hex, and the digest is a **promote-odd Merkle root over the seven per-category keys**, not a hash of a concatenated preimage. This section gives the cognition-key construction byte-exactly; §8.8 implementation and reproducible from that text alone.
 
 Why this section changed in 2.0. Through 1.1.0 this page specified a flat `SHA-256` over a length-prefixed concatenation of the seven category texts plus a role tag. The implementation mints the Merkle form. **Both wear the same `cmb-` prefix**, so an implementation built to the older text computes a _different address for the same content_ and nothing signals the mismatch — it fails silently, at every record. That is the divergence 2.0 exists to close.
 
@@ -2116,7 +2170,7 @@ Schemes a node may encounter. The reference implementation classifies three: `bl
 
 -   Category text MUST be Unicode NFC-normalised (UAX #15). Category order is the fixed CAT7 order. Mood contributes its **text only**; valence, arousal and all vector embeddings are excluded from the address.
 -   Netstring length-prefixing makes each per-category preimage injection-proof with no escaping and no JSON-canonicalization dependency, so implementations in different languages agree byte-for-byte.
--   A record binds **content only** — identical content by any author at any time yields one address. Descent is committed alongside the address in the signature (§8.2.4), never folded into it, so that collapse property is preserved.
+-   A record binds **content only** — identical content by any author at any time yields one address. Descent is committed alongside the address in the signature (§8.8.4), never folded into it, so that collapse property is preserved.
 -   The full 256-bit width is normative: a truncated hash’s birthday bound would admit a grind-then-substitute attack against the signed key.
 
 ### 8.3 Category-by-Category Guide
@@ -2407,7 +2461,7 @@ A CMB SHOULD carry its author’s signature in `cmb.sig` (base64url) with `cmb.s
 
 Why are all 7 categories required, not optional?
 
-SVAF computes per-category drift across all 7 categories. missing categories make the drift formula undefined — the aggregate changes depending on which categories are present. Categories the agent cannot meaningfully extract are set to "neutral" (a known, consistent baseline vector), never omitted. To reconcile the phrasings elsewhere: emitters normalize absent categories to "neutral"; the legacy key scheme (§8.2.1) hashed an absent category as the empty string ""; and SVAF treats a category as non-evaluable when it is absent or neutral (§9.2.1).
+The cognition address and SVAF evidence are defined over a fixed CAT7 tuple. Missing categories would change both constructions. An emitter therefore normalizes a category it cannot meaningfully extract to the canonical neutral value before addressing and signing; the receiver may classify that neutral category as non-evaluable when forming its whole-record admission decision (§9.2.1).
 
 Why not let agents define their own categories?
 
@@ -2421,118 +2475,117 @@ Mood has a well-established dimensional model (Russell’s circumplex). other ca
 
 ---
 
-<!-- 8.2 Record Model -->
+<!-- 8.8 Record Model -->
 
-## 8.2 Record Model
+## 8.8 Record Model
 
-This section specifies the three constructions an independent implementation MUST reproduce byte-for-byte to interoperate: the record's **shape**, its **content address**, and its **signature payload**. Everything else about how a node stores, indexes, caches or evaluates records is a local matter and is out of scope here.
+A Cognitive Memory Block separates _what the agent says_ from _what the mesh can prove about that assertion_. This section is normative and byte-exact. The public schemas, constructors and vectors are available from the [conformance suite](/spec/mmp/conformance).
 
-### 8.2.1 Two-section record
+**v2.0 conformance correction.** The MMP version remains 2.0. New cryptographic constructions identify themselves independently as `mmp-sig-v2.0`. A reader MUST NOT silently interpret a legacy construction as Core Secure.
 
-A record has exactly two top-level sections. `categories` carries the CAT7 content; `metadata` carries every provable fact about the record — its address, its author, its time, its audience and its descent.
-
-One name. The seven members are **categories**, and so is the wire key that carries them. They were briefly different — the terminology was corrected before the wire was — and that gap is now closed: the runtime emits `categories` and reads nothing else. A record carrying the retired name does not resolve, which is deliberate: it is legible at the boundary rather than half-read further in. The container’s key name never enters any preimage in §8.2.3 or §8.2.4, so the rename moved no address and invalidated no signature.
-
-Why the split is normative. The address is a function of the categories alone (§8.2.3), and the signature is a function of the metadata plus a commitment to per-category descent (§8.2.4). Keeping them in separate sections means the same content always yields the same address regardless of who authored it, when, or into which room — which is what makes identical observations from different nodes collapse to one address.
+### 8.8.1 Two-section logical record
 
 ```
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "required": ["categories", "metadata"],
-  "properties": {
-    "categories": {
-      "type": "object",
-      "description": "The CAT7 container. Seven categories, each {text, …}; see §8. The wire key and the prose term are the same word: categories.",
-      "required": ["focus","issue","intent","motivation","commitment","perspective","mood"]
-    },
-    "metadata": {
-      "type": "object",
-      "required": ["key", "createdBy", "createdTimestamp"],
-      "properties": {
-        "key":              { "type": "string", "pattern": "^cmb-[0-9a-f]{64}$", "description": "Content address (§8.2.3)" },
-        "createdBy":        { "type": "string", "description": "Authoring node identity" },
-        "createdTimestamp": { "type": "integer", "minimum": 0, "description": "Milliseconds since epoch" },
-        "lineage":          { "type": ["object","null"], "description": "Descent; null for a root record" },
-        "room":             { "type": ["string","null"], "description": "Audience boundary" },
-        "to":               { "type": ["string","null"], "description": "Directed recipient, or null for broadcast" },
-        "sig":              { "type": "string", "description": "base64url Ed25519 over the §8.2.4 payload" },
-        "sigAlg":           { "const": "ed25519" }
-      }
-    }
+  "categories": { "focus": { "text": "…", "meta": { "key": "…", "parents": [] } }, "…": "six more" },
+  "metadata": {
+    "key": "cmb-…",
+    "addressScheme": "mmp-cmb-merkle-v2",
+    "assertionId": "asrt-…",
+    "signatureSuite": "mmp-sig-v2.0",
+    "createdByNodeId": "…",
+    "createdBy": "display label",
+    "createdTimestamp": 1786611600000,
+    "room": "team-room",
+    "to": null,
+    "lineage": null,
+    "application": null,
+    "sigAlg": "ed25519",
+    "sig": "…"
   }
 }
 ```
 
-Implementations MUST treat `metadata.key` as the record's identity. A record carrying two CAT7 containers MUST NOT be processed; it is malformed, and a receiver MUST refuse it rather than choose between them.
+-   —The decrypted logical record MUST have exactly the two top-level members shown above.
+-   —`categories` MUST contain all seven CAT7 categories and their per-category descent metadata.
+-   —`metadata` carries exact authorship, audience, lineage, application and signature assertions.
+-   —Admission may evaluate seven categories independently, but memory admission stores or refuses this immutable CMB as one record. A partial CMB is never created.
 
-### 8.2.2 Canonical framing
+### 8.8.2 Cognition key and assertion identity
 
-Two primitives are used throughout §8.2.3 and §8.2.4, and both exist so that no preimage depends on a formatting choice.
-
--   **Length-prefix.** `lp(s)` is `<utf8-byte-length>":"<utf8 bytes>`. It is injection-proof: a delimiter inside a text cannot shift a category boundary.
--   **Canonical decimal.** Integers enter as ASCII decimal — no leading zeros, no sign, no separators, no exponent — and MUST be non-negative. A float or a negative reaching a preimage produces bytes another implementation cannot reproduce.
-
-Text entering any preimage MUST be Unicode NFC-normalised. Mood contributes its **text only**; its scalar valence and arousal are excluded, so no preimage contains a floating-point number and there is no number-formatting hazard across languages.
-
-### 8.2.3 Content address
-
-The address is `"cmb-"` followed by 64 lowercase hex characters. A key is valid _iff_ it matches exactly that form; implementations MUST reject anything else rather than attempt a legacy interpretation.
-
-**Per-category key.** For each of the seven categories:
+`metadata.key` identifies CAT7 cognition. It is the promote-odd Merkle root defined in §8.2.1 and remains independent of author, time, audience, lineage and application bytes. Identical CAT7 cognition therefore collapses to one `cmb-` key.
 
 ```
-categoryKey(name, text) = SHA-256( "mmp-cmb-v1\n" ‖ lp(name) ‖ lp(NFC(text)) )
+assertionId = "asrt-" || lowercaseHex(SHA-256(signingPayloadV2_0))
 ```
 
-The **category name is a preimage input** and MUST NOT be omitted. Without it, identical text collapses across positions — `focus:"done"` would share an address with `commitment:"done"`, and every empty category everywhere would collapse together. With the name bound in, corroboration is per _(category, text)_: two agents said the same thing about the same category.
+`assertionId` identifies the complete authenticated assertion. Memory deduplication uses the cognition key. Directed or actionable delivery deduplication MUST use the assertion identity. Two records with the same CAT7 categories but different application bytes consequently share a cognition key and have different assertion identities.
 
-**Root.** The seven category keys, in the fixed CAT7 order, are combined by a Merkle root with **promote-odd**:
+### 8.8.3 Authenticated application bytes
 
-```
-leaf_i    = SHA-256( 0x00 ‖ decode_hex(categoryKey_i) )
-node(a,b) = SHA-256( 0x01 ‖ a ‖ b )
-odd node  → PROMOTED unchanged to the next level; never duplicated
-key       = "cmb-" ‖ hex(root)
-```
-
--   **Leaves and internal nodes are domain-separated** (0x00 / 0x01), so no value can be read as a leaf at one level and an internal node at another.
--   **Operands are decoded bytes, not hex text**, so the preimage is not a function of an encoding choice.
--   **No length-prefixing here**, and this is the one place its absence is correct: both operands are fixed-width 32 bytes and therefore self-delimiting.
--   **Promote-odd is binding.** Seven is odd, so the rule fires on _every_ record. An implementation that duplicates the last node instead — a common Merkle convention — computes a different address for the same content, and the divergence is silent.
-
-### 8.2.4 Signature payload
-
-A record is signed with the author's Ed25519 identity key over the following bytes. After the domain tag the payload is **uniformly length-prefixed ASCII** — no raw bytes anywhere, every hash as lowercase hex text. The tag itself is raw with a trailing newline, because a fixed leading constant is self-delimiting.
+An application action MUST NOT ride as an unsigned top-level payload. When present, it is stored as `metadata.application`:
 
 ```
-"mmp-sig-v2\n"
-  ‖ lp(key)                       full prefixed address — binds the scheme, not just the digest
-  ‖ lp(NFC(createdBy))
-  ‖ lp(decimal(createdTimestamp))
-  ‖ lp(NFC(room))                 "" when absent
-  ‖ lp(NFC(to))                   "" when absent
-  ‖ lp(decimal(count(parents)))
-  ‖ lp(parent) for each parent    bytewise-sorted
-  ‖ lp(categoryParentsCommitment)
+{
+  "mediaType": "application/json",
+  "schema": "https://example.test/schema/action-v1.json",
+  "encoding": "base64url",
+  "byteLength": 123,
+  "digest": "sha256-<64 lowercase hex>",
+  "data": "<unpadded base64url>"
+}
 ```
 
-Parents are a **set**: they MUST be sorted bytewise before framing, so their order cannot change the signed bytes. The **audience is signed** — a signature is valid only for the room and recipient it was made for, which is what stops a directed record being replayed as a broadcast.
-
-**Category-parents commitment.** Per-category descent is bound alongside the root rather than folded into it:
+`data` is unpadded canonical base64url and decodes to at most 524,288 bytes. Before application exposure, a receiver MUST verify the encoding, decoded length and SHA-256 digest. The descriptor commitment binds presence, media type, schema URI, encoding, length and digest into the record signature.
 
 ```
-SHA-256( "mmp-fp-v1\n" ‖ for each category in CAT7 order:
-             lp(categoryName) ‖ lp(decimal(count(refs))) ‖ lp(ref)… )
+applicationCommitmentV1(absent) =
+  hex(SHA-256(UTF8("mmp-app-v1\n") || lp("0")))
+
+applicationCommitmentV1(present) =
+  hex(SHA-256(UTF8("mmp-app-v1\n") || lp("1") || lp(mediaType) ||
+    lp(NFC(schema)) || lp("base64url") || lp(decimal(byteLength)) || lp(digest)))
 ```
 
-Counts are length-prefixed at both levels, so `["ab","c"]` and `["a","bc"]` cannot collide, and a category with no asserted descent stays distinguishable from an absent category. It has its own domain tag and its own version because it is its own construction with its own lifecycle.
+### 8.8.4 Corrected v2.0 signature payload
 
-Why descent is not in the root. Folding lineage into the content address would make the address lineage-dependent, and identical observations from different nodes would then no longer collapse to one address. The root stays content-only; descent is attested beside it.
+`lp(x)` is ASCII decimal UTF-8 byte length, a colon, then the UTF-8 bytes of `x`. Integers are unsigned canonical decimal with no leading zero. Lists state their count and sort members bytewise.
 
-### 8.2.5 Verification
+```
+UTF8("mmp-sig-v2.0\n") ||
+lp("2.0") ||
+lp("mmp-cmb-merkle-v2") ||
+lp(metadata.key) ||
+lp(metadata.createdByNodeId) ||
+lp(NFC(metadata.createdBy)) ||
+lp(decimal(metadata.createdTimestamp)) ||
+lp(NFC(metadata.room)) ||
+lp(metadata.to or "") ||
+lp(decimal(parentCount)) ||
+concat(lp(parent) for bytewise-sorted parents) ||
+lp(categoryParentsCommitment) ||
+lp(applicationCommitmentV1)
+```
 
-A verifier MUST recompute the address from the categories and compare it to `metadata.key` before checking the signature; a record whose key does not match its content is rejected without reference to its signature. A verifier that cannot read a record's categories — absent, or ciphertext it holds no key for — MUST NOT report the record as valid: **it reports that it cannot verify.** Absence is never silence.
+-   —`createdByNodeId` is the cryptographic author identity and MUST resolve to the verifying Ed25519 key.
+-   —`createdBy` is a signed display label and MUST NOT be used for identity resolution or routing.
+-   —`room` is explicit. The default room is the literal string `default`, not absence.
+-   —New v2.0 records MUST declare `mmp-cmb-merkle-v2`; a verifier MUST NOT guess among address derivations sharing one prefix.
+
+### 8.8.5 Verification order
+
+1.  Validate the negotiated frame and record schemas.
+2.  When encrypted, authenticate and decrypt the transport envelope.
+3.  Verify application encoding, length and digest.
+4.  Recompute every category key and the cognition key.
+5.  Recompute the assertion identity and reject a carried mismatch.
+6.  Resolve the author key by `createdByNodeId` and verify the Ed25519 signature.
+7.  Verify signed room and recipient audience.
+8.  Only then expose the record for delivery and receiver-autonomous admission.
+
+Failure at any cryptographic step is a refusal, not an “unverified success.” Legacy reading belongs to a named migration profile and MUST NOT downgrade Core Secure automatically.
+
+Machine contract. Download the [record schema](/spec/mmp/schema/cmb.schema.json), [signature vectors](/spec/mmp/conformance/v2/record-signature-v2.json) and [application vectors](/spec/mmp/conformance/v2/application-v2.json).
 
 
 
@@ -2590,7 +2643,7 @@ Rejected
 
 When a node receives a `cmb` frame, it MUST evaluate the signal independently of peer coupling state, through an admission path that satisfies the δf interface (Section 9.2.1). “Support” here means interoperate-with, not implement-only-this: every implementation MUST provide the concrete cosine-distance baseline (Section 9.2.1) as its interoperable floor — the path a node with no other method uses, and the one interop test vectors target — and its baseline path MUST reproduce those vectors. An implementation MAY additionally use a richer path (a trained neural evaluator is one such path; the heuristic baseline is the production default in the reference runtime); a richer path still satisfies the interface, but admission is then receiver-divergent by design (Section 2.7), not identical across nodes. (The mood category’s unconditional delivery is a Section 9.3 _delivery_ mechanism, separate from this _admission_ evaluation.) The encoder that maps category text to vectors SHOULD use semantic embeddings (e.g. sentence-transformers) rather than lexical hashing — per-category evaluation quality is bounded by encoder quality (Section 18.7), so thresholds are meaningful only within a pinned encoder.
 
-The SVAF evaluation computes per-category drift between the incoming CMB and local anchor CMBs, applies per-agent category weights (αf), combines with temporal drift, and produces a four-class decision using a band-pass model:
+The SVAF evaluation computes category evidence between the incoming CMB and local anchor CMBs, applies per-agent category weights (αf), combines with temporal drift, and produces one whole-record four-class decision using a band-pass model:
 
 ```
 totalDrift = (1 - λ) × fieldDrift + λ × temporalDrift
@@ -2611,9 +2664,9 @@ temporalDrift = 1 - exp(-age / τ_freshness)
 
 Admission is evaluation-time-dependent by design. Because `totalDrift` blends content drift with `temporalDrift`, the same CMB can admit when evaluated fresh and reject when evaluated late: any block whose aggregated category drift D lies in `( (Tguarded − λ) / (1 − λ),  Tguarded / (1 − λ) )` — at the reference values (λ = 0.3, Tguarded = 0.5), D ∈ (0.286, 0.714) — crosses the guarded boundary as its age term saturates. Below that window a block admits at every age; above it, it rejects even fresh. This is a consequence of the blend, disclosed rather than incidental: freshness is part of relevance, so a receiver’s verdict on stale traffic legitimately differs from its verdict on live traffic. Implementations and operators MUST NOT assume admission is reproducible across evaluation times; reproducibility holds only at fixed age (see the determinism & test-vectors note below).
 
-### 9.2.1 Per-category drift δf (Admission Interface)
+### 9.2.1 Category drift δf (Decision Evidence)
 
-δf ∈ \[0,1\] is the per-category admission drift computed for each CAT7 category of an incoming CMB. This specification defines δf as an interface — its inputs, range, and required invariants — and does not prescribe the internal computation. An implementation is free to use cosine-distance, attention-based, or neural methods, provided the invariants below hold.
+δf ∈ \[0,1\] is the category drift computed for each CAT7 category of an incoming CMB. This specification defines δf as an interface — its inputs, range, and required invariants — and does not prescribe the internal computation. An implementation is free to use cosine-distance, attention-based, or neural methods, provided the invariants below hold.
 
 Inputs: the incoming category vector xf and the receiver’s local anchor set A. Output: δf ∈ \[0,1\] — 0 means the category is already represented in memory (no information gain); 1 means maximally novel or foreign relative to memory.
 
@@ -2658,7 +2711,7 @@ SVAF governs two _separate_ receiver decisions that implementations MUST not con
 
 A CMB’s binding is determined by its transport routing envelope (§4.4.4) — the presence or absence of a `to` recipient:
 
--   — Group-bound (autonomous). A CMB broadcast to a channel/group with no `to` recipient. The receiver evaluates it autonomously: SVAF gates _both_ memory admission and delivery. A group-bound CMB that SVAF rejects (or deems redundant) MUST NOT be surfaced to the application layer — this is receiver-autonomous attention, the mechanism that keeps broadcast traffic from overwhelming every node. (Mood is the sole exception — §9.3.)
+-   — Room-bound (autonomous). A CMB broadcast to its authenticated room with no `to` recipient. The receiver evaluates it autonomously: SVAF gates _both_ memory admission and delivery. A room-bound CMB that SVAF rejects (or deems redundant) MUST NOT be surfaced to the application layer — this is receiver-autonomous attention, the mechanism that keeps broadcast traffic from overwhelming every node. (Mood is the sole exception — §9.3.)
 -   — Peer-bound (directed). A CMB addressed to a specific recipient (`to` = this node, §4.4.4). A directed CMB is a request from one agent to another; the receiver MUST surface it to the application/agent layer _unconditionally_, regardless of the SVAF verdict. For a directed CMB, SVAF governs _memory admission only_ — the receiver MAY still decline to store a directed CMB it finds redundant or foreign, but it MUST NOT withhold delivery on those grounds. Suppressing a peer-bound CMB because SVAF scored it low is a conformance defect (the agent was spoken to and did not hear it).
 
 Delivery MUST be exactly-once per received CMB: a directed CMB that SVAF _admits_ surfaces through the normal admission path; a directed CMB that SVAF _rejects_ surfaces through the unconditional-delivery rule above. Implementations MUST ensure these two paths do not both fire for the same CMB. Receive-path de-duplication (§4.2) applies equally to both bindings.
@@ -4400,7 +4453,7 @@ A broadcast directive carries no privileged authority. Every receiving node MUST
 -   MUST NOT An implementation grant a broadcast directive elevated admission weight on the basis that it originates from the operator. Elevated influence, where it exists, comes only from earned authority (§6.5), evaluated identically for human and agent emissions.
 -   SHOULD The per-node admit/reject verdict on a directive be recorded in the admission audit trail — it is the honest record of _how the mesh received the steer_, node by node.
 
-WHY IT MATTERS  
+WHY IT MATTERS
 A command-and-control system would force every agent to obey the operator. A mesh does not: the operator emits, and each sovereign agent decides for itself whether the directive fits what it knows. You steer the mesh by _persuading its cognition_, and you can watch, in the audit, exactly which agents took the steer and which did not.
 
 §14.12 — New in 1.1.0 — work layer
@@ -4731,144 +4784,80 @@ Q&A   Can an extension become a core frame type? — Yes. An extension that pro
 
 ## 17\. Conformance
 
-MMP conformance is defined in two classes, not one ladder, because the protocol’s two halves have different natures. Emission — minting a well-formed CAT7 block and putting it on the wire — is a message-format contract: fully specified, byte-testable, and implementable by any party in an afternoon. Cognition — admission, temporal integration, reinforcement, branching — is a coupled runtime whose correctness lives in dynamics, not in a wire format; it is documented so an emitter can _trust_ what a mesh will do with its blocks, not so third parties _rebuild_ it. Interoperability lives at the emission layer; the receiver-side is a runtime, and the reference implementation is its normative behavior. (This is the deliberate architecture, not a limitation — see the formalization’s “reference implementation is the standard” note.)
+The specification and its published machine artifacts define MMP conformance. SYM, Swift, xmesh-core and third-party software are implementations of that contract. No implementation is the standard, and sharing source with a reference implementation is neither required nor sufficient for conformance.
 
-### 17.1 Class 1 — Emitter (the normative wire contract)
+Receiver autonomy means conforming cognitive nodes may reach different admission decisions. It does not permit private wire bytes, unverifiable identity, unsigned actions, partial CMB storage or hidden-state exchange.
 
-An Emitter participates in a mesh by producing CAT7 blocks and delivering them; it need not admit, store, or reason. This is the third-party conformance target — what a sensor, a CI pipeline, or another vendor’s agent implements to _emit into_ a mesh. A conforming Emitter MUST:
+### 17.1 Core Secure participant
 
--   Identity — hold a stable nodeId backed by a persistent Ed25519 keypair (§3.1.3, §18.3).
--   CAT7 blocks — mint CMBs carrying all seven typed categories (§8.2), absent categories normalized to `"neutral"`, never omitted.
--   Content address — compute the `cmb-` key over the canonical serialization (§8.2.1); two conforming emitters MUST produce the identical key for the same block. Verified by the [published `cmb-key-v1` vectors](https://github.com/sym-bot/mesh-memory-protocol/tree/main/conformance).
--   Signature — sign the block over the §18.3.1 payload (binding key, author, time, and audience); `cmb-sig-v1` vectors are the contract.
--   Transport + handshake — length-prefixed JSON over TCP (LAN) or WSS (relay), the §5 handshake, and deliver a `cmb` frame (§7). Silently ignore unrecognised frame types.
--   Anti-echo — emit only on genuinely new domain data (§15.7); an emitter that re-states without new observation is noise.
+A Core Secure participant MUST:
 
-An Emitter is fully specified today and needs no receiver-side machinery: it does not run SVAF, keeps no store, and hosts no cognitive state. (The relay/forwarding-only node of earlier revisions is an Emitter sub-profile that forwards frames without minting them.) An SDK SHOULD package this as a thin client so emitting is a handful of lines; where the reference SDK does not yet provide a standalone emitter, the wire requirements above remain the normative contract — see [§17.6](#implementation-status).
+-   hold a persistent Ed25519 identity and a canonical nodeId;
+-   complete the authenticated §5.2 transcript and prove possession of both identity and X25519 private keys;
+-   negotiate protocol version, room and extensions without silent fallback;
+-   construct all seven CAT7 categories and the §8.2.1 cognition key;
+-   authenticate author nodeId, audience, lineage and application bytes with §8.8 `mmp-sig-v2.0`;
+-   use the §18.2.1 directional HKDF/ChaChaPoly envelope and exact ordered sequence;
+-   validate schemas, cryptographic bytes, audience and replay state before application exposure;
+-   reject Core Secure downgrade to an unsigned, one-frame-handshake or legacy-suite path.
 
-### 17.2 Class 2 — Cognitive Node (reference-implementation behavior)
+### 17.2 Cognitive node
 
-A Cognitive Node is a full mesh participant: it admits, integrates, reinforces, and branches. Its behavior is specified for transparency, not reimplementation — so an Emitter knows what a mesh guarantees about its blocks (what the membrane admits, how lineage is kept, what grounding means), and so a deployment is auditable. A Cognitive Node MUST honor every Emitter obligation, plus:
+A cognitive node satisfies every Core Secure obligation and implements receiver-autonomous memory admission. It evaluates all seven categories, records per-category evidence, aggregates under its local policy and admits or refuses the immutable CMB as one whole record.
 
--   Hidden-state locality — L2 memory-tier hidden state (h₁, h₂, held by Layer 6) MUST NOT cross the wire (§2.7); a conformant node MUST NOT emit `state-sync`.
--   Admission — per-category SVAF evaluation against local anchors (§9.2), satisfying the §9.2.1 δf interface invariants; the reference baseline is vector-tested (`svaf-baseline`).
--   Integration — store an admitted block as a remix with lineage (§15.5), never the raw peer block; lineage remains walkable (§15.2) and honors the tether (§15.8).
--   Memory + Canon — the lifecycle and retention rules of §6, including the Canon exemption (§6.3) and grounding (§6.7).
--   Cognitive layers (Layers 5–7, optional) — synthetic memory (§12), Cognitive State (§13), and application (§14); a node MAY implement these, and if it persists Layer-6 state it MUST keep it across restarts (§13).
+-   hidden neural or model state MUST NOT cross the wire;
+-   foreign embedding vectors MUST NOT control admission; receivers encode from signed text;
+-   admitted peer cognition is stored as the receiver’s remix with walkable lineage;
+-   admission attestations expose the observable decision and per-category evidence;
+-   directed delivery is distinct from memory admission and carries verification/admission state;
+-   private learned policies MAY vary, but MUST NOT weaken public identity, integrity, audit or receiver-autonomy invariants.
 
-The normative behavior of Class 2 is what the [reference implementation](/spec/mmp#implementations) does; the specification of these layers is documentation of that runtime, and independent reimplementation is neither required nor expected for interoperability. Two independent Cognitive Nodes are not guaranteed to agree block-for-block — admission is receiver-divergent by design (§9.2.1), the embedding kernel is receiver-local, and thresholds are meaningful only within a pinned encoder. A mesh interoperates with a Cognitive Node; it does not certify a re-built one.
+SYM is an open transparent baseline. xmesh-core is a proprietary conforming cognition runtime. Both are measured at the same public boundary; neither may substitute private conformance bytes.
 
-### 17.4 Testing
+### 17.3 Legacy Import profile
 
-Class 1 conformance is verified byte-for-byte against the published [conformance vectors](https://github.com/sym-bot/mesh-memory-protocol/tree/main/conformance) (`cmb-key-v1`, `cmb-sig-v1`) — an Emitter that reproduces them meshes with any deployment. Class 2 implementations SHOULD additionally test admission (the `svaf-baseline` vectors), CMB creation, and lineage. At minimum, tests SHOULD cover:
+Legacy Import exists only to read retained history or perform an explicit reader-first migration. It is not Core Secure and MUST NOT be selected through negotiation failure. A host MUST expose the profile and verification limitations to its operator. Legacy network admission is removed after the declared migration window; offline store import may remain.
 
--   Ed25519 identity keypair — generated at first launch, persisted, and presented in the handshake (Sections 3.1.3, 18.3)
--   CMB signature verification — a receiver holding the author’s key MUST reject forged or tampered CMBs (Section 18.3.1)
--   Emission gate — a remix MUST carry new domain data; pure paraphrase is not emitted (Section 15.7)
--   Receiver-autonomous SVAF admission — per-category evaluation at the receiver, no sender override (Section 9.2)
--   Hidden-state locality — hidden state (h₁, h₂) MUST NOT cross the wire (Section 2.7)
--   Lifecycle authority gates — lifecycle advancement honored only for authors whose role resolves through the signed grant chain (Section 6.5)
+### 17.4 Executable testing
 
-The normative [conformance test vectors](https://github.com/sym-bot/mesh-memory-protocol/tree/main/conformance) are published in the protocol repository: `cmb-key-v1` (§8.2.1 content addresses), `cmb-sig-v1` (§18.3.1 signing payload + Ed25519), `svaf-baseline` (§9.2/§9.2.1 admission math, the nearest-anchor redundancy witnesses, and the evaluation-time flip window), and `tether-v1` (§15.8 drift checks + `mmp-tether-v1` attestation). A conforming Class 1 Emitter MUST reproduce the `cmb-key-v1` and `cmb-sig-v1` expectations exactly. The `svaf-baseline` and `tether-v1` sets are runtime-audit vectors: they pin the reference runtime’s admission math so deployments are verifiable, not so third parties rebuild it (§17.2); they carry raw category vectors and no text — they test the math, not the encoder (§9.2.1). The reference implementation re-derives every vector in its own suite, so it cannot drift from the published contract.
+A conforming implementation MUST consume the public files, reproduce their expected values and reject the negative mutations. Generating private vectors from the implementation under test proves only self-consistency and MUST NOT be reported as MMP conformance.
 
-### 17.5 Requirements Added in 1.1.0
+Artifact
 
-NEW IN 1.1.0   The following requirements were added by the 1.1.0 work layer. They are required for 1.1.0 conformance; a 1.0.x implementation remains 1.0.x-conformant without them (1.1.0 is wire-compatible):
+Required proof
 
--   Canon tier — validated and canonical CMBs MUST NOT be age-purged (Section 6.3)
--   Grounding rules — lifecycle state is receiver-relative; a node MUST NOT self-advance its own CMBs’ lifecycle (Section 6.7)
--   Walkable trail — lineage MUST remain walkable end-to-end, and a duplicate delivery is deduplicated, not an error (Section 14.12)
+[application-v2](/spec/mmp/conformance/v2/application-v2.json)
 
-Added by the 2026-07-07 soundness & completeness update (same wire compatibility):
+canonical bytes, length, digest and presence commitment
 
--   Nearest-anchor redundancy basis — the redundancy decision MUST be computed from δfnear (Section 9.2.1)
--   Repeat verification — a recognised grounding MUST NOT be refused solely for redundancy (Section 6.7)
--   Failure channel — observed failure outcomes MUST NOT be selectively suppressed (Section 6.7)
--   Lineage tether — a remix MUST NOT carry lineage its anchor’s reject band would disown; severed remixes enter as fresh roots (Section 15.8)
+[record-signature-v2](/spec/mmp/conformance/v2/record-signature-v2.json)
 
-### 17.6 Implementation Status
+category keys, Merkle address, assertion identity and Ed25519 signature
 
-Where the reference implementations stand against this specification. Normative requirements are defined by the sections cited, not by this table; a specified-but-unimplemented item is a conformance gap of the reference implementation, never a weaker requirement.
+[handshake-v2](/spec/mmp/conformance/v2/handshake-v2.json)
 
-Requirement
+transcript, proofs, X25519 confirmation and HKDF outputs
 
-Section
+[e2e-v2](/spec/mmp/conformance/v2/e2e-v2.json)
 
-Reference-implementation status
+directional keys, counter nonces, AAD, ciphertext and authentication failures
 
-Nearest-anchor redundancy basis
+Cognitive profiles SHOULD additionally consume the public baseline SVAF and tether vectors, and MUST test whole-record admission, signed freshness, lineage and audit outcomes.
 
-§9.2.1
+### 17.5 Release gate
 
-Implemented (Node.js, Swift — both reproduce the published svaf-baseline vectors)
+-   A clean-room verifier passes without importing SYM or xmesh-core.
+-   Every emitted core frame validates against its published schema.
+-   Node and Swift implementations reproduce identical transcript, signature and AEAD bytes.
+-   Packaged release artifacts run the corpus from a clean install.
+-   xmesh-core passes the public boundary corpus without disclosing private internals.
+-   The website build generates and verifies its own canonical artifacts before producing the published Pages output.
 
-Repeat verification & failure channel
+**Current status:** canonical v2.0 schemas, constructors and vectors are published as a candidate conformance contract. Runtime reader-first migration is in progress. Until every gate above passes, an implementation should report its individual results, not claim blanket MMP v2.0 Core Secure certification.
 
-§6.7
+### 17.6 Independent implementation
 
-Implemented (Node.js)
-
-Lineage tether
-
-§15.8
-
-Implemented (Node.js)
-
-Tether attestation & kernel identity
-
-§15.8
-
-Implemented (Node.js)
-
-Content-addressed fetch (`cmb-fetch`)
-
-§7, §15.8
-
-Implemented (Node.js)
-
-§15.8 applied to pre-existing stores (retroactive audit)
-
-§15.8
-
-Implemented (Node.js) — annotate + attest by default, severance opt-in; unresolvable roots stay unchecked, never severed
-
-Source-novel forwarding
-
-§15.7.1
-
-Not yet implemented — the receiver-private source-novel test, wire form, and hop bound are open
-
-Inactivity archiver (validated → archived decay)
-
-§6.3–§6.4
-
-Not yet implemented — a validated entry currently leaves the Canon only by explicit dismiss
-
-Semantic encoder default
-
-§9.2.1
-
-Node.js: default. Swift: optional (host-supplied); lexical fallback warns once
-
-Conformance test vectors
-
-§17.4
-
-Published — [mesh-memory-protocol/conformance](https://github.com/sym-bot/mesh-memory-protocol/tree/main/conformance) (key, signature, SVAF baseline, tether); guarded by the reference suite
-
-Standalone Emitter SDK (Class 1, §17.1)
-
-§17.1
-
-Wire contract complete + vector-tested; a thin emit-only client is not yet packaged (today emitting runs through a full node or the local daemon IPC) — SDK gap, not a spec gap
-
-Machine-readable schema files
-
-§20
-
-Published — [mesh-memory-protocol/schema](https://github.com/sym-bot/mesh-memory-protocol/tree/main/schema) (handshake, cmb + tether attestation, cmb frame, cmb-fetch pair; guarded by the reference suite); remaining frame types tracked
-
-Q&A   What’s the smallest thing I can build to join a mesh? — A Class 1 Emitter (§17.1): identity, CAT7 minting, the `cmb-` address, a signature, and the handshake + `cmb` frame. No LLM, no SVAF, no store. You emit into a mesh; the Cognitive Nodes (§17.2) admit, rank, and remix what you send. Being a Cognitive Node is the runtime, not a reimplementation target.
+An independent implementation is a first-class target. It can emit, receive, authenticate and encrypt MMP records from this specification and public corpus alone. A full cognitive engine is optional; an emitter or verifier need not implement SVAF, a memory store or an LLM.
 
 
 
@@ -4958,7 +4947,7 @@ Handled by Apple. Implementation uses APNs certificate.
 
 WSS (TLS) encrypts the transport — it protects from eavesdroppers on the wire. But the relay operator can still read the JSON payload inside the TLS tunnel. For `cmb` frames containing CMBs, this means the relay sees all 7 CAT7 category texts in plaintext.
 
-When CMBs transit a relay, implementations MUST encrypt CMB category text end-to-end so the relay forwards opaque ciphertext, not readable categories. The relay MUST NOT be able to read CMB content.
+In the Core Secure profile, implementations MUST encrypt CAT7 categories and application bytes end to end on every transport. A relay forwards an opaque envelope and MUST NOT learn protected content.
 
 Layer
 
@@ -4978,48 +4967,43 @@ Relay operator, intermediaries
 
 Only the intended peer can decrypt category text
 
-The encryption scheme SHOULD use the Ed25519 keypair from Layer 0 (Section 3) for key exchange, with X25519 Diffie-Hellman for shared secret derivation and XChaCha20-Poly1305 for symmetric encryption. The encrypted payload replaces the `categories` object in the CMB:
+The v2.0 Core Secure suite is X25519 key agreement, HKDF-SHA256 derivation and IETF ChaCha20-Poly1305 authenticated encryption. Ed25519 identity proofs and X25519 key confirmations bind both public keys to the authenticated handshake transcript (§5.2).
 
 ```
 {
-  "type": "cmb",
-  "timestamp": 1711540800000,
-  "cmb": {
-    "key": "cmb-b2c3d4e5f6a7b8c9",
-    "createdBy": "agent-a",
-    "createdAt": 1711540800000,
-    "categories": "<encrypted>",        // opaque ciphertext
-    "nonce": "base64-encoded-nonce", // per-frame nonce
-    "lineage": { ... }              // lineage stays cleartext for graph traversal
-  }
+  "type": "cmb-encrypted",
+  "protocolVersion": "2.0",
+  "suite": "X25519-HKDF-SHA256-ChaCha20-Poly1305",
+  "sessionId": "<32 lowercase hex>",
+  "sequence": "0",
+  "direction": "client-to-server",
+  "metadata": { "key": "cmb-…", "assertionId": "asrt-…",
+                "createdByNodeId": "<uuid>", "room": "team", "to": "<uuid>" },
+  "sealed": "<unpadded base64url ciphertext || 16-byte tag>"
 }
 ```
 
-`lineage` (parents, ancestors, method) remains in cleartext. Lineage contains only CMB keys (content hashes) — not category text. This allows the relay and intermediate nodes to maintain graph structure without reading content.
+Each direction has a distinct HKDF-derived 32-byte traffic key. The first sequence is zero; the nonce is that sequence encoded as an unsigned 96-bit big-endian integer. An ordered receiver MUST require the exact next sequence and reject replay, rollback and gaps.
 
-On LAN (Bonjour TCP), E2E encryption is RECOMMENDED but not required — there is no relay intermediary. On trusted LANs, the transport itself provides sufficient isolation.
+The protected plaintext contains `categories` and decoded application bytes. Associated data binds protocol version, session, direction, sequence, cognition key, assertion identity, author nodeId, room and recipient. After decrypting, the receiver reconstructs the logical two-section record and follows §8.8.5 verification order. Exact outputs are published in the [E2E vector](/spec/mmp/conformance/v2/e2e-v2.json).
 
 ### 18.3 Node Identity & Authentication
 
-Node identity is UUID-based with mandatory Ed25519 cryptographic identity (Section 3.1.3). Authentication ensures that nodeId claims are verifiable and that relay intermediaries cannot impersonate peers.
+Node identity is a UUID bound to an Ed25519 key through the authenticated transcript in §5.2. An X25519 session key is separately generated but proven in the same transcript.
 
 -   —Each node MUST generate an Ed25519 keypair at first launch and persist it alongside the nodeId.
--   —The public key MUST be included in the handshake frame and DNS-SD TXT record.
--   —Peers SHOULD verify identity by challenging the node to sign a nonce with its private key.
--   —Implementations that have not yet adopted cryptographic verification MAY rely on DNS-SD discovery scope and network isolation as an interim trust model, but MUST document this limitation.
+-   —Discovery records are untrusted hints. A peer MUST NOT pin their identity or E2E key from DNS-SD, relay discovery or an unproven hello.
+-   —Both nonces, nodeIds, keys, room, protocol version, implementation identifiers and extension negotiation MUST enter the signed transcript.
+-   —Core Secure MUST require both the Ed25519 transcript proof and X25519/HKDF key confirmation. Network isolation is not identity authentication.
 
 #### 18.3.1 CMB Signature Verification
 
-Transport identity (above) authenticates the _connection_; CMB signatures authenticate each _cognitive block_ end-to-end — the layer that matters when a peer-pushed CMB can enter the receiving agent’s context. Every CMB SHOULD be signed by its author using the same Ed25519 identity key the node announces in its handshake.
+Transport identity (above) authenticates the _connection_; CMB signatures authenticate each _record assertion_ end-to-end. Every Core Secure CMB MUST be signed by its author using the Ed25519 identity proven in the handshake or a verifiable author key-binding chain.
 
--   —**The signature payload is specified in [§8.2.4](/spec/mmp/record#signature), and that section is the only normative statement of it.** The author signs a canonical payload binding the content address, the author’s identity, the author’s own creation time, the CMB’s _audience_, and its per-category descent. The signature travels as `metadata.sig` (base64url) with `metadata.sigAlg` (`ed25519`); a verifier MUST pin the expected algorithm rather than trust `sigAlg`.  
-      
-    Superseded, and why it is named rather than deleted. 1.x specified a different payload here — a `mmp-sig-v1` domain tag over `createdAt` and `group`. It is **not normative in 2.0** and MUST NOT be implemented: the two payloads bind different members under different domain tags, so a node built to the older text produces signatures a current node cannot verify, and the failure surfaces as a _tamper_ accusation rather than a version mismatch. An implementation encountering blocks signed under the older payload MAY keep verifying them for as long as it holds such history; it MUST NOT emit them.
--   —A receiver holding the author’s public key MUST verify a signed CMB on two counts before admitting or surfacing it: (1) the signature verifies against that key, and (2) the content-address key still matches the actual fields — a valid signature replayed over _swapped_ content MUST be rejected.
--   —Audience check. Because the signature binds `group` and `to`, a receiver MUST additionally reject a signed CMB whose `group` is not the receiver’s group, or whose `to` is neither empty nor the receiver’s nodeId — a cross-group or mis-directed _replay_ that is genuinely signed but not for this audience. This is a check distinct from a bad signature, so a wrong-audience block is not mis-reported as tampering; it also enforces the §5.8 group boundary cryptographically, not only at the frame layer.
--   —A CMB that fails any check MUST NOT be surfaced to the application layer or stored, and SHOULD be audit-logged. This forecloses spoofing (forging another peer’s authorship), tampering (mutating a block in flight), and cross-audience replay.
--   —Unsigned CMBs MAY be accepted only from peers that never demonstrated signing. To prevent downgrade (stripping the signature and re-emitting unsigned), once a receiver has admitted a signed CMB from an identity it MUST reject subsequent unsigned CMBs purporting to be from that identity. (This requires durable per-identity state; first contact remains trust-on-first-use.)
--   —Enforcement scope, disclosed. A strict mode that rejects unsigned CMBs is necessarily scoped to peers whose keys the receiver can resolve: unsigned traffic from a peer with _no_ pinned or roster-resolvable key passes even in strict mode — the receiver cannot distinguish a never-signing peer from a stripped signature at first contact. Key resolution SHOULD consult the full binding registry (anchor-pinned, handshake-pinned, and grant-vouched keys — §6.6), not the direct-handshake map alone, so relayed peers the receiver never met still verify; the residual unsigned-from-unknown window closes only when signature enforcement is on _and_ the roster covers the mesh. Operators of regulated meshes SHOULD run enforcement on with a seeded roster.
+-   —The byte-exact `mmp-sig-v2.0` payload is specified only in [§8.8.4](/spec/mmp/record#signature). It binds the cognition address, address scheme, author nodeId and label, signed author time, room, recipient, lineage commitments and application commitment.
+-   —The receiver MUST resolve the author key by `createdByNodeId`, never `createdBy`.
+-   —Before admission or application exposure, the receiver follows all checks in §8.8.5, including record address, assertion identity, signature and audience.
+-   —An unsigned, legacy-suite or unverifiable record MUST NOT enter Core Secure. It may be quarantined under an explicitly selected Legacy Import profile; no automatic downgrade is permitted.
 
 ### 18.4 Cognitive Threats
 
@@ -5035,7 +5019,7 @@ Lineage forgery
 
 A node claims false lineage — listing ancestors it never actually remixed — to inflate its remix count or inject itself into chains.
 
-MITIGATION CMB keys are cmb- content addresses (§8.2.1). A forged lineage referencing a non-existent key is detectable, and the Ed25519 author signature (§18.3.1) binds createdBy and content — a receiver that holds the author’s key MUST reject a forged or tampered block.
+MITIGATION CMB keys are cmb- content addresses (§8.8.2). The corrected signature (§8.8.4) binds createdByNodeId, audience, lineage commitments and application bytes. A receiver resolves the author key by nodeId and rejects a forged or tampered assertion.
 
 Fake outcome attestation (grounding abuse)
 
@@ -5053,17 +5037,17 @@ Sybil attack
 
 An attacker creates multiple fake nodes to amplify influence in peer-influence weighting.
 
-MITIGATION Peer-influence weighting (Section 10.1) weights by drift and recency, not by node count. Many aligned Sybil nodes produce the same aggregate influence as one. Keypairs are free to generate, so identity alone does not limit Sybil creation; drift/recency weighting and earned authority (Section 6.5) bound the influence a new identity can carry.
+MITIGATION Keypairs are free to generate, so identity alone does not limit Sybil creation. Receiver-local drift/recency weighting reduces but does not prove Sybil resistance. Authority-bearing actions require an anchor-rooted signed grant chain (§6.5–§6.6), and operators SHOULD rate-limit new identities and seed trusted anchors. Quantitative Sybil bounds are an open research claim unless demonstrated by a named profile.
 
 Cold-start capture
 
-An attacker floods a freshly joined node before it forms anchors. During the bootstrap window the §9.2.1 cold-start rule admits everything (empty memory MUST admit to avoid starvation), so the attacker’s content becomes the node’s first anchors and seeds every later admission decision — the content-trim influence bound does not cover a fresh node.
+An attacker floods a freshly joined node before it forms category anchors. Category drift is then unevaluable, so content cannot yet be trimmed against local memory.
 
-MITIGATION Bootstrap-admit is a disclosed trade (§9.2.1 invariant 4): liveness over trim at birth. Operators SHOULD seed new nodes with trusted anchors before exposing them to open traffic; implementations SHOULD surface the bootstrap state to the operator, and MAY defer trust-weighted uses of early anchors until admission has run against a seeded store. Honest-anchoring bootstrap is a named open problem.
+MITIGATION The baseline performs temporal-gated bootstrap: category verdicts are silent, but a stale signal can still be refused by signed author time. Operators SHOULD seed trusted anchors before open traffic, surface bootstrap state, and defer authority-bearing use of early anchors. Honest anchoring remains an open problem.
 
 ### 18.5 Privacy & Deployment Recommendations
 
-Metadata exposure. Even with E2E field encryption (Section 18.2.1), the following metadata travels in cleartext: `createdBy`, `lineage.parents`, `lineage.ancestors`, and mood valence/arousal values. Mood is intentionally unencrypted because it is always delivered even from rejected CMBs (Section 9.3). Deployments where mood leakage is unacceptable MUST disable mood delivery by setting all mood category weights to 0. This is a deliberate privacy trade-off: the protocol prioritises collective intelligence over metadata confidentiality.
+Metadata exposure. The Core Secure envelope leaves only the routing and verification metadata required by its schema in cleartext and authenticates it as AEAD associated data. CAT7 categories, including mood text, valence and arousal, and application bytes are encrypted. A relay can still observe endpoints, room/routing identifiers, record and assertion identifiers, sizes, timing and traffic volume. MMP v2.0 does not provide traffic-analysis resistance.
 
 MMP is designed for privacy by default — L0 data never leaves the node, hidden states are opaque, and SVAF gates what enters. For domains with heightened privacy or IP concerns, the following deployment model is RECOMMENDED:
 
@@ -5150,7 +5134,7 @@ Implementations targeting domains where category extraction quality is critical 
 
 ## 19\. Configuration
 
-Constants are fixed by the specification. Configuration is per-agent and per-implementation. Both are normative — implementations MUST respect constants and SHOULD use the default configuration values unless the agent’s domain requires otherwise.
+Wire limits and syntax constants are fixed by the specification. Operational defaults are local policy and are labelled as such. Implementations MUST respect the wire limits; they SHOULD expose operational policy rather than presenting one runtime’s defaults as interoperability law.
 
 ### 19.1 Protocol Constants
 
@@ -5174,15 +5158,15 @@ Inbound identification deadline
 
 HEARTBEAT\_INTERVAL
 
-5,000 ms
+local policy
 
-Default; configurable per implementation
+SYM reference default: 10,000 ms
 
 HEARTBEAT\_TIMEOUT
 
-15,000 ms
+local policy
 
-Default; configurable per implementation
+SYM reference default: 120,000 ms
 
 WAKE\_COOLDOWN
 
@@ -5572,112 +5556,68 @@ Temporal drift contribution
 
 ## 20\. JSON Schema
 
-Formal JSON Schema definitions for core frame types — the schemas are the contract, and any implementation (the reference included) conforms to them. Implementations SHOULD validate frames against these schemas. `additionalProperties` is `true` by design: §8 requires unrecognised categories to be silently ignored, so a schema SHOULD not reject a forward-compatible extension. The single-page [downloadable specification](/spec/mmp-v2.0.md) carries the full rendered spec. Machine-readable schema files are [published in the protocol repository](https://github.com/sym-bot/mesh-memory-protocol/tree/main/schema) — handshake, CMB (including the §15.8 tether attestation), the cmb frame, and the cmb-fetch pair — and the reference implementation’s suite validates its real wire objects against them, so it cannot drift from this contract. The published schema set above is the final normative set; frame types without a published schema are validated against their §7 definitions.
+These draft 2020-12 schemas are part of the normative MMP v2.0 machine contract. This source repository owns the schemas, constructors and vectors beside the specification pages. The `mesh-memory-protocol` repository receives a manual mirror after an accepted source change; the mirror never overrides this source.
 
-Two scope notes. These are the _wire_ schemas: receiver-local fields (`source`, `originTimestamp`, `storedAt`, `confidence`, `provenance`) are set on receipt and never cross the wire, so they are not listed. And the CMB schema describes the _decrypted_ form: under end-to-end encryption (§18.2.1) a CMB in transit carries `categories` as ciphertext plus `_e2e.nonce`, and the object schema below applies after decryption. Each category also carries a `vector` embedding; it is _advisory_ and encoder-specific (§18.7) — not part of the content address (§8.2.1), and a receiver recomputes it locally rather than trusting the sender’s. Optional application-level fields (`meta`, `payload`) MAY also be present and are permitted by `additionalProperties`.
+[artifact-manifest.json](/spec/mmp/artifact-manifest.json) pins every published schema and vector to its source commit and SHA-256 digest. The production build fails if any copied artifact changes without an intentional manifest update.
 
-### 20.1 Handshake Frame Schema
+A schema-valid object is not yet trusted. A receiver MUST also perform the byte-level address, digest, signature, transcript, audience and AEAD checks required by the relevant sections. Schema validation catches shape errors; cryptography establishes integrity and identity.
 
-```
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "required": ["type", "nodeId", "name", "version", "publicKey"],
-  "additionalProperties": true,
-  "properties": {
-    "type": { "const": "handshake" },
-    "nodeId": { "type": "string", "format": "uuid" },
-    "name": { "type": "string", "minLength": 1, "maxLength": 64 },
-    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
-    "publicKey": { "type": "string", "description": "base64url raw Ed25519 identity key (32 bytes); verifies this node's CMB signatures (§18.3.1)" },
-    "e2ePublicKey": { "type": "string", "description": "base64 X25519 key for end-to-end field encryption (§18.2.1)" },
-    "group": { "type": "string", "description": "The node's mesh group; the §5.8 isolation boundary. Absent ⇒ 'default' (§5.2)." },
-    "lifecycleRole": { "enum": ["participant", "validator", "anchor"], "description": "Senders SHOULD include it (§5.2); receivers treat absence as participant. Self-declared: an elevated role is honored only with a signed role-grant (§6.6)." },
-    "extensions": { "type": "array", "items": { "type": "string" } }
-  }
-}
-```
+### 20.1 Canonical artifacts
 
-### 20.2 CMB Schema
+Schema
 
-The `cmb` object within a `cmb` frame:
+Scope
 
-```
-{
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "type": "object",
-  "description": "The two-section record. Normative construction of the address and signature is §8.2.",
-  "required": ["categories", "metadata"],
-  "additionalProperties": true,
-  "properties": {
-    "categories": {
-      "type": "object",
-      "description": "The CAT7 container (§8). Seven categories, each an object with a required 'text'.",
-      "required": ["focus", "issue", "intent", "motivation", "commitment", "perspective", "mood"],
-      "properties": {
-        "focus":       { "type": "object", "required": ["text"], "properties": { "text": { "type": "string" }, "vector": { "type": "array", "items": { "type": "number" } } } },
-        "issue":       { "type": "object", "required": ["text"], "properties": { "text": { "type": "string" }, "vector": { "type": "array", "items": { "type": "number" } } } },
-        "intent":      { "type": "object", "required": ["text"], "properties": { "text": { "type": "string" }, "vector": { "type": "array", "items": { "type": "number" } } } },
-        "motivation":  { "type": "object", "required": ["text"], "properties": { "text": { "type": "string" }, "vector": { "type": "array", "items": { "type": "number" } } } },
-        "commitment":  { "type": "object", "required": ["text"], "properties": { "text": { "type": "string" }, "vector": { "type": "array", "items": { "type": "number" } } } },
-        "perspective": { "type": "object", "required": ["text"], "properties": { "text": { "type": "string" }, "vector": { "type": "array", "items": { "type": "number" } } } },
-        "mood": {
-          "type": "object",
-          "required": ["text"],
-          "properties": {
-            "text": { "type": "string", "description": "Mood keyword (MUST). Only the TEXT enters the address preimage (§8.2.3)." },
-            "valence": { "type": "number", "minimum": -1, "maximum": 1, "description": "RECOMMENDED when the agent has reliable circumplex data. Excluded from every preimage." },
-            "arousal": { "type": "number", "minimum": -1, "maximum": 1, "description": "RECOMMENDED when the agent has reliable circumplex data. Excluded from every preimage." },
-            "vector": { "type": "array", "items": { "type": "number" } }
-          }
-        }
-      }
-    },
-    "metadata": {
-      "type": "object",
-      "required": ["key", "createdBy", "createdTimestamp"],
-      "properties": {
-        "key": { "type": "string", "pattern": "^cmb-[0-9a-f]{64}$", "description": "Content address (§8.2.3). A key is valid IFF it is 'cmb-' + exactly 64 lowercase hex; every other form MUST be rejected rather than reinterpreted." },
-        "createdBy": { "type": "string", "description": "Authoring node identity; bound by the signature (§8.2.4)" },
-        "createdTimestamp": { "type": "integer", "minimum": 0, "description": "Unix ms creation time, author-asserted; bound by the signature (§8.2.4)" },
-        "lineage": { "type": ["object", "null"], "description": "Descent (§10). null on a root record; a null lineage signs as zero parents." },
-        "room": { "type": ["string", "null"], "description": "Audience boundary; bound by the signature, so a record is valid only for the room it was authored for (§8.2.4)" },
-        "to": { "type": ["string", "null"], "description": "Directed recipient; null or empty for a broadcast. Also signature-bound." },
-        "sig": { "type": "string", "description": "base64url Ed25519 over the §7.3 payload. SHOULD be present; a receiver holding the author key MUST verify it." },
-        "sigAlg": { "const": "ed25519", "description": "A verifier MUST pin this value rather than trust what the record asserts." },
-        "_e2e": { "type": "object", "description": "Present only when the container is E2E-encrypted in transit (§18.2.1): then 'categories' is a ciphertext string, not the object above. A receiver that cannot decrypt MUST report cannot-verify, never valid.", "properties": { "nonce": { "type": "string" } } }
-      }
-    }
-  }
-}
-```
+[application.schema.json](/spec/mmp/schema/application.schema.json)
 
-Complete `cmb` frame with CMB:
+Authenticated opaque application bytes under metadata.application
 
-```
-{
-  "type": "cmb",
-  "timestamp": 1774326000000,
-  "cmb": {
-    "categories": {
-      "focus":       { "text": "user coding for 3 hours, energy declining" },
-      "issue":       { "text": "sedentary since morning, skipping lunch" },
-      "intent":      { "text": "recommend movement break before fatigue worsens" },
-      "motivation":  { "text": "3 agents reported declining energy in last hour" },
-      "commitment":  { "text": "fitness monitoring active, 10min stretch queued" },
-      "perspective": { "text": "fitness agent, afternoon session, home office" },
-      "mood":        { "text": "concerned, low energy", "valence": -0.3, "arousal": -0.4 }
-    },
-    "lineage": {
-      "parents": ["cmb-a1b2c3d4e5f6"],
-      "ancestors": ["cmb-a1b2c3d4e5f6"],
-      "method": "SVAF-v2"
-    }
-  }
-}
-```
+[cmb.schema.json](/spec/mmp/schema/cmb.schema.json)
 
-The container above is the `categories` section of a record; §8.2 defines the accompanying `metadata` section, the address (`cmb-` + 64 lowercase hex) and the signature payload, byte-exactly.
+Decrypted two-section record, cognition key, assertion identity and signature
+
+[handshake.schema.json](/spec/mmp/schema/handshake.schema.json)
+
+client-hello, server-hello and client-finish
+
+[encrypted-cmb-frame.schema.json](/spec/mmp/schema/encrypted-cmb-frame.schema.json)
+
+Core Secure ChaCha20-Poly1305 transport envelope
+
+[cmb-frame.schema.json](/spec/mmp/schema/cmb-frame.schema.json)
+
+Explicit cleartext or migration-profile CMB frame
+
+[cmb-fetch.schema.json](/spec/mmp/schema/cmb-fetch.schema.json)
+
+Content-address fetch request
+
+[cmb-fetch-result.schema.json](/spec/mmp/schema/cmb-fetch-result.schema.json)
+
+Content-address fetch response
+
+[tether-attestation.schema.json](/spec/mmp/schema/tether-attestation.schema.json)
+
+Lineage-tether attestation
+
+### 20.2 Closed core, negotiated extensions
+
+Core objects use `additionalProperties: false`. This is deliberate: a misspelled security field or an unsigned sibling must not be mistaken for a forward-compatible extension. Extension data is carried only in its specified container and only after the extension identifier was negotiated in the authenticated handshake.
+
+-   —A sender MUST NOT emit an unregistered core sibling such as the retired top-level `payload`.
+-   —A receiver MUST NOT silently discard an unknown member inside a signed or authenticated core object and continue as if it had understood the assertion.
+-   —A negotiated extension defines its own schema, version, failure behaviour and signed/encrypted scope.
+
+### 20.3 Executable corpus
+
+The normative v2.0 value-level vectors are:
+
+-   [application-v2.json](/spec/mmp/conformance/v2/application-v2.json) — application presence, bytes, digest and commitment
+-   [record-signature-v2.json](/spec/mmp/conformance/v2/record-signature-v2.json) — cognition key, assertion identity and Ed25519 signature
+-   [handshake-v2.json](/spec/mmp/conformance/v2/handshake-v2.json) — transcript, proofs, key confirmation and HKDF outputs
+-   [e2e-v2.json](/spec/mmp/conformance/v2/e2e-v2.json) — directional traffic keys, nonces, AAD and ChaChaPoly ciphertext
+
+A conforming implementation MUST reproduce these values without importing a reference runtime. Release CI MUST NOT substitute vectors generated only from its own implementation.
 
 
 
@@ -5719,7 +5659,7 @@ The protocol’s no-center, receiver-autonomous-admission, and lineage-provenanc
 
 \[Liquid-Necessity\] Xu, H. (2026). On the Necessity of a Liquid Substrate for Mesh Intelligence. _arXiv:_[2606.28413](https://arxiv.org/abs/2606.28413). The adaptive-timescale and elapsed-gap conditions any fixed-weight agent must meet to fold irregular peer arrivals online (Section 13).
 
-\[SVAF\] Xu, H. (2026). Symbolic-Vector Attention Fusion for Collective Intelligence. _arXiv:_[2604.03955](https://arxiv.org/abs/2604.03955) \[cs.MA, cs.AI\]. The per-category admission gate (Section 9).
+\[SVAF\] Xu, H. (2026). Symbolic-Vector Attention Fusion for Collective Intelligence. _arXiv:_[2604.03955](https://arxiv.org/abs/2604.03955) \[cs.MA, cs.AI\]. Receiver admission with per-category evaluation evidence (Section 9).
 
 \[MMP-Paper\] Xu, H. (2026). Mesh Memory Protocol: Semantic Infrastructure for Multi-Agent LLM Systems. _arXiv:_[2604.19540](https://arxiv.org/abs/2604.19540). The protocol described at v0.2.x; this specification covers the same contracts.
 
@@ -5737,7 +5677,9 @@ The protocol’s no-center, receiver-autonomous-admission, and lineage-provenanc
 
 ### 21.4 Reference Implementations
 
-\[SYM\] Reference implementation (Node.js, packages `@sym-bot/sym` and `@sym-bot/core`): [github.com/sym-bot/sym](https://github.com/sym-bot/sym)
+\[SYM\] Open reference implementation (Node.js, package `@sym-bot/sym`): [github.com/sym-bot/sym](https://github.com/sym-bot/sym)
+
+\[XMESH-CORE\] Proprietary conforming runtime used to validate implementation boundaries. Its source is not part of the open specification and is not required for independent conformance.
 
 \[SYM-Swift\] Reference implementation (Swift): [github.com/sym-bot/sym-swift](https://github.com/sym-bot/sym-swift)
 
