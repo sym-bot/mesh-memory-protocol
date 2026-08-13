@@ -197,7 +197,7 @@ Changes
 
 **Single-file artifacts** are now `/spec/mmp-v2.0.md` and `.html`. `mmp-v1.0.*` remain published, frozen, for existing citations.
 
-**v2.0 alignment errata (2026-08-13; no version bump).** The current corpus now enforces direct-parent-only wire lineage and derives transitive provenance by traversing locally verified parent records; CAT7 embeddings are explicitly receiver-local rather than wire fields; `cmb-encrypted` is the single canonical sealed-frame name; and every active core and relay frame is mapped to a closed JSON Schema through a machine-readable, schema-validated registry. The authenticated v2 handshake is the only extension-negotiation contract, and structured CMB extension bytes use the assertion-bound `metadata.application` container. Executable gates now reject schema drift, stale v1 claims in current pages, unregistered artifacts, broken local links, duplicate rendered IDs and unsigned metadata extension siblings.
+**v2.0 alignment errata (2026-08-13; no version bump).** The current corpus now enforces direct-parent-only wire lineage and derives transitive provenance by traversing locally verified parent records; CAT7 embeddings are explicitly receiver-local rather than wire fields; `cmb-encrypted` is the single canonical sealed-frame name; and every active core and relay frame is mapped to a closed JSON Schema through a machine-readable, schema-validated registry. The authenticated v2 handshake now publishes its exact transcript-hash session identifier, HKDF salt, role-specific finished-key labels, directional traffic-key labels, proof payload and confirmation payload. It is the only extension-negotiation contract, and structured CMB extension bytes use the assertion-bound `metadata.application` container. Executable gates now reject schema drift, stale v1 claims in current pages, unregistered artifacts, broken local links, duplicate rendered IDs and unsigned metadata extension siblings.
 
 1.1.0
 registry note
@@ -1332,6 +1332,38 @@ Only after client-finish verifies: CONNECTED
 -   —The listener MUST require `client-hello` first and `client-finish` before any non-handshake frame. Timeout is 10,000 ms by default.
 
 The byte-exact transcript, proof, HKDF and key-confirmation constructions are normative in [the handshake vector](/spec/mmp/conformance/v2/handshake-v2.json). Any lifecycle role advertised by an extension is a hint only. Authority is resolved from the signed role-grant chain, never self-declared handshake data.
+
+### 5.2.1 Core Secure key schedule
+
+The following construction is normative. `lp(x)` is the ASCII decimal byte length of `x`, then `:`, then the bytes of `x`. Every quoted label is an exact, case-sensitive UTF-8 byte string with no trailing NUL. HKDF is RFC 5869 HKDF-Extract followed by HKDF-Expand using SHA-256; the full transcript hash is the salt, not a zero or empty salt.
+
+```
+T  = handshakeTranscriptV2(clientOffer, serverOffer, selectedExtensions)
+TH = SHA-256(T)                                      // exactly 32 bytes
+sessionId = lowercaseHex(TH[0..15])                  // first 16 bytes
+SS = X25519(localPrivateKey, peerPublicKey)          // exactly 32 bytes
+
+HKDF32(info) = HKDF-SHA256(IKM=SS, salt=TH, info=UTF8(info), L=32)
+
+clientFinishedKey = HKDF32("mmp-finished-v2 client")
+serverFinishedKey = HKDF32("mmp-finished-v2 server")
+clientToServerKey = HKDF32("mmp-aead-v2 client-to-server")
+serverToClientKey = HKDF32("mmp-aead-v2 server-to-client")
+
+proofPayload(role) = UTF8("mmp-handshake-proof-v2\n") ||
+                     lp(role) || lp(lowercaseHex(TH))
+proof(role) = Ed25519-Sign(identityPrivateKey(role), proofPayload(role))
+
+confirmPayload(role) = UTF8("mmp-key-confirm-v2\n") ||
+                       lp(role) || lp(lowercaseHex(TH))
+keyConfirmation(role) = HMAC-SHA256(finishedKey(role), confirmPayload(role))
+```
+
+-   —`sessionId` is derived directly from the transcript hash; it is not an HKDF output.
+-   —The X25519 shared secret and every finished or traffic key are raw 32-byte values. An invalid peer key or all-zero shared secret MUST abort authentication.
+-   —The server sends the server proof and server key confirmation in `server-hello`; the client sends the client proof and client key confirmation in `client-finish`.
+-   —Proofs are unpadded base64url Ed25519 signatures. Confirmations are unpadded base64url HMAC-SHA256 values and MUST be compared in constant time.
+-   —The two traffic keys feed only their named direction of the `cmb-encrypted` envelope. Reversing or reusing a direction key is non-conformant.
 
 Deprecated. The one-frame `handshake` that pins its own unproven keys is a Legacy Import/migration protocol and MUST NOT be accepted by Core Secure. `state-sync` is also retired: hidden state never crosses the wire.
 
