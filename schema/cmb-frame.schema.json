@@ -4,11 +4,26 @@
   "title": "MMP v2.0 unencrypted CMB frame",
   "description": "Allowed only by an explicitly selected cleartext/migration profile. Core Secure uses encrypted-cmb-frame.schema.json.",
   "type": "object",
-  "required": ["type", "protocolVersion", "cmb"],
+  "required": [
+    "type",
+    "cmb"
+  ],
   "additionalProperties": false,
   "properties": {
-    "type": { "const": "cmb" },
-    "protocolVersion": { "const": "2.0" },
-    "cmb": { "$ref": "cmb.schema.json" }
+    "type": {
+      "const": "cmb"
+    },
+    "protocolVersion": {
+      "const": "2.0",
+      "description": "OPTIONAL, and never the place a version is agreed. The protocol version is settled once per connection in the authenticated \u00a75.2 handshake (client-hello carries it; CONNECTED means it verified), so it is part of a signed transcript. A frame is transport and is not signed, so a per-frame version is unauthenticated and redundant \u2014 a receiver trusting it would be preferring a value anyone can set over one both parties proved. Accepted when present for older senders."
+    },
+    "timestamp": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "OPTIONAL. Unix epoch milliseconds at which THIS SENDER emitted THIS frame \u2014 it is a transport fact, changes on a re-send, and is not the record's creation time. The timestamp a receiver reasons from is metadata.createdTimestamp inside the record, which is MANDATORY and is covered by the signature, so a relay cannot age a signed record without breaking it. This frame field sits outside the signature: trusting it let a relay make a signed record look arbitrarily old or new, which is why implementations demoted it (see \u00a78.8 verification and the freshness rules). It survives as the interop fallback for a record carrying no signed timestamp, and a conforming receiver MUST prefer metadata.createdTimestamp whenever it is present."
+    },
+    "cmb": {
+      "$ref": "cmb.schema.json"
+    }
   }
 }
