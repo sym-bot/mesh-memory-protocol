@@ -196,6 +196,8 @@ Changes
 
 **Single-file artifacts** are now `/spec/mmp-v2.0.md` and `.html`. `mmp-v1.0.*` remain published, frozen, for existing citations.
 
+**Terminology: group → room, completed (2026-09-16; no version bump).** The core renamed this concept to _room_ on 13 August, but only where the text was being rewritten: the handshake block and §5.8's body moved, while §5.8's heading still read "Mesh Groups", the §5.2 field table still listed a `group` field the published schema does not define, and §5.9, §4 and the glossary still said group. Those are corrected. The two extensions were the last documents in the old vocabulary and are renamed with them: `mesh-group-v0.1.0` → `mesh-room-v0.2.0` and `group-directory-v0.1.0` → `room-directory-v0.2.0`, including their identifiers (`group_id`, `groupId`, `group_label`, `group_token` and the Bonjour service type). Nothing implemented the old names, so they are superseded rather than aliased. The previous URLs redirect.
+
 **v2.0 conformance errata (2026-09-14; no version bump).** Ed25519 signature bytes are excluded from the reproduction requirement in §17.4 and §20.3: WebKit and Apple's CryptoKit both sign with added randomness, so a correct implementation returns different valid bytes on every call and a suite asserting byte equality fails on Safari and on every browser on iOS. Pinned signatures — `expectedSignature` and the handshake proofs — are for VERIFICATION, never reproduction; every other pinned value remains deterministic and must reproduce exactly. The §17.5 release criterion claiming Node and Swift reproduce identical signature bytes is withdrawn, having been measured unmeetable. On the unencrypted CMB frame, `protocolVersion` and `timestamp` are now OPTIONAL rather than required: the protocol version is agreed once in the authenticated §5.2 handshake and carried in a signed transcript, and the mandatory timestamp is `metadata.createdTimestamp` inside the record, which the signature covers.
 
 **v2.0 alignment errata (2026-08-13; no version bump).** The current corpus now enforces direct-parent-only wire lineage and derives transitive provenance by traversing locally verified parent records; CAT7 embeddings are explicitly receiver-local rather than wire fields; `cmb-encrypted` is the single canonical sealed-frame name; and every active core and relay frame is mapped to a closed JSON Schema through a machine-readable, schema-validated registry. The authenticated v2 handshake now publishes its exact transcript-hash session identifier, HKDF salt, role-specific finished-key labels, directional traffic-key labels, proof payload and confirmation payload. It is the only extension-negotiation contract, and structured CMB extension bytes use the assertion-bound `metadata.application` container. Executable gates now reject schema drift, stale v1 claims in current pages, unregistered artifacts, broken local links, duplicate rendered IDs and unsigned metadata extension siblings.
@@ -2296,11 +2298,11 @@ Frame types are identified by their `type` string value. Core types (this specif
 
 Why MUST nodes silently ignore unknown frame types?
 
-Without this rule, you can never add new features to the protocol. If a node crashes or rejects unknown frame types, then deploying a new extension (like mesh groups) requires upgrading every node on the mesh simultaneously — impossible in a peer-to-peer system. Silent ignore means old nodes and new nodes coexist: a node running a new extension sends its frames, and nodes that don’t support the extension simply ignore them. No crash, no error, the mesh keeps working. When a node adds support later, it handles the frame. No coordinated upgrade needed. This is the same principle used by HTTP (unknown headers ignored), TCP (unknown options skipped), and HTML (unknown tags ignored). Every successful protocol is evolvable because of this rule.
+Without this rule, you can never add new features to the protocol. If a node crashes or rejects unknown frame types, then deploying a new extension (like mesh rooms) requires upgrading every node on the mesh simultaneously — impossible in a peer-to-peer system. Silent ignore means old nodes and new nodes coexist: a node running a new extension sends its frames, and nodes that don’t support the extension simply ignore them. No crash, no error, the mesh keeps working. When a node adds support later, it handles the frame. No coordinated upgrade needed. This is the same principle used by HTTP (unknown headers ignored), TCP (unknown options skipped), and HTML (unknown tags ignored). Every successful protocol is evolvable because of this rule.
 
 What happens if a relay receives an unknown frame type?
 
-The relay forwards it. The relay is a dumb transport pipe — it wraps the payload in a { from, fromName, payload } envelope and sends it to the target or broadcasts it. It never inspects the payload type. This means extension frames (group, vendor, future types) flow through the relay without any relay changes. The intelligence is at the endpoints, not the transport.
+The relay forwards it. The relay is a dumb transport pipe — it wraps the payload in a { from, fromName, payload } envelope and sends it to the target or broadcasts it. It never inspects the payload type. This means extension frames (room, vendor, future types) flow through the relay without any relay changes. The intelligence is at the endpoints, not the transport.
 
 Can an extension frame break an existing node?
 
@@ -5099,7 +5101,7 @@ Extensions are advertised in the authenticated `extensions` array of `client-hel
 
 ### 16.2 Frame Type Naming
 
-Core types (this specification): MUST NOT be redefined by extensions. Extension types: MUST use `<extension>-<name>` format (e.g., `mesh-group-join`). Vendor types: MUST use `x-<vendor>-<name>` format. Vendor types MUST be silently ignored by non-supporting nodes.
+Core types (this specification): MUST NOT be redefined by extensions. Extension types: MUST use `<extension>-<name>` format (e.g., `mesh-room-join`). Vendor types: MUST use `x-<vendor>-<name>` format. Vendor types MUST be silently ignored by non-supporting nodes.
 
 ### 16.3 Extension Negotiation
 
@@ -5113,17 +5115,17 @@ Status
 
 Specification
 
-mesh-group-v0.1.0
+mesh-room-v0.2.0
 
 Proposal
 
-[MMP Mesh Group Extension v0.1.0](/spec/mmp/extensions/mesh-group) — generic transient subgroup primitive formalising §5.8 (group identity, Bonjour + relay discovery, group-scoped CMB tagging, membership lifecycle). First use case: MeloTune Mood Room. (Draft — promotes to Published upon second-implementer adoption per the extension’s own §10, Promotion Criteria.)
+[MMP Mesh Room Extension v0.1.0](/spec/mmp/extensions/mesh-room) — generic transient subgroup primitive formalising §5.8 (room identity, Bonjour + relay discovery, room-scoped CMB tagging, membership lifecycle). First use case: MeloTune Mood Room. (Draft — promotes to Published upon second-implementer adoption per the extension’s own §10, Promotion Criteria.)
 
-group-directory-v0.1.0
+room-directory-v0.2.0
 
 Draft
 
-[MMP Extension: Group Directory v0.1.0](/spec/mmp/extensions/group-directory) — persistent group metadata, admin approval workflow, and directory enumeration. Higher-layer extension building on §5.8 mesh groups for chat-platform-style UX (browse / request-to-join / approve). (Draft — pre-implementation; promotes on first reference impl per §16.5.)
+[MMP Extension: Room Directory v0.1.0](/spec/mmp/extensions/room-directory) — persistent room metadata, admin approval workflow, and directory enumeration. Higher-layer extension building on §5.8 mesh rooms for chat-platform-style UX (browse / request-to-join / approve). (Draft — pre-implementation; promotes on first reference impl per §16.5.)
 
 error-handling-v0.2.0
 
@@ -5149,7 +5151,7 @@ Extensions progress through a defined lifecycle:
 
 Extensions use [Semantic Versioning](https://semver.org) independently of the core MMP specification version. An extension version bump MUST NOT require a core spec version bump unless the extension is being promoted to core.
 
-Q&A   Can an extension become a core frame type? — Yes. An extension that proves stable and widely adopted MAY be promoted to a core frame type via a spec version bump. Group membership illustrates the path: the `extensions` field (Section 5.2) and group isolation (Section 5.8) are core, while the mesh-group extension document that formalises the richer subgroup lifecycle remains a Proposal record (Section 16.4).
+Q&A   Can an extension become a core frame type? — Yes. An extension that proves stable and widely adopted MAY be promoted to a core frame type via a spec version bump. Room membership illustrates the path: the `extensions` field (Section 5.2) and room isolation (Section 5.8) are core, while the mesh-room extension document that formalises the richer subgroup lifecycle remains a Proposal record (Section 16.4).
 
 
 
