@@ -2710,21 +2710,7 @@ Cognitive Memory Blocks were first formalised in the Mesh Memory Protocol (Conse
 
 A CMB SHOULD carry its author’s signature in `cmb.sig` (base64url) with `cmb.sigAlg`. Receivers verify the signature and content-address integrity before admitting or surfacing a block. See [§18.3.1 CMB Signature Verification](/spec/mmp/security#cmb-signature) for the normative signing and verification requirements.
 
-### Q&A
-
-Why are all 7 categories required, not optional?
-
-The cognition address and SVAF evidence are defined over a fixed CAT7 tuple. Missing categories would change both constructions. An emitter therefore normalizes a category it cannot meaningfully extract to the canonical neutral value before addressing and signing; the receiver may classify that neutral category as non-evaluable when forming its whole-record admission decision (§9.2.1).
-
-Why not let agents define their own categories?
-
-SVAF needs a shared schema to compare incoming categories against local anchors. If each agent defined its own categories, cross-domain evaluation is impossible — a fitness agent and a music agent would have no common dimensions to compute drift on.
-
-Why does mood carry valence and arousal but other categories don’t carry numeric values?
-
-Mood has a well-established dimensional model (Russell’s circumplex). other categories are inherently symbolic — "debugging auth module" has no meaningful numeric axis. Valence and arousal are RECOMMENDED, not required — agents without reliable circumplex data omit them.
-
-## 8.8 Record Model
+### 8.8 Record Model
 
 A Cognitive Memory Block separates _what the agent says_ from _what the mesh can prove about that assertion_. This section is normative and byte-exact. The public schemas, constructors and vectors are available from the [conformance suite](/spec/mmp/conformance).
 
@@ -2833,6 +2819,20 @@ lp(applicationCommitmentV1)
 Failure at any cryptographic step is a refusal, not an “unverified success.” Legacy reading belongs to a named migration profile and MUST NOT downgrade Core Secure automatically.
 
 Machine contract. Download the [record schema](/spec/mmp/schema/cmb.schema.json), [signature vectors](/spec/mmp/conformance/v2/record-signature-v2.json) and [application vectors](/spec/mmp/conformance/v2/application-v2.json).
+
+### Q&A
+
+Why are all 7 categories required, not optional?
+
+The cognition address and SVAF evidence are defined over a fixed CAT7 tuple. Missing categories would change both constructions. An emitter therefore normalizes a category it cannot meaningfully extract to the canonical neutral value before addressing and signing; the receiver may classify that neutral category as non-evaluable when forming its whole-record admission decision (§9.2.1).
+
+Why not let agents define their own categories?
+
+SVAF needs a shared schema to compare incoming categories against local anchors. If each agent defined its own categories, cross-domain evaluation is impossible — a fitness agent and a music agent would have no common dimensions to compute drift on.
+
+Why does mood carry valence and arousal but other categories don’t carry numeric values?
+
+Mood has a well-established dimensional model (Russell’s circumplex). other categories are inherently symbolic — "debugging auth module" has no meaningful numeric axis. Valence and arousal are RECOMMENDED, not required — agents without reliable circumplex data omit them.
 
 
 
