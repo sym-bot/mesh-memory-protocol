@@ -24,9 +24,15 @@ description: 'Persistent room metadata, admin approval, and directory enumeratio
 > **Renamed in 0.2.0-DRAFT (15 September 2026).** The core protocol calls this concept a **room**:
 > §5.8 is *Mesh Rooms*, the handshake field is `room`, and the published handshake schema has no
 > `group` field. This draft was written before that rename and kept the old word throughout.
-> Everything here now says room, including the identifiers: `group_id` → `room_id`, `group_token` →
-> `room_token`, and the extension identifier itself, `group-directory-v0.1.0` →
-> `room-directory-v0.2.0`. Not an alias — nothing implemented the old names, so there is no
+> Everything here now says room, including every identifier this extension proposes:
+> `group_id` → `room_id`, `group_token` → `room_token`, the MCP tools
+> (`sym_rooms_browse`, `sym_room_create`, `sym_room_request_join`, `sym_room_approve_member`,
+> `sym_room_reject_member`, `sym_room_revoke_member`), the SDK calls
+> (`SymNode.listRooms()`, `SymNode.createRoom()`), and the extension identifier itself,
+> `group-directory-v0.1.0` → `room-directory-v0.2.0`. Three names that this draft described as
+> ALREADY SHIPPED were also wrong against the code rather than merely old, and are corrected to
+> what ships: the environment variable is `SYM_ROOM`, and the tools are `sym_join_room` and
+> `sym_rooms_discover`. Not an alias — nothing implemented the old names, so there is no
 > compatibility to preserve, and a silent alias would hide the rename from the next reader.
 
 ## Abstract
@@ -54,7 +60,7 @@ the minimal primitive.
 
 ### What MMP §5.8 already provides
 
-- **LAN rooms**: a node setting `SYM_GROUP=<name>` advertises on
+- **LAN rooms**: a node setting `SYM_ROOM=<name>` advertises on
   `_<name>._tcp` via Bonjour/mDNS. Nodes in different rooms never see
   each other at mDNS. Membership is per-process, constructor-locked.
 - **Relay channels**: the `sym-relay` server maps tokens to channels
@@ -226,7 +232,7 @@ public rooms as JSON:
 This endpoint has no auth by design (public discovery). Rate-limited to
 10 requests per minute per source IP. Private rooms are never included.
 
-An MCP client implementing this extension adds `sym_groups_browse` tool
+An MCP client implementing this extension adds `sym_rooms_browse` tool
 that hits this endpoint on the configured relay host and returns the
 list in human-readable form.
 
@@ -237,7 +243,7 @@ list in human-readable form.
 | MMP §5.8 bare LAN room | Shipped (v0.1.23) | Unchanged. Bare rooms remain in-band (mDNS only), not registered with any relay, invisible to `/rooms`. |
 | sym-relay token/channel isolation | Shipped | This extension uses token/channel as the transport primitive for directory-registered private rooms. Creation emits a token; accept hands the token to the accepted member. |
 | `sym_invite_create` / `sym_invite_info` | Shipped (v0.1.23) | URL-based invite flow remains as the **private** join path — admin generates invite, shares out of band, each invite bundles the channel token. Works with or without directory registration. |
-| `sym_join_group` | Shipped (v0.1.23) | Extended: for directory-registered rooms, `sym_join_group` becomes multi-step — issues `room-join-request`, waits for accept, then hot-swaps with the granted token. |
+| `sym_join_room` | Shipped (v0.1.23) | Extended: for directory-registered rooms, `sym_join_room` becomes multi-step — issues `room-join-request`, waits for accept, then hot-swaps with the granted token. |
 
 ### Implementation surface
 
@@ -250,13 +256,13 @@ Estimated size (rough):
   admin-side events, pending-queue subscription, request/accept state
   machine).
 - **sym-mesh-channel**: 4–6 new MCP tools (~200 LOC):
-  - `sym_groups_browse` — GET /rooms on configured relay
-  - `sym_group_create` — creates on relay, becomes admin
-  - `sym_group_request_join` — sends join-request, waits for result
-  - `sym_group_approve_member` — admin action on pending request
-  - `sym_group_reject_member` — admin action on pending request
-  - `sym_group_revoke_member` — admin action post-accept
-  - (extensions to existing `sym_groups_discover` to include
+  - `sym_rooms_browse` — GET /rooms on configured relay
+  - `sym_room_create` — creates on relay, becomes admin
+  - `sym_room_request_join` — sends join-request, waits for result
+  - `sym_room_approve_member` — admin action on pending request
+  - `sym_room_reject_member` — admin action on pending request
+  - `sym_room_revoke_member` — admin action post-accept
+  - (extensions to existing `sym_rooms_discover` to include
     directory-registered rooms on configured relays)
 
 ---
@@ -312,8 +318,8 @@ Three stages, each independently valuable:
 ### Stage 1 — relay directory endpoint + public-room CRUD (v0.1.0-alpha)
 
 - `sym-relay`: schema, `/rooms` HTTP, room-create / room-list / room-delete.
-- `@sym-bot/sym`: `SymNode.listGroups()` / `SymNode.createGroup()`.
-- `sym-mesh-channel`: `sym_groups_browse`, `sym_group_create`.
+- `@sym-bot/sym`: `SymNode.listRooms()` / `SymNode.createRoom()`.
+- `sym-mesh-channel`: `sym_rooms_browse`, `sym_room_create`.
 - **UX delivered**: users can browse public rooms on a relay, create
   new public rooms, and share direct invite URLs. No admin approval yet —
   public rooms are open-join.
@@ -323,8 +329,8 @@ Three stages, each independently valuable:
 - `sym-relay`: pending-request queue, admin-only frames (accept, reject,
   revoke), fanout on member changes.
 - `@sym-bot/sym`: admin-side events, request state machine.
-- `sym-mesh-channel`: `sym_group_request_join`, `sym_group_approve_member`,
-  `sym_group_reject_member`, `sym_group_revoke_member`.
+- `sym-mesh-channel`: `sym_room_request_join`, `sym_room_approve_member`,
+  `sym_room_reject_member`, `sym_room_revoke_member`.
 - **UX delivered**: private rooms with gated membership. Full Telegram-
   style team management within a single relay.
 

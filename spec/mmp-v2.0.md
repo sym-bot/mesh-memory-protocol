@@ -5119,13 +5119,13 @@ mesh-room-v0.2.0
 
 Proposal
 
-[MMP Mesh Room Extension v0.1.0](/spec/mmp/extensions/mesh-room) — generic transient subgroup primitive formalising §5.8 (room identity, Bonjour + relay discovery, room-scoped CMB tagging, membership lifecycle). First use case: MeloTune Mood Room. (Draft — promotes to Published upon second-implementer adoption per the extension’s own §10, Promotion Criteria.)
+[MMP Mesh Room Extension v0.2.0](/spec/mmp/extensions/mesh-room) — generic transient subgroup primitive formalising §5.8 (room identity, Bonjour + relay discovery, room-scoped CMB tagging, membership lifecycle). First use case: MeloTune Mood Room. (Draft — promotes to Published upon second-implementer adoption per the extension’s own §10, Promotion Criteria.)
 
 room-directory-v0.2.0
 
 Draft
 
-[MMP Extension: Room Directory v0.1.0](/spec/mmp/extensions/room-directory) — persistent room metadata, admin approval workflow, and directory enumeration. Higher-layer extension building on §5.8 mesh rooms for chat-platform-style UX (browse / request-to-join / approve). (Draft — pre-implementation; promotes on first reference impl per §16.5.)
+[MMP Extension: Room Directory v0.2.0-DRAFT](/spec/mmp/extensions/room-directory) — persistent room metadata, admin approval workflow, and directory enumeration. Higher-layer extension building on §5.8 mesh rooms for chat-platform-style UX (browse / request-to-join / approve). (Draft — pre-implementation; promotes on first reference impl per §16.5.)
 
 error-handling-v0.2.0
 
