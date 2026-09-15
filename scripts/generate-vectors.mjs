@@ -4,6 +4,7 @@ import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import {
   ADDRESS_SCHEME,
+  CAT7,
   PROTOCOL_VERSION,
   SIGNATURE_SUITE,
   aeadAADV2,
@@ -22,15 +23,22 @@ import {
   sha256,
   signingPayloadV2_0,
   x25519PrivateKey,
-} from '../conformance/lib.mjs';
+} from './mmp/lib.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const out = path.join(root, 'conformance', 'v2');
+const out = path.join(root, 'conformance', 'v2');   // MIRROR LAYOUT (see MMP-MIRROR.md)
+const exampleOut = path.join(root, 'examples', 'v2');   // MIRROR LAYOUT
 fs.mkdirSync(out, { recursive: true });
+fs.mkdirSync(exampleOut, { recursive: true });
 
 const write = (name, value) => {
   fs.writeFileSync(path.join(out, name), `${JSON.stringify(value, null, 2)}\n`);
-  console.log(`wrote conformance/v2/${name}`);
+  console.log(`wrote public/spec/mmp/conformance/v2/${name}`);
+};
+
+const writeExample = (name, value) => {
+  fs.writeFileSync(path.join(exampleOut, name), `${JSON.stringify(value, null, 2)}\n`);
+  console.log(`wrote public/spec/mmp/examples/v2/${name}`);
 };
 
 const utf8 = (value) => Buffer.from(value, 'utf8');
@@ -116,6 +124,10 @@ const signatureCases = records.map(({ label, record }) => {
     expectedSigningPayloadHex: hex(payload),
     expectedAssertionId: id,
     expectedSignature: signature,
+    // The field name is the trap: "expected" reads as "required to match", and this holds ONE VALID
+    // signature among many. Said at the point of use, because a reader who copies a line copies it
+    // from here and not from `usage` six lines up (dev-team-5, 2026-09-13).
+    expectedSignatureIsOneOfMany: 'One valid signature over expectedSigningPayloadHex. Verify it; do not reproduce it. A hedged signer (WebKit) returns different valid bytes each call.',
   };
 });
 
@@ -129,6 +141,15 @@ write('record-signature-v2.json', {
     publicKeyBase64url: b64u(signingPublic),
   },
   invariant: 'Both cases have one cognition key and two assertion identities.',
+  // VERIFICATION, NEVER REPRODUCTION. `expectedSignature` is pinned so an implementation can check
+  // that it ACCEPTS a known-good signature — never so it can sign the payload and compare bytes.
+  // Ed25519 is deterministic in RFC 8032, and Node, Chromium and Firefox all reproduce the
+  // published vector five times out of five; WebKit ships a HEDGED signer, so Safari and every
+  // browser on iOS produce a different VALID signature on every call (measured by dev-team-3 on
+  // Safari 26.5 and dev-team-5 on three engines, 2026-09-13). A suite that asserts signature
+  // equality therefore fails on the platform this protocol most needs to reach, and reads as a
+  // browser bug rather than as the invalid assertion it is.
+  usage: 'Verification only. Check that your implementation ACCEPTS expectedSignature for the given payload and key; never sign the payload and compare bytes. WebKit (Safari, and every browser on iOS) ships a hedged Ed25519 signer that returns a different valid signature on each call, so signature equality is not a property of a conforming implementation. To test signing, sign the same payload twice and assert that both verify — and assert nothing about whether they are equal.',
   cases: signatureCases,
 });
 
@@ -221,6 +242,10 @@ const clientFinish = {
 write('handshake-v2.json', {
   protocolVersion: PROTOCOL_VERSION,
   warning: 'all private keys and nonces are fixed conformance fixtures',
+  // The proofs are Ed25519 SIGNATURES, so they carry the same rule as record-signature-v2's
+  // expectedSignature and for the same reason — a hedged signer (WebKit, CryptoKit) produces
+  // different valid bytes on every call. Said here because a suite reads the vector, not the page.
+  usage: 'Verification only, for clientProofBase64url and serverProofBase64url: check that your implementation ACCEPTS each proof over its pinned payload and key; never sign the payload and compare bytes. Every other pinned value here — transcript hash, HKDF outputs, key confirmations — is deterministic and MUST reproduce exactly.',
   fixture: {
     handshake,
     frames: { clientHello, serverHello, clientFinish },
@@ -260,6 +285,29 @@ const encryptionCases = [
   { direction: 'server-to-client', key: serverToClientKey, sequence: '0' },
 ];
 
+// MMP v2.0: absence of an application is distinct from a present zero-byte
+// application. When metadata.application is null, applicationData is OMITTED
+// from the protected plaintext. An empty string remains available to encode
+// the data of a real application whose byteLength is zero.
+const noApplicationRecord = structuredClone(signatureCases[0].record);
+const noApplicationPlaintext = Buffer.from(JSON.stringify({
+  categories: noApplicationRecord.categories,
+}), 'utf8');
+const noApplicationDirection = 'client-to-server';
+const noApplicationSequence = '0';
+const noApplicationAAD = aeadAADV2({
+  sessionId,
+  direction: noApplicationDirection,
+  sequence: noApplicationSequence,
+  metadata: noApplicationRecord.metadata,
+});
+const noApplicationSealed = encryptChaChaPoly({
+  key: clientToServerKey,
+  sequence: noApplicationSequence,
+  plaintext: noApplicationPlaintext,
+  aad: noApplicationAAD,
+});
+
 write('e2e-v2.json', {
   protocolVersion: PROTOCOL_VERSION,
   suite: 'X25519-HKDF-SHA256-ChaCha20-Poly1305',
@@ -278,4 +326,110 @@ write('e2e-v2.json', {
       sealedBase64url: b64u(sealed),
     };
   }),
+  noApplication: {
+    rule: 'metadata.application=null means applicationData is omitted; applicationData="" is reserved for a present zero-byte application',
+    protectedPlaintextUtf8: noApplicationPlaintext.toString('utf8'),
+    metadata: noApplicationRecord.metadata,
+    case: {
+      direction: noApplicationDirection,
+      sequence: noApplicationSequence,
+      trafficKeyHex: hex(clientToServerKey),
+      nonceHex: BigInt(noApplicationSequence).toString(16).padStart(24, '0'),
+      aadHex: hex(noApplicationAAD),
+      sealedBase64url: b64u(noApplicationSealed),
+    },
+  },
 });
+
+function exampleFrame({ createdBy, createdByNodeId, createdTimestamp, texts, mood, parent = null, method }) {
+  const categoryParents = parent ? [parent] : [];
+  const exampleCategories = Object.fromEntries(CAT7.map((name) => {
+    const text = texts[name];
+    const category = {
+      text,
+      meta: { key: categoryKeyV1(name, text), parents: categoryParents },
+    };
+    if (name === 'mood') Object.assign(category, mood);
+    return [name, category];
+  }));
+  const record = {
+    categories: exampleCategories,
+    metadata: {
+      key: blockKeyV2(exampleCategories),
+      addressScheme: ADDRESS_SCHEME,
+      signatureSuite: SIGNATURE_SUITE,
+      createdByNodeId,
+      createdBy,
+      createdTimestamp,
+      room: 'spec-examples',
+      to: null,
+      lineage: { parents: categoryParents, method },
+      application: null,
+    },
+  };
+  record.metadata.assertionId = assertionId(record);
+  record.metadata.sigAlg = 'ed25519';
+  record.metadata.sig = b64u(crypto.sign(null, signingPayloadV2_0(record), signingPrivate));
+  // Both of these are OPTIONAL on the frame, and the examples carry them only to show the shape.
+  // The mandatory timestamp is metadata.createdTimestamp INSIDE the record, which is covered by the
+  // signature; this frame field is outside it and is the interop fallback only. The version is
+  // agreed once, in the authenticated §5.2 handshake, where both parties prove it — a per-frame
+  // copy would be unsigned and redundant. An earlier revision of this comment asserted the frame
+  // timestamp was mandatory; that was withdrawn the same day and the claim must not outlive it.
+  return { type: 'cmb', protocolVersion: PROTOCOL_VERSION, timestamp: createdTimestamp, cmb: record };
+}
+
+const transportParent = `cmb-${'10'.repeat(32)}`;
+writeExample('transport-cmb.json', exampleFrame({
+  createdBy: 'sensor-a',
+  createdByNodeId: '018f47a0-7b21-7abc-8def-aaaaaaaaaaaa',
+  createdTimestamp: 1711540800000,
+  parent: transportParent,
+  method: 'svaf-heuristic',
+  texts: {
+    focus: 'user coding for 3 hours, energy declining',
+    issue: 'sedentary since morning, skipping lunch',
+    intent: 'recommend movement break before fatigue worsens',
+    motivation: 'three agents reported declining energy in the last hour',
+    commitment: 'fitness monitoring active, ten-minute stretch queued',
+    perspective: 'fitness agent, afternoon session, home office',
+    mood: 'concerned, low energy',
+  },
+  mood: { valence: -0.3, arousal: -0.4 },
+}));
+
+const dismissedParent = `cmb-${'20'.repeat(32)}`;
+writeExample('feedback-dismissal.json', exampleFrame({
+  createdBy: 'validator-node',
+  createdByNodeId: '018f47a0-7b21-7abc-8def-bbbbbbbbbbbb',
+  createdTimestamp: 1775485628563,
+  parent: dismissedParent,
+  method: 'operator-dismissal',
+  texts: {
+    focus: 'Dismissed: frontend framework release flagged as relevant',
+    issue: 'Dismissal reasoning: frontend tooling is outside this mesh review scope',
+    intent: 'Record the operator dismissal as evidence, not as an unsigned command',
+    motivation: 'Prevent wasted analysis on out-of-scope signals',
+    commitment: `Dismissed ${dismissedParent}: framework-release analysis`,
+    perspective: 'operator, via dashboard',
+    mood: 'corrective',
+  },
+  mood: { valence: -0.1, arousal: 0.2 },
+}));
+
+writeExample('feedback-directive.json', exampleFrame({
+  createdBy: 'validator-node',
+  createdByNodeId: '018f47a0-7b21-7abc-8def-bbbbbbbbbbbb',
+  createdTimestamp: 1775485630000,
+  method: 'operator-directive',
+  texts: {
+    focus: 'Frontend framework releases are separate from backend review',
+    issue: 'Feed signals about frontend tooling are out-of-scope noise here',
+    intent: 'Distinguish backend runtime signals from frontend tooling',
+    motivation: 'Prevent wasted analysis outside the mesh scope',
+    commitment: 'Standing directive: apply this scope to future feed analysis',
+    perspective: 'operator, mesh steward',
+    mood: 'clarifying',
+  },
+  mood: { valence: 0.1, arousal: 0.2 },
+}));

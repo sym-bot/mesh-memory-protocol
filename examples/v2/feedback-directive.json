@@ -1,6 +1,7 @@
 {
   "type": "cmb",
   "protocolVersion": "2.0",
+  "timestamp": 1775485630000,
   "cmb": {
     "categories": {
       "focus": {

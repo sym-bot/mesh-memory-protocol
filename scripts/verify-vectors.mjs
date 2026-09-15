@@ -23,10 +23,10 @@ import {
   sha256,
   signingPayloadV2_0,
   x25519PrivateKey,
-} from '../conformance/lib.mjs';
+} from './mmp/lib.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const artifactRoot = root;
+const artifactRoot = root;   // MIRROR LAYOUT: the source's public/spec/mmp/* lives at this repo's root
 const read = (name) => JSON.parse(fs.readFileSync(path.join(artifactRoot, 'conformance', 'v2', name), 'utf8'));
 const readExample = (name) => JSON.parse(fs.readFileSync(path.join(artifactRoot, 'examples', 'v2', name), 'utf8'));
 const b64u = (value) => Buffer.from(value, 'base64url');
@@ -193,6 +193,37 @@ for (const c of ev.cases) {
   tamperedSealed[0] ^= 1;
   assert.throws(() => decryptChaChaPoly({ key, sequence: c.sequence, sealed: tamperedSealed, aad }), undefined, `${c.direction}/${c.sequence}: tampered ciphertext`);
 }
+
+const noApp = ev.noApplication;
+assert.equal(noApp.metadata.application, null, 'no-application metadata must remain explicit null');
+const noAppShape = JSON.parse(noApp.protectedPlaintextUtf8);
+assert.deepEqual(Object.keys(noAppShape), ['categories'], 'applicationData must be omitted when metadata.application is null');
+assert.deepEqual(noAppShape.categories, JSON.parse(ev.protectedPlaintextUtf8).categories, 'application presence must not alter cognition bytes');
+const noAppCase = noApp.case;
+const noAppKey = Buffer.from(noAppCase.trafficKeyHex, 'hex');
+const noAppAAD = aeadAADV2({
+  sessionId: ev.sessionId,
+  direction: noAppCase.direction,
+  sequence: noAppCase.sequence,
+  metadata: noApp.metadata,
+});
+assert.equal(hex(nonceFromSequence(noAppCase.sequence)), noAppCase.nonceHex, 'no-application: nonce');
+assert.equal(hex(noAppAAD), noAppCase.aadHex, 'no-application: aad');
+assert.ok(validateEncrypted({
+  type: 'cmb-encrypted',
+  protocolVersion: ev.protocolVersion,
+  suite: ev.suite,
+  sessionId: ev.sessionId,
+  sequence: noAppCase.sequence,
+  direction: noAppCase.direction,
+  metadata: noApp.metadata,
+  sealed: noAppCase.sealedBase64url,
+}), `no-application: encrypted schema ${JSON.stringify(validateEncrypted.errors)}`);
+assert.deepEqual(
+  decryptChaChaPoly({ key: noAppKey, sequence: noAppCase.sequence, sealed: b64u(noAppCase.sealedBase64url), aad: noAppAAD }),
+  Buffer.from(noApp.protectedPlaintextUtf8, 'utf8'),
+  'no-application: decrypt',
+);
 
 assert.equal(requireNextSequence('0', '0'), '1');
 assert.throws(() => requireNextSequence('1', '0'), /unexpected sequence/, 'replay must be refused');

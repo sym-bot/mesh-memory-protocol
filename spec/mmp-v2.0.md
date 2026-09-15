@@ -2,7 +2,7 @@
 
 > A Mesh Protocol for Collective Intelligence
 >
-> **Version:** 2.0  ·  **Published:** 27 March 2026  ·  **Last updated:** 13 August 2026  ·  **Editor:** Hongwei Xu  ·  **License:** CC BY 4.0
+> **Version:** 2.0  ·  **Published:** 27 March 2026  ·  **Last updated:** 14 September 2026  ·  **Editor:** Hongwei Xu  ·  **License:** CC BY 4.0
 >
 > **Canonical:** https://meshcognition.org/spec/mmp  ·  **arXiv:** https://arxiv.org/abs/2604.19540
 
@@ -63,7 +63,7 @@ First published
 
 This version
 
-13 August 2026
+14 September 2026
 
 Author
 
@@ -149,7 +149,7 @@ Proprietary cognition runtime. Its public MMP boundary, safety invariants and au
 
 ## Change Log
 
-**Current — 2.0 “Re-derived from the implementation” (13 August 2026):** the record model advanced in the runtime while the published text continued to describe the earlier shape, and 2.0 closes that gap. Corrected [§8.8 Record Model](/spec/mmp/record) gives the two-section record, the byte-exact content address (a promote-odd Merkle root over the seven per-category keys) and the byte-exact signature payload. The normative address form is corrected to `cmb-` + 64 lowercase hex — 1.x declared a version-tagged prefix instead, which the runtime rejects. Admission wording is corrected to per-category _evaluation_ on which the receiver decides for itself; receiver autonomy is unchanged. CAT7 members are named **categories** throughout, and the wire key is untouched.
+**Current — 2.0 “Re-derived from the implementation” (14 September 2026):** the record model advanced in the runtime while the published text continued to describe the earlier shape, and 2.0 closes that gap. Corrected [§8.8 Record Model](/spec/mmp/record) gives the two-section record, the byte-exact content address (a promote-odd Merkle root over the seven per-category keys) and the byte-exact signature payload. The normative address form is corrected to `cmb-` + 64 lowercase hex — 1.x declared a version-tagged prefix instead, which the runtime rejects. Admission wording is corrected to per-category _evaluation_ on which the receiver decides for itself; receiver autonomy is unchanged. CAT7 members are named **categories** throughout, and the wire key is untouched.
 
 **1.1.0 “The Work Layer” (2026-07-05, updated 2026-07-07):** grounding cognition in reality — §6.7 outcomes carried by lineage, the §6.3 Canon tier, §14.12 work sessions as mesh members, plus the folded-in full-corpus coherence errata. The 2026-07-07 update folds in the **soundness & completeness amendments from the formalization of the open-source runtime**: §9.2.1 redundancy invariants pinned to the nearest-anchor basis, the §9.2 evaluation-time-dependence disclosure, the cold-start-capture threat row, §6.7 repeat verification and the load-bearing failure channel, and the §15.8 lineage tether. Wire-compatible with 1.0.x.
 
@@ -196,6 +196,8 @@ Changes
 **CAT7 terminology.** The seven members are **categories** throughout, replacing mixed use of “dimensions” and “fields” in prose. A category is the semantic member; a dimension is the length of the vector encoding it. The wire key is `categories` too — prose and wire now use one word. It never enters an address or signature preimage, so the rename moved no address and invalidated no signature.
 
 **Single-file artifacts** are now `/spec/mmp-v2.0.md` and `.html`. `mmp-v1.0.*` remain published, frozen, for existing citations.
+
+**v2.0 conformance errata (2026-09-14; no version bump).** Ed25519 signature bytes are excluded from the reproduction requirement in §17.4 and §20.3: WebKit and Apple's CryptoKit both sign with added randomness, so a correct implementation returns different valid bytes on every call and a suite asserting byte equality fails on Safari and on every browser on iOS. Pinned signatures — `expectedSignature` and the handshake proofs — are for VERIFICATION, never reproduction; every other pinned value remains deterministic and must reproduce exactly. The §17.5 release criterion claiming Node and Swift reproduce identical signature bytes is withdrawn, having been measured unmeetable. On the unencrypted CMB frame, `protocolVersion` and `timestamp` are now OPTIONAL rather than required: the protocol version is agreed once in the authenticated §5.2 handshake and carried in a signed transcript, and the mandatory timestamp is `metadata.createdTimestamp` inside the record, which the signature covers.
 
 **v2.0 alignment errata (2026-08-13; no version bump).** The current corpus now enforces direct-parent-only wire lineage and derives transitive provenance by traversing locally verified parent records; CAT7 embeddings are explicitly receiver-local rather than wire fields; `cmb-encrypted` is the single canonical sealed-frame name; and every active core and relay frame is mapped to a closed JSON Schema through a machine-readable, schema-validated registry. The authenticated v2 handshake now publishes its exact transcript-hash session identifier, HKDF salt, role-specific finished-key labels, directional traffic-key labels, proof payload and confirmation payload. It is the only extension-negotiation contract, and structured CMB extension bytes use the assertion-bound `metadata.application` container. Executable gates now reject schema drift, stale v1 claims in current pages, unregistered artifacts, broken local links, duplicate rendered IDs and unsigned metadata extension siblings.
 
@@ -973,6 +975,7 @@ MMP 2.0 · JSON · Signed CMB
 {
   "type": "cmb",
   "protocolVersion": "2.0",
+  "timestamp": 1711540800000,
   "cmb": {
     "categories": {
       "focus": {
@@ -3325,6 +3328,7 @@ MMP 2.0 · JSON · Dismissal
 {
   "type": "cmb",
   "protocolVersion": "2.0",
+  "timestamp": 1775485628563,
   "cmb": {
     "categories": {
       "focus": {
@@ -3427,6 +3431,7 @@ MMP 2.0 · JSON · Directive
 {
   "type": "cmb",
   "protocolVersion": "2.0",
+  "timestamp": 1775485630000,
   "cmb": {
     "categories": {
       "focus": {
@@ -5199,6 +5204,8 @@ Legacy Import exists only to read retained history or perform an explicit reader
 
 A conforming implementation MUST consume the public files, reproduce their expected values and reject the negative mutations. Generating private vectors from the implementation under test proves only self-consistency and MUST NOT be reported as MMP conformance.
 
+**Signature bytes are the one exception, and a suite MUST NOT assert equality on them.** A pinned `expectedSignature` exists so an implementation can prove it _accepts_ a known-good signature over the given payload and key. Ed25519 is deterministic in RFC 8032, and Node, Chromium and Firefox each reproduce the published bytes on every call — but WebKit ships a _hedged_ signer, so Safari, and therefore every browser on iOS, returns a different valid signature each time it signs. Signing a pinned payload and comparing the result is not a conformance test; it fails on a conforming implementation and reads as a browser defect. To exercise signing, sign the same payload twice, assert that both verify, and assert nothing about whether they are equal.
+
 Artifact
 
 Required proof
@@ -5228,11 +5235,13 @@ Cognitive profiles SHOULD additionally consume the public baseline SVAF and teth
 ### 17.5 Release gate
 
 -   A clean-room verifier passes without importing SYM or xmesh-core.
--   Every emitted core frame validates against its published schema.
--   Node and Swift implementations reproduce identical transcript, signature and AEAD bytes.
+-   Every published example frame validates against its published schema.
+-   Node and Swift implementations reproduce identical transcript and AEAD bytes, and each accepts the other's signatures. Signature bytes are _not_ compared: Apple's CryptoKit signs Ed25519 with added randomness, so a correct Swift implementation returns different valid bytes on every call and byte equality is not a release criterion.
 -   Packaged release artifacts run the corpus from a clean install.
 -   xmesh-core passes the public boundary corpus without disclosing private internals.
 -   The website build generates and verifies its own canonical artifacts before producing the published Pages output.
+
+Each item above names a check that is executed, not an assurance, and says who runs it. The website's own verifiers run on every build. The packaged-artifact check runs at publish. The clean-room verifier and the boundary corpus are invoked by hand: the boundary corpus was last recorded as run on 1 August 2026 and has not been run for the releases since, so its standing is that date and not this page. A criterion with no runnable check behind it does not belong here — the byte-equality claim between implementations was corrected on 14 September 2026, after measurement showed no implementation could meet it.
 
 **Current status:** canonical v2.0 schemas, constructors and vectors are published as a candidate conformance contract. Runtime reader-first migration is in progress. Until every gate above passes, an implementation should report its individual results, not claim blanket MMP v2.0 Core Secure certification.
 
@@ -6027,6 +6036,8 @@ The normative v2.0 value-level vectors are:
 -   [examples/v2](/spec/mmp/examples/v2/transport-cmb.json) — signed, schema-valid transport and feedback CMB frames
 
 A conforming implementation MUST reproduce these values without importing a reference runtime. Release CI MUST NOT substitute vectors generated only from its own implementation.
+
+**Ed25519 signature bytes are excluded from that requirement** — every one of them in this corpus, not only the field named `expectedSignature`: the handshake proofs (`clientProofBase64url`, `serverProofBase64url`) are signatures over the proof payload and fail on a hedged signer for the same reason. An implementation MUST verify each of them against the pinned payload and key, and MUST NOT be required to reproduce one. Ed25519 is deterministic in RFC 8032, but WebKit signs with added randomness, so Safari — and every browser on iOS, where no other engine is available — returns a different valid signature on each call. Requiring byte equality would declare a correct implementation non-conforming on that platform. Every pinned value that is NOT an Ed25519 signature — transcript hashes, HKDF outputs, key confirmations, AEAD ciphertext under the pinned nonces — is a deterministic function of its inputs and MUST reproduce exactly.
 
 
 
