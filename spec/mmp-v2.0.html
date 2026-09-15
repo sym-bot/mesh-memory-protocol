@@ -121,20 +121,19 @@
       <li><a href="#section-7">6. Memory (L3)</a></li>
       <li><a href="#section-8">7. Frame Types</a></li>
       <li><a href="#section-9">8. CMBs (CAT7)</a></li>
-      <li><a href="#section-10">8.8 Record Model</a></li>
-      <li><a href="#section-11">9. Coupling & SVAF (L4)</a></li>
-      <li><a href="#section-12">10. State Blending</a></li>
-      <li><a href="#section-13">11. Feedback Modulation</a></li>
-      <li><a href="#section-14">12. Synthetic Memory (L5)</a></li>
-      <li><a href="#section-15">13. Cognitive State (L6)</a></li>
-      <li><a href="#section-16">14. Application (L7)</a></li>
-      <li><a href="#section-17">15. Remix</a></li>
-      <li><a href="#section-18">16. Extensions</a></li>
-      <li><a href="#section-19">17. Conformance</a></li>
-      <li><a href="#section-20">18. Security</a></li>
-      <li><a href="#section-21">19. Configuration</a></li>
-      <li><a href="#section-22">20. JSON Schema</a></li>
-      <li><a href="#section-23">21. References</a></li>
+      <li><a href="#section-10">9. Coupling & SVAF (L4)</a></li>
+      <li><a href="#section-11">10. State Blending</a></li>
+      <li><a href="#section-12">11. Feedback Modulation</a></li>
+      <li><a href="#section-13">12. Synthetic Memory (L5)</a></li>
+      <li><a href="#section-14">13. Cognitive State (L6)</a></li>
+      <li><a href="#section-15">14. Application (L7)</a></li>
+      <li><a href="#section-16">15. Remix</a></li>
+      <li><a href="#section-17">16. Extensions</a></li>
+      <li><a href="#section-18">17. Conformance</a></li>
+      <li><a href="#section-19">18. Security</a></li>
+      <li><a href="#section-20">19. Configuration</a></li>
+      <li><a href="#section-21">20. JSON Schema</a></li>
+      <li><a href="#section-22">21. References</a></li>
     </ol>
   </nav>
 
@@ -227,7 +226,7 @@ SYM is the open reference substrate and transparent baseline admission profile. 
       executable vectors, and then implementations are tested against it.
 </p> <p class="mb-6">
 That is checkable rather than assertable. The constructions in
-<a href="/spec/mmp/record" class="text-purple-400 hover:text-purple-300 transition-colors">&sect;8.8
+<a href="/spec/mmp/cmb#record" class="text-purple-400 hover:text-purple-300 transition-colors">&sect;8.8
       Record Model</a> — the content address and the signature payload — were re-implemented from the
       text of that section alone, with no access to the reference code, and reproduced the running
       system&rsquo;s output <strong>byte for byte</strong>. A specification is worth the
@@ -249,7 +248,7 @@ That is checkable rather than assertable. The constructions in
 Feedback and errata: <a href="mailto:spec@meshcognition.org" class="text-purple-400 hover:text-purple-300 transition-colors">spec@meshcognition.org</a> or <a href="https://github.com/sym-bot/sym/issues" class="text-purple-400 hover:text-purple-300 transition-colors">github.com/sym-bot/sym/issues</a>.
 </p> </section> <section class="mb-10"> <h2 class="font-display text-xl text-white mb-4">Implementations</h2> <div class="overflow-x-auto"> <table class="w-full text-sm"> <thead><tr class="border-b border-white/10"><th class="text-left font-mono text-xs text-white/40 pb-2 pr-4">Language</th><th class="text-left font-mono text-xs text-white/40 pb-2 pr-4">Project</th><th class="text-left font-mono text-xs text-white/40 pb-2 pr-4">Maintainer</th><th class="text-left font-mono text-xs text-white/40 pb-2">Scope</th></tr></thead> <tbody class="text-white/60"> <tr class="border-b border-white/[0.04]"><td class="py-2 pr-4 font-mono text-xs">Node.js / TypeScript</td><td class="py-2 pr-4"><a href="https://github.com/sym-bot/sym" class="text-purple-400 hover:text-purple-300 transition-colors">sym-bot/sym</a></td><td class="py-2 pr-4">SYM.BOT</td><td class="py-2">Open reference substrate and transparent baseline admission profile (Apache 2.0). Conformance is measured against the published artifacts, not defined by this code.</td></tr> <tr class="border-b border-white/[0.04]"><td class="py-2 pr-4 font-mono text-xs">Swift</td><td class="py-2 pr-4"><a href="https://github.com/sym-bot/sym-swift" class="text-purple-400 hover:text-purple-300 transition-colors">sym-bot/sym-swift</a></td><td class="py-2 pr-4">SYM.BOT</td><td class="py-2">Apple-platform implementation. Core Secure v2.0 reader migration is in progress.</td></tr> <tr><td class="py-2 pr-4 font-mono text-xs">Node.js</td><td class="py-2 pr-4">xmesh-core</td><td class="py-2 pr-4">SYM.BOT</td><td class="py-2">Proprietary cognition runtime. Its public MMP boundary, safety invariants and audit outcomes are the conformance surface; the complete v2.0 result is pending. Internal policies and optimisations are not open reference code.</td></tr> </tbody> </table> </div> </section> <section class="mb-10"> <h2 class="font-display text-xl text-white mb-4">Change Log</h2> <p class="mb-3 text-sm"> <strong>Current — 2.0 &ldquo;Re-derived from the implementation&rdquo; (14 September 2026):</strong> the
       record model advanced in the runtime while the published text continued to describe the earlier
-      shape, and 2.0 closes that gap. Corrected <a href="/spec/mmp/record" class="text-purple-400 hover:text-purple-300 transition-colors">&sect;8.8
+      shape, and 2.0 closes that gap. Corrected <a href="/spec/mmp/cmb#record" class="text-purple-400 hover:text-purple-300 transition-colors">&sect;8.8
       Record Model</a> gives the two-section record, the byte-exact content address (a promote-odd
       Merkle root over the seven per-category keys) and the byte-exact signature payload. The
       normative address form is corrected to <code class="text-purple-300/80">cmb-</code> + 64
@@ -1394,7 +1393,7 @@ A CMB&rsquo;s <code class="text-purple-300/80">key</code> is a content address: 
 This scheme has three known weaknesses, which the successor resolves: the
 <code class="text-purple-300/80">|</code> join is not injection-proof (a delimiter inside a category can shift a boundary), text is not Unicode-normalised (NFC vs NFD diverge), and the
       128-bit truncation gives only 64-bit collision resistance.
-</p> <p class="mb-2 text-sm"> <span class="text-white/90">Normative record &mdash; see <a href="/spec/mmp/record" class="text-purple-400 hover:text-purple-300 transition-colors">&sect;8.8 Record Model</a>.</span>
+</p> <p class="mb-2 text-sm"> <span class="text-white/90">Normative record &mdash; see <a href="#record" class="text-purple-400 hover:text-purple-300 transition-colors">&sect;8.8 Record Model</a>.</span>
 The address is <code class="text-purple-300/80">"cmb-"</code> + 64 lowercase hex, and the digest
       is a <strong>promote-odd Merkle root over the seven per-category keys</strong>, not a hash of a
       concatenated preimage. This section gives the cognition-key construction byte-exactly; &sect;8.8
@@ -1495,12 +1494,7 @@ A CMB <span class="text-yellow-400 font-mono text-xs">SHOULD</span> carry its au
       and content-address integrity before admitting or surfacing a block. See
 <a href="/spec/mmp/security#cmb-signature" class="text-purple-400 hover:text-purple-300 transition-colors">&sect;18.3.1 CMB Signature Verification</a>
 for the normative signing and verification requirements.
-</p> <h3 class="font-display text-base text-white/90 mb-3 mt-8">Q&amp;A</h3> <div class="space-y-3 mb-6"> <div class="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3"> <p class="text-sm text-white/70 font-medium mb-1">Why are all 7 categories required, not optional?</p> <p class="text-xs text-white/50">The cognition address and SVAF evidence are defined over a fixed CAT7 tuple. Missing categories would change both constructions. An emitter therefore normalizes a category it cannot meaningfully extract to the canonical neutral value before addressing and signing; the receiver may classify that neutral category as non-evaluable when forming its whole-record admission decision (§9.2.1).</p> </div><div class="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3"> <p class="text-sm text-white/70 font-medium mb-1">Why not let agents define their own categories?</p> <p class="text-xs text-white/50">SVAF needs a shared schema to compare incoming categories against local anchors. If each agent defined its own categories, cross-domain evaluation is impossible — a fitness agent and a music agent would have no common dimensions to compute drift on.</p> </div><div class="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3"> <p class="text-sm text-white/70 font-medium mb-1">Why does mood carry valence and arousal but other categories don’t carry numeric values?</p> <p class="text-xs text-white/50">Mood has a well-established dimensional model (Russell’s circumplex). other categories are inherently symbolic — &quot;debugging auth module&quot; has no meaningful numeric axis. Valence and arousal are RECOMMENDED, not required — agents without reliable circumplex data omit them.</p> </div> </div> </section>  </div>
-  </section>
-
-  <section id="section-10" class="spec-section">
-    <p class="section-tag">8.8 Record Model</p>
-     <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="record">8.8 Record Model</h2> <p class="mb-4 text-sm">
+</p> <h3 class="font-display text-base text-white/90 mb-3 mt-8">Q&amp;A</h3> <div class="space-y-3 mb-6"> <div class="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3"> <p class="text-sm text-white/70 font-medium mb-1">Why are all 7 categories required, not optional?</p> <p class="text-xs text-white/50">The cognition address and SVAF evidence are defined over a fixed CAT7 tuple. Missing categories would change both constructions. An emitter therefore normalizes a category it cannot meaningfully extract to the canonical neutral value before addressing and signing; the receiver may classify that neutral category as non-evaluable when forming its whole-record admission decision (§9.2.1).</p> </div><div class="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3"> <p class="text-sm text-white/70 font-medium mb-1">Why not let agents define their own categories?</p> <p class="text-xs text-white/50">SVAF needs a shared schema to compare incoming categories against local anchors. If each agent defined its own categories, cross-domain evaluation is impossible — a fitness agent and a music agent would have no common dimensions to compute drift on.</p> </div><div class="bg-white/[0.02] border border-white/[0.05] rounded-lg p-3"> <p class="text-sm text-white/70 font-medium mb-1">Why does mood carry valence and arousal but other categories don’t carry numeric values?</p> <p class="text-xs text-white/50">Mood has a well-established dimensional model (Russell’s circumplex). other categories are inherently symbolic — &quot;debugging auth module&quot; has no meaningful numeric axis. Valence and arousal are RECOMMENDED, not required — agents without reliable circumplex data omit them.</p> </div> </div> </section> <section> <h2 class="font-display text-xl text-white mb-4" id="record">8.8 Record Model</h2> <p class="mb-4 text-sm">
 A Cognitive Memory Block separates <em>what the agent says</em> from <em>what the mesh can
       prove about that assertion</em>. This section is normative and byte-exact. The public schemas,
       constructors and vectors are available from the
@@ -1579,7 +1573,7 @@ Failure at any cryptographic step is a refusal, not an “unverified success.”
 </p> </section>  </div>
   </section>
 
-  <section id="section-11" class="spec-section">
+  <section id="section-10" class="spec-section">
     <p class="section-tag">9. Coupling & SVAF (L4)</p>
      <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="svaf">9. Layer 4: Coupling and SVAF Evaluation</h2> <h3 class="font-display text-base text-white/90 mb-3">9.1 Peer-Level Coupling (Drift)</h3> <p class="mb-4">
 Peer drift measures how cognitively distant a peer is, so the mesh can weight that peer&rsquo;s influence
@@ -1825,7 +1819,7 @@ Cold-start convergence time depends on CMB frequency, category relevance, and mo
 </p> </div> </section>  </div>
   </section>
 
-  <section id="section-12" class="spec-section">
+  <section id="section-11" class="spec-section">
     <p class="section-tag">10. State Blending</p>
      <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="state-blending">10. State Blending</h2> <p class="mb-4">
 State blending is one step in the Mesh Cognition cycle. The full path:
@@ -1910,7 +1904,7 @@ State blending is one step in a closed loop. Each cycle, the graph grows and eve
 </p> </div> </section>  </div>
   </section>
 
-  <section id="section-13" class="spec-section">
+  <section id="section-12" class="spec-section">
     <p class="section-tag">11. Feedback Modulation</p>
      <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="feedback">11. Feedback Modulation</h2> <p class="mb-6">
 Feedback modulation is the mechanism by which collective intelligence becomes self-correcting.
@@ -2203,7 +2197,7 @@ Prompt updates are out-of-band: they bypass the mesh, leave no lineage, produce 
 </p> </div> </section>  </div>
   </section>
 
-  <section id="section-14" class="spec-section">
+  <section id="section-13" class="spec-section">
     <p class="section-tag">12. Synthetic Memory (L5)</p>
      <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="synthetic-memory">12. Synthetic Memory (Layer 5)</h2> <p class="mb-4">
 Synthetic Memory bridges LLM reasoning (Layer 7) and LNN dynamics (Layer 6).
@@ -2464,7 +2458,7 @@ This bound follows from sovereignty (a node&rsquo;s store never crosses the wire
 </p> </div> </section>  </div>
   </section>
 
-  <section id="section-15" class="spec-section">
+  <section id="section-14" class="spec-section">
     <p class="section-tag">13. Cognitive State (L6)</p>
      <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="cognitive-state">13. Cognitive State &mdash; Per-Agent LNN (Layer 6)</h2> <div class="bg-white/[0.03] border border-white/[0.06] border-l-2 border-l-purple-400/50 rounded-lg p-4 mb-6"> <p class="font-mono text-xs tracking-wider uppercase text-purple-400 mb-2">Naming note</p> <p class="text-sm text-white/60">
 Layer 6 was called xMesh in the v0.2.x drafts and in the published papers
@@ -2573,7 +2567,7 @@ Note: <code class="text-purple-300/60">sym-mesh-channel</code> implements this p
 </p> </div> </section>  </div>
   </section>
 
-  <section id="section-16" class="spec-section">
+  <section id="section-15" class="spec-section">
     <p class="section-tag">14. Application (L7)</p>
      <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="application">14. Application (Layer 7)</h2> <p class="mb-4">
 Layer 7 is where agents live and their LLMs reason on the remix subgraph.
@@ -2823,7 +2817,7 @@ The profile is deliberately thin: charter, decision, artifact are informative vo
 <a href="/spec/mmp/blending" class="text-purple-400 hover:text-purple-300 transition-colors"> State Blending</a> </p> </div> </section>  </div>
   </section>
 
-  <section id="section-17" class="spec-section">
+  <section id="section-16" class="spec-section">
     <p class="section-tag">15. Remix</p>
      <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="remix">15. Remix</h2> <p class="mb-4">
 Remix is how collective intelligence emerges. Without remix, agents forward data. With remix,
@@ -3047,7 +3041,7 @@ carry any <code class="text-purple-300/80">parents</code> from the severed chain
 <a href="/spec/mmp/synthetic-memory#context-curation" class="text-purple-400 hover:text-purple-300 transition-colors"> Context Curation</a> </p> </div> </section>  </div>
   </section>
 
-  <section id="section-18" class="spec-section">
+  <section id="section-17" class="spec-section">
     <p class="section-tag">16. Extensions</p>
      <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="extensions">16. Extension Mechanism</h2> <p class="mb-4">
 MMP is designed for extensibility. Extensions add new frame types, handshake fields, or
@@ -3082,7 +3076,7 @@ Extensions use <a href="https://semver.org" class="text-purple-400 hover:text-pu
 </p> </div> </section>  </div>
   </section>
 
-  <section id="section-19" class="spec-section">
+  <section id="section-18" class="spec-section">
     <p class="section-tag">17. Conformance</p>
      <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="conformance">17. Conformance</h2> <p class="mb-4 text-sm">
 The specification and its published machine artifacts define MMP conformance. SYM, Swift,
@@ -3153,7 +3147,7 @@ An independent implementation is a first-class target. It can emit, receive, aut
 </p> </section>  </div>
   </section>
 
-  <section id="section-20" class="spec-section">
+  <section id="section-19" class="spec-section">
     <p class="section-tag">18. Security</p>
      <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="security">18. Security Considerations</h2> <p class="mb-6 text-sm">
 MMP is designed for autonomous agents that share cognitive state. Security must address
@@ -3212,7 +3206,7 @@ Node identity is a UUID bound to an Ed25519 key through the authenticated transc
 Transport identity (above) authenticates the <em>connection</em>; CMB signatures authenticate
       each <em>record assertion</em> end-to-end. Every Core Secure CMB <span class="text-red-400 font-mono text-xs">MUST</span> be signed by its author
       using the Ed25519 identity proven in the handshake or a verifiable author key-binding chain.
-</p> <ul class="space-y-2 mb-4 text-sm"> <li class="pl-4 relative"><span class="absolute left-0 text-purple-400/60">&mdash;</span>The byte-exact <code class="text-purple-300/80">mmp-sig-v2.0</code> payload is specified only in <a href="/spec/mmp/record#signature" class="text-purple-400 hover:text-purple-300">&sect;8.8.4</a>. It binds the cognition address, address scheme, author nodeId and label, signed author time, room, recipient, lineage commitments and application commitment.</li> <li class="pl-4 relative"><span class="absolute left-0 text-purple-400/60">&mdash;</span>The receiver <span class="text-red-400 font-mono text-xs">MUST</span> resolve the author key by <code class="text-purple-300/80">createdByNodeId</code>, never <code class="text-purple-300/80">createdBy</code>.</li> <li class="pl-4 relative"><span class="absolute left-0 text-purple-400/60">&mdash;</span>Before admission or application exposure, the receiver follows all checks in &sect;8.8.5, including record address, assertion identity, signature and audience.</li> <li class="pl-4 relative"><span class="absolute left-0 text-purple-400/60">&mdash;</span>An unsigned, legacy-suite or unverifiable record <span class="text-red-400 font-mono text-xs">MUST NOT</span> enter Core Secure. It may be quarantined under an explicitly selected Legacy Import profile; no automatic downgrade is permitted.</li> </ul> </section> <section> <h3 class="font-display text-base text-white/90 mb-3">18.4 Cognitive Threats</h3> <p class="mb-4 text-sm">
+</p> <ul class="space-y-2 mb-4 text-sm"> <li class="pl-4 relative"><span class="absolute left-0 text-purple-400/60">&mdash;</span>The byte-exact <code class="text-purple-300/80">mmp-sig-v2.0</code> payload is specified only in <a href="/spec/mmp/cmb#signature" class="text-purple-400 hover:text-purple-300">&sect;8.8.4</a>. It binds the cognition address, address scheme, author nodeId and label, signed author time, room, recipient, lineage commitments and application commitment.</li> <li class="pl-4 relative"><span class="absolute left-0 text-purple-400/60">&mdash;</span>The receiver <span class="text-red-400 font-mono text-xs">MUST</span> resolve the author key by <code class="text-purple-300/80">createdByNodeId</code>, never <code class="text-purple-300/80">createdBy</code>.</li> <li class="pl-4 relative"><span class="absolute left-0 text-purple-400/60">&mdash;</span>Before admission or application exposure, the receiver follows all checks in &sect;8.8.5, including record address, assertion identity, signature and audience.</li> <li class="pl-4 relative"><span class="absolute left-0 text-purple-400/60">&mdash;</span>An unsigned, legacy-suite or unverifiable record <span class="text-red-400 font-mono text-xs">MUST NOT</span> enter Core Secure. It may be quarantined under an explicitly selected Legacy Import profile; no automatic downgrade is permitted.</li> </ul> </section> <section> <h3 class="font-display text-base text-white/90 mb-3">18.4 Cognitive Threats</h3> <p class="mb-4 text-sm">
 MMP introduces threats unique to cognitive coupling that traditional protocol security does not address:
 </p> <div class="space-y-4 mb-6"> <div class="border-l-2 border-red-500/20 pl-5"> <p class="text-white/80 font-medium text-sm">Cognitive poisoning</p> <p class="text-xs text-white/40 mt-1">A malicious node sends crafted CMBs designed to skew the receiver’s cognitive state toward a desired outcome. (Hidden vectors cannot be injected — they never cross the wire, §2.7 — so the only attack surface is CMB content.)</p> <p class="text-xs text-white/50 mt-2"><span class="text-green-400/70 font-mono text-[10px]">MITIGATION</span> SVAF per-category evaluation (Layer 4) judges each CMB on content before it is admitted. Drift-bounded influence (Section 10) limits any peer to α &lt; 1, so a peer influences but never overrides. Peer-level disconnection at Layer 2 provides immediate escape.</p> </div><div class="border-l-2 border-red-500/20 pl-5"> <p class="text-white/80 font-medium text-sm">Lineage forgery</p> <p class="text-xs text-white/40 mt-1">A node claims false lineage — listing ancestors it never actually remixed — to inflate its remix count or inject itself into chains.</p> <p class="text-xs text-white/50 mt-2"><span class="text-green-400/70 font-mono text-[10px]">MITIGATION</span> CMB keys are cmb- content addresses (§8.8.2). The corrected signature (§8.8.4) binds createdByNodeId, audience, lineage commitments and application bytes. A receiver resolves the author key by nodeId and rejects a forged or tampered assertion.</p> </div><div class="border-l-2 border-red-500/20 pl-5"> <p class="text-white/80 font-medium text-sm">Fake outcome attestation (grounding abuse)</p> <p class="text-xs text-white/40 mt-1">A node emits intent=&quot;ground&quot; CMBs (§6.7) with fabricated &quot;verified:&quot; outcomes against its own cognition to steer receivers’ evidence-based validation — or griefs with &quot;failed:&quot; attestations to un-ground cognition a validator or anchor verified (latest-observation-wins, §6.7).</p> <p class="text-xs text-white/50 mt-2"><span class="text-green-400/70 font-mono text-[10px]">MITIGATION</span> An outcome is an attestation, never a fact (§6.7): it advances no lifecycle by itself, and elevation is an explicit act under validator-or-above authority that SHOULD weigh the grounding author’s resolved authority (§6.5–§6.6). Groundedness is receiver-relative — only attestations the receiver’s own SVAF admitted count — and ordering uses receiver-local stored time, so a backdated createdTimestamp cannot game latest-wins. A below-validator &quot;failed:&quot; MUST NOT un-ground a validator-or-above &quot;verified:&quot; (§6.7 hard-gate reading) — a tier gate, not a soft weighted vote, since sheer low-authority volume defeats a weighted vote but not the gate; within a tier, latest-wins still surfaces a genuine same-authority regression.</p> </div><div class="border-l-2 border-red-500/20 pl-5"> <p class="text-white/80 font-medium text-sm">Drift manipulation</p> <p class="text-xs text-white/40 mt-1">A node gradually sends benign, redundant CMBs to lower its peer drift with a target, then suddenly sends adversarial content once coupling is accepted.</p> <p class="text-xs text-white/50 mt-2"><span class="text-green-400/70 font-mono text-[10px]">MITIGATION</span> SVAF per-category evaluation (Layer 4) operates on content, not just drift. Even with low peer drift, adversarial CMB content is evaluated per category and rejected if category drift is high.</p> </div><div class="border-l-2 border-red-500/20 pl-5"> <p class="text-white/80 font-medium text-sm">Sybil attack</p> <p class="text-xs text-white/40 mt-1">An attacker creates multiple fake nodes to amplify influence in peer-influence weighting.</p> <p class="text-xs text-white/50 mt-2"><span class="text-green-400/70 font-mono text-[10px]">MITIGATION</span> Keypairs are free to generate, so identity alone does not limit Sybil creation. Receiver-local drift/recency weighting reduces but does not prove Sybil resistance. Authority-bearing actions require an anchor-rooted signed grant chain (§6.5–§6.6), and operators SHOULD rate-limit new identities and seed trusted anchors. Quantitative Sybil bounds are an open research claim unless demonstrated by a named profile.</p> </div><div class="border-l-2 border-red-500/20 pl-5"> <p class="text-white/80 font-medium text-sm">Cold-start capture</p> <p class="text-xs text-white/40 mt-1">An attacker floods a freshly joined node before it forms category anchors. Category drift is then unevaluable, so content cannot yet be trimmed against local memory.</p> <p class="text-xs text-white/50 mt-2"><span class="text-green-400/70 font-mono text-[10px]">MITIGATION</span> The baseline performs temporal-gated bootstrap: category verdicts are silent, but a stale signal can still be refused by signed author time. Operators SHOULD seed trusted anchors before open traffic, surface bootstrap state, and defer authority-bearing use of early anchors. Honest anchoring remains an open problem.</p> </div> </div> </section> <section> <h3 class="font-display text-base text-white/90 mb-3">18.5 Privacy &amp; Deployment Recommendations</h3> <p class="mb-4 text-sm"> <span class="text-white/90">Metadata exposure.</span> The Core Secure envelope leaves only the routing and verification
       metadata required by its schema in cleartext and authenticates it as AEAD associated data.
@@ -3261,7 +3255,7 @@ Implementations targeting domains where category extraction quality is critical 
 </p> <ul class="space-y-2 mb-6 text-sm"> <li class="pl-4 relative"><span class="absolute left-0 text-purple-400/60">&mdash;</span><span class="text-white/90">Schema validation</span> &mdash; reject CMBs with empty or defaulted categories before they enter the mesh</li> <li class="pl-4 relative"><span class="absolute left-0 text-purple-400/60">&mdash;</span><span class="text-white/90">Confidence thresholds</span> &mdash; the LLM can assign a confidence score to its extraction; low-confidence CMBs can be withheld</li> <li class="pl-4 relative"><span class="absolute left-0 text-purple-400/60">&mdash;</span><span class="text-white/90">Lineage feedback</span> &mdash; CMBs that get remixed by other agents (have descendants in the DAG) signal high quality; CMBs that expire without children signal noise. This feedback loop lets the mesh itself shape extraction quality over time</li> <li class="pl-4 relative"><span class="absolute left-0 text-purple-400/60">&mdash;</span><span class="text-white/90">Semantic embedding encoder</span> &mdash; implementations <span class="text-yellow-400 font-mono text-xs">SHOULD</span> use a semantic embedding model (e.g. all-MiniLM-L6-v2) for SVAF drift computation. The evaluation pipeline is encoder-agnostic &mdash; any function that maps text to unit-normalised vectors works. N-gram encoding <span class="text-green-400 font-mono text-xs">MAY</span> be used as a zero-dependency fallback.</li> </ul> </section>  </div>
   </section>
 
-  <section id="section-21" class="spec-section">
+  <section id="section-20" class="spec-section">
     <p class="section-tag">19. Configuration</p>
      <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="configuration">19. Configuration</h2> <p class="mb-6 text-sm">
 Wire limits and syntax constants are fixed by the specification. Operational defaults are local
@@ -3305,7 +3299,7 @@ At default settings (<code class="text-purple-300/80">temporalLambda: 0.3</code>
 </p> <div class="overflow-x-auto mb-6"> <table class="w-full text-sm"> <thead><tr class="border-b border-white/10"><th class="text-left font-mono text-xs text-white/40 pb-2 pr-4">Signal age</th><th class="text-left font-mono text-xs text-white/40 pb-2">Temporal drift contribution</th></tr></thead> <tbody class="text-white/60"> <tr class="border-b border-white/[0.04]"><td class="py-2 pr-4 font-mono text-xs">1 minute</td><td class="py-2">~0.01 &mdash; negligible</td></tr> <tr class="border-b border-white/[0.04]"><td class="py-2 pr-4 font-mono text-xs">30 minutes</td><td class="py-2">~0.19 &mdash; noticeable</td></tr> <tr><td class="py-2 pr-4 font-mono text-xs">2 hours</td><td class="py-2">~0.29 &mdash; likely pushes over threshold</td></tr> </tbody> </table> </div> </section>  </div>
   </section>
 
-  <section id="section-22" class="spec-section">
+  <section id="section-21" class="spec-section">
     <p class="section-tag">20. JSON Schema</p>
      <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="json-schema">20. JSON Schema</h2> <p class="mb-4 text-sm">
 These draft 2020-12 schemas are part of the normative MMP v2.0 machine contract. This source
@@ -3343,7 +3337,7 @@ A conforming implementation <span class="text-red-400 font-mono text-xs">MUST</s
 </p> </section>  </div>
   </section>
 
-  <section id="section-23" class="spec-section">
+  <section id="section-22" class="spec-section">
     <p class="section-tag">21. References</p>
      <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <section> <h2 class="font-display text-xl text-white mb-4" id="references">21. References</h2> <p class="mb-6 text-sm text-white/50">
 References are split into <span class="text-white/70">normative</span> (a conforming

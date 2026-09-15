@@ -20,20 +20,19 @@
 8. [6. Memory (L3)](#6-memory-l3)
 9. [7. Frame Types](#7-frame-types)
 10. [8. CMBs (CAT7)](#8-cmbs-cat7)
-11. [8.8 Record Model](#8-8-record-model)
-12. [9. Coupling & SVAF (L4)](#9-coupling-svaf-l4)
-13. [10. State Blending](#10-state-blending)
-14. [11. Feedback Modulation](#11-feedback-modulation)
-15. [12. Synthetic Memory (L5)](#12-synthetic-memory-l5)
-16. [13. Cognitive State (L6)](#13-cognitive-state-l6)
-17. [14. Application (L7)](#14-application-l7)
-18. [15. Remix](#15-remix)
-19. [16. Extensions](#16-extensions)
-20. [17. Conformance](#17-conformance)
-21. [18. Security](#18-security)
-22. [19. Configuration](#19-configuration)
-23. [20. JSON Schema](#20-json-schema)
-24. [21. References](#21-references)
+11. [9. Coupling & SVAF (L4)](#9-coupling-svaf-l4)
+12. [10. State Blending](#10-state-blending)
+13. [11. Feedback Modulation](#11-feedback-modulation)
+14. [12. Synthetic Memory (L5)](#12-synthetic-memory-l5)
+15. [13. Cognitive State (L6)](#13-cognitive-state-l6)
+16. [14. Application (L7)](#14-application-l7)
+17. [15. Remix](#15-remix)
+18. [16. Extensions](#16-extensions)
+19. [17. Conformance](#17-conformance)
+20. [18. Security](#18-security)
+21. [19. Configuration](#19-configuration)
+22. [20. JSON Schema](#20-json-schema)
+23. [21. References](#21-references)
 
 ---
 
@@ -105,7 +104,7 @@ SYM is the open reference substrate and transparent baseline admission profile. 
 
 **What changed is that the runtime moved and the text did not follow.** The record model advanced — a two-section record, a Merkle-derived content address, a new signing payload — while the published text continued to describe the earlier shape. 2.0 re-derives the specification and runtime into alignment clause by clause. Where text, schemas, vectors and code disagree, none is silently declared correct: the v2.0 errata rules the construction, publishes executable vectors, and then implementations are tested against it.
 
-That is checkable rather than assertable. The constructions in [§8.8 Record Model](/spec/mmp/record) — the content address and the signature payload — were re-implemented from the text of that section alone, with no access to the reference code, and reproduced the running system’s output **byte for byte**. A specification is worth the implementations it can produce, and §8.2 has been shown to produce one.
+That is checkable rather than assertable. The constructions in [§8.8 Record Model](/spec/mmp/cmb#record) — the content address and the signature payload — were re-implemented from the text of that section alone, with no access to the reference code, and reproduced the running system’s output **byte for byte**. A specification is worth the implementations it can produce, and §8.2 has been shown to produce one.
 
 **Why a major version, when the wire itself did not change.** Because conforming to the previous text no longer yields an interoperating implementation. 1.x declared a different, version-tagged address prefix as normative, which the current runtime rejects; it specified a flat record the runtime no longer emits; and it derived the content address by hashing a concatenation, where the runtime computes a Merkle root — the same `cmb-` prefix on a different digest, so the divergence is silent. Anything built against a running node is unaffected. Anything built from the 1.x record text would not interoperate today. **2.0 is the correction, and it is the version to build from.**
 
@@ -149,7 +148,7 @@ Proprietary cognition runtime. Its public MMP boundary, safety invariants and au
 
 ## Change Log
 
-**Current — 2.0 “Re-derived from the implementation” (14 September 2026):** the record model advanced in the runtime while the published text continued to describe the earlier shape, and 2.0 closes that gap. Corrected [§8.8 Record Model](/spec/mmp/record) gives the two-section record, the byte-exact content address (a promote-odd Merkle root over the seven per-category keys) and the byte-exact signature payload. The normative address form is corrected to `cmb-` + 64 lowercase hex — 1.x declared a version-tagged prefix instead, which the runtime rejects. Admission wording is corrected to per-category _evaluation_ on which the receiver decides for itself; receiver autonomy is unchanged. CAT7 members are named **categories** throughout, and the wire key is untouched.
+**Current — 2.0 “Re-derived from the implementation” (14 September 2026):** the record model advanced in the runtime while the published text continued to describe the earlier shape, and 2.0 closes that gap. Corrected [§8.8 Record Model](/spec/mmp/cmb#record) gives the two-section record, the byte-exact content address (a promote-odd Merkle root over the seven per-category keys) and the byte-exact signature payload. The normative address form is corrected to `cmb-` + 64 lowercase hex — 1.x declared a version-tagged prefix instead, which the runtime rejects. Admission wording is corrected to per-category _evaluation_ on which the receiver decides for itself; receiver autonomy is unchanged. CAT7 members are named **categories** throughout, and the wire key is untouched.
 
 **1.1.0 “The Work Layer” (2026-07-05, updated 2026-07-07):** grounding cognition in reality — §6.7 outcomes carried by lineage, the §6.3 Canon tier, §14.12 work sessions as mesh members, plus the folded-in full-corpus coherence errata. The 2026-07-07 update folds in the **soundness & completeness amendments from the formalization of the open-source runtime**: §9.2.1 redundancy invariants pinned to the nearest-anchor basis, the §9.2 evaluation-time-dependence disclosure, the cold-start-capture threat row, §6.7 repeat verification and the load-bearing failure channel, and the §15.8 lineage tether. Wire-compatible with 1.0.x.
 
@@ -2416,7 +2415,7 @@ key = "cmb-" + first 32 hex chars of SHA-256( UTF-8( focus.text + "|" + issue.te
 
 This scheme has three known weaknesses, which the successor resolves: the `|` join is not injection-proof (a delimiter inside a category can shift a boundary), text is not Unicode-normalised (NFC vs NFD diverge), and the 128-bit truncation gives only 64-bit collision resistance.
 
-Normative record — see [§8.8 Record Model](/spec/mmp/record). The address is `"cmb-"` + 64 lowercase hex, and the digest is a **promote-odd Merkle root over the seven per-category keys**, not a hash of a concatenated preimage. This section gives the cognition-key construction byte-exactly; §8.8 makes the construction implementable and reproducible from that text alone.
+Normative record — see [§8.8 Record Model](#record). The address is `"cmb-"` + 64 lowercase hex, and the digest is a **promote-odd Merkle root over the seven per-category keys**, not a hash of a concatenated preimage. This section gives the cognition-key construction byte-exactly; §8.8 makes the construction implementable and reproducible from that text alone.
 
 Why this section changed in 2.0. Through 1.1.0 this page specified a flat `SHA-256` over a length-prefixed concatenation of the seven category texts plus a role tag. The implementation mints the Merkle form. **Both wear the same `cmb-` prefix**, so an implementation built to the older text computes a _different address for the same content_ and nothing signals the mismatch — it fails silently, at every record. That is the divergence 2.0 exists to close.
 
@@ -2724,12 +2723,6 @@ SVAF needs a shared schema to compare incoming categories against local anchors.
 Why does mood carry valence and arousal but other categories don’t carry numeric values?
 
 Mood has a well-established dimensional model (Russell’s circumplex). other categories are inherently symbolic — "debugging auth module" has no meaningful numeric axis. Valence and arousal are RECOMMENDED, not required — agents without reliable circumplex data omit them.
-
-
-
----
-
-<!-- 8.8 Record Model -->
 
 ## 8.8 Record Model
 
@@ -5396,7 +5389,7 @@ Node identity is a UUID bound to an Ed25519 key through the authenticated transc
 
 Transport identity (above) authenticates the _connection_; CMB signatures authenticate each _record assertion_ end-to-end. Every Core Secure CMB MUST be signed by its author using the Ed25519 identity proven in the handshake or a verifiable author key-binding chain.
 
--   —The byte-exact `mmp-sig-v2.0` payload is specified only in [§8.8.4](/spec/mmp/record#signature). It binds the cognition address, address scheme, author nodeId and label, signed author time, room, recipient, lineage commitments and application commitment.
+-   —The byte-exact `mmp-sig-v2.0` payload is specified only in [§8.8.4](/spec/mmp/cmb#signature). It binds the cognition address, address scheme, author nodeId and label, signed author time, room, recipient, lineage commitments and application commitment.
 -   —The receiver MUST resolve the author key by `createdByNodeId`, never `createdBy`.
 -   —Before admission or application exposure, the receiver follows all checks in §8.8.5, including record address, assertion identity, signature and audience.
 -   —An unsigned, legacy-suite or unverifiable record MUST NOT enter Core Secure. It may be quarantined under an explicitly selected Legacy Import profile; no automatic downgrade is permitted.
