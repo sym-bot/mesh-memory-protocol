@@ -346,7 +346,7 @@ A node whose interior is a single agent (mind + store + SVAF) — the ordinary c
 
 Gateway
 
-A node whose interior is a sub-mesh. It participates in its interior group as an ordinary node and presents a boundary to exterior gateways; what crosses is its own lossy CAT7 projection of admitted interior cognition, never a relayed interior frame (Sections 5.9–5.11).
+A node whose interior is a sub-mesh. It participates in its interior room as an ordinary node and presents a boundary to exterior gateways; what crosses is its own lossy CAT7 projection of admitted interior cognition, never a relayed interior frame (Sections 5.9–5.11).
 
 CMB
 
@@ -1137,7 +1137,7 @@ On the relay, a frame is wrapped in a relay-layer _routing envelope_ — this en
 
 If `to` is present, the relay forwards to that peer only. If absent, the relay broadcasts to all peers on the same channel. The relay adds `from` and `fromName` to forwarded frames. The relay MUST NOT route frames across channels.
 
-The presence of `to` also fixes the CMB’s binding at the receiver: a frame with `to` = the receiving node is peer-bound (directed) and is delivered to the application layer unconditionally; a frame with no `to` is group-bound (autonomous) and is SVAF-gated for delivery. See §9.2.2 for the directed-vs-autonomous delivery contract.
+The presence of `to` also fixes the CMB’s binding at the receiver: a frame with `to` = the receiving node is peer-bound (directed) and is delivered to the application layer unconditionally; a frame with no `to` is room-bound (autonomous) and is SVAF-gated for delivery. See §9.2.2 for the directed-vs-autonomous delivery contract.
 
 #### 4.4.5 Keepalive
 
@@ -1300,11 +1300,11 @@ SHOULD
 
 Machine hostname
 
-group
+room
 
 MAY
 
-Mesh group identifier (Section 5.8). Default `"default"` if absent.
+Mesh room identifier (Section 5.8). Default `"default"` if absent.
 
 To prevent duplicate connections, the node with the lexicographically smaller nodeId MUST initiate the outbound TCP connection. The other node MUST NOT initiate.
 
@@ -1446,7 +1446,7 @@ After handshake, nodes SHOULD exchange `peer-info` frames containing known peer 
 
 Nodes MAY register a wake channel (APNs, FCM, or other push mechanism) via the `wake-channel` frame. Peers MAY use this channel to wake a sleeping node when they have a signal to deliver. Wake requests SHOULD be rate-limited (default cooldown: 300,000 ms per peer).
 
-### 5.8 Mesh Groups
+### 5.8 Mesh Rooms
 
 A node MUST declare membership in one mesh room at handshake time via the explicit `room` field (Section 5.2). A room is a named cohort of nodes that exchange application-layer frames only with each other. Rooms let an operator host multiple mutually isolated meshes on the same relay or LAN segment.
 
@@ -1464,13 +1464,13 @@ The naming convention above is the complete normative surface; deeper design rat
 
 §5.9–5.11 — Informative
 
-Sections 5.9–5.11 describe an informative design pattern for composing meshes — not a normative wire. The single-mesh protocol (§1–§5.8, §6–§20) is complete and unaffected without it. There is one reference implementation (a gateway prototype) and it realizes only a subset of the pattern (see “Reference implementation” below); the core runtime is single-group. Adopt this as a topology pattern with a stated production-security bar, not as a shipped protocol feature.
+Sections 5.9–5.11 describe an informative design pattern for composing meshes — not a normative wire. The single-mesh protocol (§1–§5.8, §6–§20) is complete and unaffected without it. There is one reference implementation (a gateway prototype) and it realizes only a subset of the pattern (see “Reference implementation” below); the core runtime is single-room. Adopt this as a topology pattern with a stated production-security bar, not as a shipped protocol feature.
 
 ### 5.9 Interior and Boundary (the composition idea)
 
-A mesh presents itself to another mesh as a single node: a gateway. A gateway participates in its own interior group as an ordinary node (§5.2, single group on the wire) and presents a boundary to exterior gateways over a separate transport. It is not one handshake declaring several groups — interior participation and the exterior boundary are distinct connections.
+A mesh presents itself to another mesh as a single node: a gateway. A gateway participates in its own interior room as an ordinary node (§5.2, single room on the wire) and presents a boundary to exterior gateways over a separate transport. It is not one handshake declaring several rooms — interior participation and the exterior boundary are distinct connections.
 
-Admit-then-reproject, not relay (the intended grammar). The pattern forbids forwarding an interior frame outward. Instead a gateway _admits_ its interior cognition through SVAF (§9) and emits a new lossy CAT7 projection (§2.7) outward — its own cognition, signed, carrying its own lineage (§15), never a relayed copy. This preserves the §5.8 guarantee (no interior frame crosses a group boundary) by construction. _Implementation status: the reference prototype does not yet do this — see below._
+Admit-then-reproject, not relay (the intended grammar). The pattern forbids forwarding an interior frame outward. Instead a gateway _admits_ its interior cognition through SVAF (§9) and emits a new lossy CAT7 projection (§2.7) outward — its own cognition, signed, carrying its own lineage (§15), never a relayed copy. This preserves the §5.8 guarantee (no interior frame crosses a room boundary) by construction. _Implementation status: the reference prototype does not yet do this — see below._
 
 ### 5.10 The Gateway Node
 
@@ -1506,13 +1506,13 @@ into a boundary policy; MAY re-project inward
 
 membership
 
-one group
+one room
 
-one interior group + an exterior boundary (Section 5.9)
+one interior room + an exterior boundary (Section 5.9)
 
 A gateway node is an ordinary node whose interior happens to be a mesh; its domain lens (Section 3.1) is “represent my interior.” Because the same emit / admit grammar holds at every scale — agent, team, org, cross-org — the mesh is fractal: any mesh MAY appear as a single node inside a larger mesh.
 
-Relation to Section 3.2. “One agent, one node” is preserved. A gateway is not a shared identity: it has its own nodeId, its own keypair, and its own SVAF. Its interior agents are separate nodes on a separate (interior) group; the gateway participates in that interior group as an ordinary node and presents an exterior boundary (§5.9) — evaluating each side through its own lens, the very property Section 3.2 protects.
+Relation to Section 3.2. “One agent, one node” is preserved. A gateway is not a shared identity: it has its own nodeId, its own keypair, and its own SVAF. Its interior agents are separate nodes on a separate (interior) room; the gateway participates in that interior room as an ordinary node and presents an exterior boundary (§5.9) — evaluating each side through its own lens, the very property Section 3.2 protects.
 
 No center, per level. The “no center” invariant (Section 2.3) is enforced at each boundary, not as a claim about interiors. A gateway’s interior MAY be organized however it likes — centered or not; that choice does not leak, because only the gateway’s projection crosses. A member of an outer mesh MAY therefore be a gateway over a centered interior while the outer mesh remains center-free. Federation couples meshes; it MUST NOT synchronize them.
 
