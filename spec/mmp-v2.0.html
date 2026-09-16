@@ -1028,6 +1028,15 @@ compare the grant&rsquo;s bound key against a key the peer <em>proved</em> posse
       independently of, the handshake that would have judged it. Handshake frames <span class="text-red-400 font-mono text-xs">MUST NOT</span> be gated this way
       &mdash; a grant-holder could then never join. Liveness frames <span class="text-green-400 font-mono text-xs">MAY</span> be answered, since a keep-alive tells
       a refused peer nothing that a closed connection does not.
+</p> <p class="mb-4"> <span class="text-white/90">A door governs a room, not a node&rsquo;s voice.</span> Admission decides what is exchanged
+<em>within</em> a room; it does not make a node inaudible outside one. A receiver that also hears a
+      band the room does not scope &mdash; a discovery advertisement, a broadcast channel, any transport
+      it shares with non-members &mdash; <span class="text-red-400 font-mono text-xs">MUST NOT</span> ingest what arrives there as room content, because
+      nothing on that band passed the door. This is not hypothetical: an independent implementation built
+      against this specification was measured on 2026-09-16 emitting an adversarial node&rsquo;s records to
+      every peer on the local segment <em>without ever joining the room</em>, and its door counted nothing,
+      correctly &mdash; the node never knocked. A door that is never approached refuses nothing, and a
+      receiver <span class="text-red-400 font-mono text-xs">MUST NOT</span> read that silence as evidence of admission.
 </p> <p class="mb-4"> <span class="text-white/90">What the door cannot do.</span> In an <em>ungated</em> room there is no admission to enforce: declaring
       the room at handshake is membership, by &sect;5.8. A receiver in an ungated room therefore has no basis to
       refuse an unknown peer&rsquo;s frames on admission grounds, and <span class="text-red-400 font-mono text-xs">MUST NOT</span> report the absence of grants
@@ -1040,9 +1049,14 @@ The reference runtime implements owner-signed grants with the key binding, the v
         24-hour cap, and the per-frame door described above. Two parts of this section are <span class="text-white/90">specified but not
         exercised</span>: no shipped deployment gates a room, so the refusal paths are covered by tests rather than
         by traffic; and the proving handshake that would supply a <em>proven</em> key is not reachable from the
-        admission path, which is why a gated room stays shut rather than opening on an asserted key. Revocation
-        exists only as expiry. Treat the grant mechanism as specified and implemented, and the gated-room
-        deployment as untried.
+        admission path. The consequence is worth stating plainly rather than leaving to be discovered: because
+        the verifier refuses for want of proof <em>before</em> it compares keys, a gated room in that runtime is
+        currently shut to <span class="text-white/90">everyone</span> &mdash; a legitimate grant-holder is refused for the same reason as a
+        thief presenting a stolen grant. That is fail-closed, and it is the right direction to fail, but it means
+        the key binding described above is <span class="text-white/90">specified and implemented without being reachable</span>, and no
+        measurement of a refusal in that runtime can yet distinguish the binding working from the door being
+        closed. Revocation exists only as expiry. Treat the grant mechanism as specified and implemented, the
+        binding as not yet exercisable, and the gated-room deployment as untried.
 </p> </div> <div class="bg-white/[0.03] border border-white/[0.06] border-l-2 border-l-purple-400/50 rounded-lg p-4 mb-6"> <p class="font-mono text-xs tracking-wider uppercase text-purple-400 mb-2">§5.9&ndash;5.11 &mdash; Informative</p> <p class="text-sm text-white/60">
 Sections 5.9&ndash;5.11 describe an <span class="text-white/90">informative design pattern</span> for composing meshes &mdash; not a
         normative wire. The single-mesh protocol (§1&ndash;§5.8, §6&ndash;§20) is complete and unaffected without
