@@ -1073,7 +1073,28 @@ to exterior gateways over a separate transport. It is not one handshake declarin
 <span class="text-white/90">new</span> lossy CAT7 projection (§2.7) outward &mdash; its own cognition, signed, carrying its own
       lineage (§15), never a relayed copy. This preserves the §5.8 guarantee (no interior frame crosses a room
       boundary) by construction. <em>Implementation status: the reference prototype does not yet do this &mdash;
-      see below.</em> </p> <h3 class="font-display text-base text-white/90 mb-3" id="gateway-node">5.10 The Gateway Node</h3> <p class="mb-4">
+      see below.</em> </p> <p class="mb-4"> <span class="text-white/90">Its own lineage means ONLY its own, and the reason is not tidiness.</span> A projection emitted outward
+<span class="text-red-400 font-mono text-xs">MUST NOT</span> carry a lineage reference to the interior record it was admitted from, even though the
+      exterior could never dereference one. By &sect;8.2.1 a CMB&rsquo;s key <em>is</em> a content address &mdash;
+      a SHA-256 over the canonical serialization, which two conforming implementations compute identically for
+      the same logical block. A reference to an interior record is therefore a <span class="text-white/90">hash of that record&rsquo;s
+      content</span>, published outside the boundary. An exterior observer cannot open it, but can <em>guess</em> a
+      candidate interior content, compute its address, and compare &mdash; confirming the interior&rsquo;s
+      contents without ever being admitted to it. Where the interior&rsquo;s vocabulary is small or enumerable,
+      that is not a narrow leak but a complete one. The determinism that makes a content address work for
+      lineage, dedup and citation is the same property that makes it an oracle across a boundary, and
+      &ldquo;the reader cannot dereference it&rdquo; is the argument for safety that gets this wrong: inability
+      to dereference removes the audit value while leaving the confirmation intact.
+</p> <p class="mb-4">
+The audit trail this appears to sacrifice is not lost, only relocated to where the entitlement is. A
+      gateway <span class="text-yellow-400 font-mono text-xs">SHOULD</span> record, in its own store, which admitted interior observations a given outward
+      projection derived from. That is readable by the gateway and by anyone with interior access &mdash;
+      precisely the parties entitled to see both sides &mdash; and unlike a pointer the exterior cannot open,
+      it can actually be followed. Where a gateway must later <em>prove</em> such a derivation to a third
+      party, it <span class="text-green-400 font-mono text-xs">MAY</span> publish a salted commitment over the interior key rather than the key itself, revealing
+      the salt when it chooses to prove the link; a commitment carries no oracle, because a correct guess
+      cannot be confirmed without the salt.
+</p> <h3 class="font-display text-base text-white/90 mb-3" id="gateway-node">5.10 The Gateway Node</h3> <p class="mb-4">
 A node is a <span class="text-white/90">membrane over an arbitrary interior</span>. What makes something a node is entirely its
       boundary behavior: a stable identity (Section 3), a CAT7 projection of its state (Section 8), and a
       sovereign SVAF admission of others&rsquo; projections (Section 9). The interior behind the membrane is
