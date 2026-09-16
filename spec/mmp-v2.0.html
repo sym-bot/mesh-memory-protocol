@@ -328,6 +328,29 @@ throughout, replacing mixed use of &ldquo;dimensions&rdquo; and &ldquo;fields&rd
 <code class="text-purple-300/80">.html</code>.
 <code class="text-purple-300/80">mmp-v1.0.*</code> remain published, frozen, for existing
             citations.
+<br><br> <strong>&sect;5.8.1 Room Admission added (2026-09-16; no version bump).</strong> The
+            room-join grant existed in the reference runtime and in no version of this specification.
+            &sect;5.8.1 states it: a gated room has one owner; a grant binds room, grantee, grantee key and
+            expiry under one signature; a grant binding no key is a bearer token and MUST be refused; the
+            bound key MUST be compared against a key the peer PROVED, and refused when no proof exists; the
+            24-hour lifetime cap MUST be enforced by the verifier, because revocation is live gossip with no
+            replay and the lifetime therefore IS the offline exposure.
+<br><br>
+One clause is new to both the specification and the implementation, and it came from outside
+            this document. A simulation built against MMP found a node publishing into a room it had never
+            joined; reading the reference runtime for the same shape found it there too, arrived at
+            independently &mdash; admission was decided from the handshake and every other frame was
+            dispatched on trust. So the door is now <strong>consulted per frame, not once per greeting</strong>:
+            a receiver MUST record its admission decision and consult it on every content-bearing frame, and
+            MUST NOT process content from a peer for which no decision was ever made while the room is gated.
+            Handshake frames are exempt or a grant-holder could never join; liveness frames MAY be answered.
+<br><br>
+The section also states what admission does NOT do. Consent to hear is not consent to believe:
+            every admitted record is still evaluated by SVAF (&sect;9.2) and membership confers no standing
+            there. And in an ungated room there is nothing to enforce &mdash; declaring the room IS membership
+            &mdash; so an interface reporting a room's gating MUST distinguish <em>ungated</em> from <em>not
+            determined</em>. No shipped deployment gates a room, so no existing implementation becomes
+            non-conformant; the gated-room deployment remains untried and the section says so.
 <br><br> <strong>Terminology: group &rarr; room, completed (2026-09-16; no version bump).</strong> The core
             renamed this concept to <em>room</em> on 13 August, but only where the text was being
             rewritten: the handshake block and §5.8's body moved, while §5.8's heading still read
@@ -970,7 +993,57 @@ A node <span class="text-red-400 font-mono text-xs">MUST</span> declare membersh
 </p> <p class="mb-4"> <span class="text-white/90">SVAF and room filtering.</span> Authentication and room filtering run before SVAF. A record from a different room never reaches the evaluator. For an authenticated same-room record, category verdicts inform one whole-record admission result (&sect;9.2).
 </p> <p class="mb-4 text-sm text-white/50">
 The naming convention above is the complete normative surface; deeper design rationale is runtime documentation, not part of this specification.
-</p> <div class="bg-white/[0.03] border border-white/[0.06] border-l-2 border-l-purple-400/50 rounded-lg p-4 mb-6"> <p class="font-mono text-xs tracking-wider uppercase text-purple-400 mb-2">§5.9&ndash;5.11 &mdash; Informative</p> <p class="text-sm text-white/60">
+</p> <h3 class="font-display text-base text-white/90 mb-3" id="room-admission">5.8.1 Room Admission</h3> <p class="mb-4"> <span class="text-white/90">Consent to hear is not consent to believe.</span> Admission decides whether a node&rsquo;s frames are
+      exchanged at all. It says nothing about whether their content is true, and a receiver that treats
+      membership as credibility has confused the two. Every admitted record is still evaluated by SVAF
+      (&sect;9.2), and admission gives it no standing there.
+</p> <p class="mb-4"> <span class="text-white/90">A room name is not a credential.</span> &sect;5.8 makes a room a named cohort, and every discovery path
+      &mdash; LAN advertisement, same-host registry, relay routing &mdash; turns knowledge of that name into
+      membership without asking anyone. A deployment that needs membership to be a <em>right</em> rather than a
+<em>string</em> <span class="text-green-400 font-mono text-xs">MAY</span> gate a room. A gated room has exactly one <span class="text-white/90">owner</span>, identified by node
+      identifier and Ed25519 public key. The room identifier <code class="text-purple-300/80">default</code> <span class="text-red-400 font-mono text-xs">MUST NOT</span> be owned: it is the public mesh. An identifier that does not survive the room&harr;service-type
+      round trip <span class="text-red-400 font-mono text-xs">MUST NOT</span> be owned either, because two such names can denote one room and an
+      &ldquo;owned&rdquo; one would silently be the public square.
+</p> <p class="mb-4"> <span class="text-white/90">The room-join grant.</span> A node joins a gated room by presenting a grant signed by that room&rsquo;s
+      owner. The grant <span class="text-red-400 font-mono text-xs">MUST</span> bind, under one signature, the room identifier, the grantee&rsquo;s node
+      identifier, the grantee&rsquo;s public key, and an expiry. A grant that names a grantee but binds no key is
+      a <span class="text-white/90">bearer token</span>: anyone holding the bytes can present it, and the verifier <span class="text-red-400 font-mono text-xs">MUST</span> refuse it.
+</p> <p class="mb-4"> <span class="text-white/90">The key must be proven, not asserted.</span> A handshake field stating a public key proves nothing &mdash;
+      the key an impostor would have to state is printed inside the grant it is holding. A verifier <span class="text-red-400 font-mono text-xs">MUST</span>
+compare the grant&rsquo;s bound key against a key the peer <em>proved</em> possession of during the
+      handshake, and <span class="text-red-400 font-mono text-xs">MUST</span> refuse when no such proof is available. Failing closed here costs a deployment
+      nothing it had; failing open hands the room to whoever copied a file.
+</p> <p class="mb-4"> <span class="text-white/90">Expiry is the revocation window.</span> A grant <span class="text-red-400 font-mono text-xs">MUST NOT</span> be accepted with a lifetime exceeding
+<span class="text-white/90">24 hours</span>, and the cap <span class="text-red-400 font-mono text-xs">MUST</span> be enforced by the <em>verifier</em>, not only by the issuer: a cap
+      only the issuer honoured is a suggestion, and a receiver that accepts a ten-year grant has no window at
+      all. Revocation is live gossip with no catch-up replay, so a peer that is offline when a revocation
+      publishes never learns of it. The grant&rsquo;s own lifetime is therefore the true exposure, and this
+      number <em>is</em> that exposure rather than a bound on it.
+</p> <p class="mb-4"> <span class="text-white/90">The door is consulted per frame, not once per greeting.</span> Admission is decided from the handshake,
+      but a receiver <span class="text-red-400 font-mono text-xs">MUST</span> record that decision and consult it on every frame that carries meaning. A
+      receiver <span class="text-red-400 font-mono text-xs">MUST NOT</span> process a record, a message, or any other content-bearing frame from a peer it
+      refused, nor from a peer for which no admission decision was ever made while the room is gated. This is
+      not a restatement of &sect;5.8: an implementation can satisfy the handshake rule and still dispatch content
+      from a node that never greeted it, because frame handling is commonly attached to a transport before, or
+      independently of, the handshake that would have judged it. Handshake frames <span class="text-red-400 font-mono text-xs">MUST NOT</span> be gated this way
+      &mdash; a grant-holder could then never join. Liveness frames <span class="text-green-400 font-mono text-xs">MAY</span> be answered, since a keep-alive tells
+      a refused peer nothing that a closed connection does not.
+</p> <p class="mb-4"> <span class="text-white/90">What the door cannot do.</span> In an <em>ungated</em> room there is no admission to enforce: declaring
+      the room at handshake is membership, by &sect;5.8. A receiver in an ungated room therefore has no basis to
+      refuse an unknown peer&rsquo;s frames on admission grounds, and <span class="text-red-400 font-mono text-xs">MUST NOT</span> report the absence of grants
+      there as evidence that nobody was admitted &mdash; nothing was required. An interface that reports a
+      room&rsquo;s gating <span class="text-red-400 font-mono text-xs">MUST</span> distinguish <span class="text-white/90">ungated</span> from <span class="text-white/90">not determined</span>; the two call for
+      opposite responses and collapsing them into one false negative is the failure this clause exists to
+      prevent.
+</p> <div class="bg-white/[0.03] border border-white/[0.06] rounded-lg p-4 mb-6"> <p class="font-mono text-xs tracking-wider uppercase text-white/40 mb-2">Implementation status</p> <p class="text-sm text-white/60">
+The reference runtime implements owner-signed grants with the key binding, the verifier-enforced
+        24-hour cap, and the per-frame door described above. Two parts of this section are <span class="text-white/90">specified but not
+        exercised</span>: no shipped deployment gates a room, so the refusal paths are covered by tests rather than
+        by traffic; and the proving handshake that would supply a <em>proven</em> key is not reachable from the
+        admission path, which is why a gated room stays shut rather than opening on an asserted key. Revocation
+        exists only as expiry. Treat the grant mechanism as specified and implemented, and the gated-room
+        deployment as untried.
+</p> </div> <div class="bg-white/[0.03] border border-white/[0.06] border-l-2 border-l-purple-400/50 rounded-lg p-4 mb-6"> <p class="font-mono text-xs tracking-wider uppercase text-purple-400 mb-2">§5.9&ndash;5.11 &mdash; Informative</p> <p class="text-sm text-white/60">
 Sections 5.9&ndash;5.11 describe an <span class="text-white/90">informative design pattern</span> for composing meshes &mdash; not a
         normative wire. The single-mesh protocol (§1&ndash;§5.8, §6&ndash;§20) is complete and unaffected without
         it. There is <span class="text-white/90">one reference implementation</span> (a gateway prototype) and it realizes only a subset of
