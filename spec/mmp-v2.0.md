@@ -277,7 +277,7 @@ upd. 2026-07-07
 
 2026-06-12
 
-Layer 6 renamed “xMesh” → “Cognitive State” to disambiguate from the xMesh runtime (naming note §1, §13; wire identifiers incl. xmesh-insight unchanged; published papers retain the legacy “xMesh (L6)” label). Normative additions, backward-compatible with the v1.0 contracts: §9.2.1 specifies δf as an admission _interface_ — anchors-only baseline (incoming block excluded), cold-start non-evaluable-category exclusion + bootstrap-admit — ruling out self-referential collapse and cold-start starvation. §9.2.2 specifies the directed (peer-bound) vs autonomous (group-bound) delivery contract, separating delivery from memory admission: directed CMBs (§4.4.4 `to` = receiver) surface unconditionally; rejected broadcasts do not surface (mood excepted, §9.3). §18.3.1 specifies CMB signature verification (Ed25519 author signature + content-address integrity; forged/tampered blocks rejected) as the end-to-end authenticity layer above transport identity.
+Layer 6 renamed “xmesh” → “Cognitive State” to disambiguate from the xmesh runtime (naming note §1, §13; wire identifiers incl. xmesh-insight unchanged; published papers retain the legacy “xmesh (L6)” label). Normative additions, backward-compatible with the v1.0 contracts: §9.2.1 specifies δf as an admission _interface_ — anchors-only baseline (incoming block excluded), cold-start non-evaluable-category exclusion + bootstrap-admit — ruling out self-referential collapse and cold-start starvation. §9.2.2 specifies the directed (peer-bound) vs autonomous (group-bound) delivery contract, separating delivery from memory admission: directed CMBs (§4.4.4 `to` = receiver) surface unconditionally; rejected broadcasts do not surface (mood excepted, §9.3). §18.3.1 specifies CMB signature verification (Ed25519 author signature + content-address integrity; forged/tampered blocks rejected) as the end-to-end authenticity layer above transport identity.
 
 1.0
 
@@ -333,7 +333,7 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHOULD
 
 Naming note
 
-Layer 6 was called xMesh in the v0.2.x drafts and in the published papers (arXiv:[2604.19540](https://arxiv.org/abs/2604.19540), arXiv:[2604.03955](https://arxiv.org/abs/2604.03955)). As of v1.0.1 the layer is named Cognitive State. The name _xMesh_ now refers to the product runtime — the reference implementation of the receiver side; the open substrate SDK is SYM, and the protocol itself is this open specification. The wire frame type `xmesh-insight` retains its identifier for backward compatibility and is unchanged.
+Layer 6 was called xmesh in the v0.2.x drafts and in the published papers (arXiv:[2604.19540](https://arxiv.org/abs/2604.19540), arXiv:[2604.03955](https://arxiv.org/abs/2604.03955)). As of v1.0.1 the layer is named Cognitive State. The name _xmesh_ now refers to the product runtime — the reference implementation of the receiver side; the open substrate SDK is SYM, and the protocol itself is this open specification. The wire frame type `xmesh-insight` retains its identifier for backward compatibility and is unchanged.
 
 Term
 
@@ -417,7 +417,7 @@ The agent’s LLM reasoning on the verified remix subgraph reached by following 
 
 Cognitive State
 
-Layer 6 — each agent’s own Liquid Neural Network (LNN). Evolves continuous-time cognitive state from Synthetic Memory input. Fast τ neurons track mood; slow τ neurons preserve domain expertise. (Called xMesh in v0.2.x drafts and the published papers — see the §1 naming note.)
+Layer 6 — each agent’s own Liquid Neural Network (LNN). Evolves continuous-time cognitive state from Synthetic Memory input. Fast τ neurons track mood; slow τ neurons preserve domain expertise. (Called xmesh in v0.2.x drafts and the published papers — see the §1 naming note.)
 
 CfC
 
@@ -3886,7 +3886,7 @@ Related   [State Blending](/spec/mmp/blending) — what happens after Synthetic
 
 Naming note
 
-Layer 6 was called xMesh in the v0.2.x drafts and in the published papers (arXiv:[2604.19540](https://arxiv.org/abs/2604.19540), arXiv:[2604.03955](https://arxiv.org/abs/2604.03955)). As of v1.0.1 the layer is named Cognitive State, so that the layer and the name are not confused where the papers use the older label. SYM is the maintained open reference implementation; the protocol itself is this open specification. The wire frame type `xmesh-insight` retains its identifier for backward compatibility and is unchanged.
+Layer 6 was called xmesh in the v0.2.x drafts and in the published papers (arXiv:[2604.19540](https://arxiv.org/abs/2604.19540), arXiv:[2604.03955](https://arxiv.org/abs/2604.03955)). As of v1.0.1 the layer is named Cognitive State, so that the layer and the name are not confused where the papers use the older label. SYM is the maintained open reference implementation; the protocol itself is this open specification. The wire frame type `xmesh-insight` retains its identifier for backward compatibility and is unchanged.
 
 Each agent runs its own Liquid Neural Network (LNN) implementing Closed-form Continuous-time (CfC) dynamics. The LNN evolves cognitive state from [Synthetic Memory](/spec/mmp/memory) input (Layer 5) and direct CMB processing. Hidden state (h₁, h₂) is strictly local — per the hidden-state locality invariant ([Section 2.7](/spec/mmp/architecture#hidden-state-locality)), it never crosses the wire. A node’s hidden state evolves only from the CMBs it admits, never by importing a peer’s vectors.
 
@@ -6137,7 +6137,7 @@ The protocol’s no-center, receiver-autonomous-admission, and lineage-provenanc
 
 \[SYM\] Open reference implementation (Node.js, package `@sym-bot/sym`): [github.com/sym-bot/sym](https://github.com/sym-bot/sym)
 
-\[XMESH-CORE\] Proprietary conforming runtime used to validate implementation boundaries. Its source is not part of the open specification and is not required for independent conformance.
+\[xmesh-core\] Proprietary conforming runtime used to validate implementation boundaries. Its source is not part of the open specification and is not required for independent conformance.
 
 \[SYM-Swift\] Reference implementation (Swift): [github.com/sym-bot/sym-swift](https://github.com/sym-bot/sym-swift)
 
