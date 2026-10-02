@@ -135,6 +135,14 @@
       <li><a href="#section-21">20. JSON Schema</a></li>
       <li><a href="#section-22">21. References</a></li>
     </ol>
+    <h2 style="margin-top: 20px;">Extension documents</h2>
+    <p style="font-size: 13px; margin: 0 0 8px 0;">Published with §16, each versioned separately with its own status.</p>
+    <ul>
+      <li><a href="#section-23">Extension: mesh-room-v0.2.0 (Proposal)</a></li>
+      <li><a href="#section-24">Extension: room-directory-v0.2.0 (Draft)</a></li>
+      <li><a href="#section-25">Extension: error-handling-v0.2.0 (Draft — Candidate Extension)</a></li>
+      <li><a href="#section-26">Extension: trust-horizon-v0.1.0 (Draft — Candidate Extension)</a></li>
+    </ul>
   </nav>
 
   <section id="section-0" class="spec-section">
@@ -3487,6 +3495,963 @@ References are split into <span class="text-white/70">normative</span> (a confor
       listed last; the published conformance vectors (&sect;17.4) are the byte-level
       interop contract for this final version.
 </p> <h3 class="font-display text-base text-white/90 mb-3" id="normative">21.1 Normative References</h3> <div class="space-y-2 text-sm text-white/50 mb-8"> <p><span class="text-white/70">[RFC 2119]</span> Bradner, S. (1997). Key words for use in RFCs to Indicate Requirement Levels. <em>IETF BCP 14, RFC 2119</em>.</p> <p><span class="text-white/70">[RFC 8174]</span> Leiba, B. (2017). Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words. <em>IETF BCP 14, RFC 8174</em>. Only UPPERCASE keywords carry normative force in this specification.</p> <p><span class="text-white/70">[RFC 6455]</span> Fette, I. &amp; Melnikov, A. (2011). The WebSocket Protocol. <em>IETF RFC 6455</em>. Relay transport (Section 4.4).</p> <p><span class="text-white/70">[RFC 8032]</span> Josefsson, S. &amp; Liusvaara, I. (2017). Edwards-Curve Digital Signature Algorithm (EdDSA). <em>IETF RFC 8032</em>. Ed25519 node identity and CMB signatures (Sections 3, 18.3.1).</p> <p><span class="text-white/70">[RFC 7748]</span> Langley, A., Hamburg, M. &amp; Turner, S. (2016). Elliptic Curves for Security. <em>IETF RFC 7748</em>. X25519 key agreement for end-to-end CMB encryption (Section 18.2.1).</p> <p><span class="text-white/70">[RFC 8439]</span> Nir, Y. &amp; Langley, A. (2018). ChaCha20 and Poly1305 for IETF Protocols. <em>IETF RFC 8439</em>. AEAD construction underlying relay-transit E2E encryption (Section 18.2.1).</p> <p><span class="text-white/70">[RFC 9562]</span> Davis, K., Peabody, B. &amp; Leach, P. (2024). Universally Unique IDentifiers (UUIDs). <em>IETF RFC 9562</em>. Node identifiers (Section 3.1).</p> <p><span class="text-white/70">[RFC 8259]</span> Bray, T. (2017). The JavaScript Object Notation (JSON) Data Interchange Format. <em>IETF STD 90, RFC 8259</em>. Frame payload encoding (Section 4.1).</p> <p><span class="text-white/70">[RFC 6763]</span> Cheshire, S. &amp; Krochmal, M. (2013). DNS-Based Service Discovery. <em>IETF RFC 6763</em>. LAN peer discovery (Section 5.1).</p> <p><span class="text-white/70">[JSON-Schema]</span> Wright, A., Andrews, H., Hutton, B. &amp; Dennis, G. (2022). JSON Schema: A Media Type for Describing JSON Documents. <em>IETF Internet-Draft, draft 2020-12</em>. Frame validation (Section 20).</p> </div> <h3 class="font-display text-base text-white/90 mb-3" id="foundational">21.2 Foundational Papers</h3> <p class="mb-3 text-sm text-white/40">The protocol&rsquo;s no-center, receiver-autonomous-admission, and lineage-provenance design rests on these published results. (Numeric defaults and thresholds are engineering choices of the runtime, not results derived in these papers.)</p> <div class="space-y-2 text-sm text-white/50 mb-8"> <p><span class="text-white/70">[Mesh-Inference]</span> Xu, H. (2026). Mesh Inference: A Formal Model of Collective Inference Without a Center. <em>arXiv:</em><a href="https://arxiv.org/abs/2606.19537" class="text-purple-400 hover:text-purple-300 transition-colors">2606.19537</a>. Convergence, identification-completeness, and observation-only confidentiality for the admission/emission policy (Sections 9, 12).</p> <p><span class="text-white/70">[Liquid-Necessity]</span> Xu, H. (2026). On the Necessity of a Liquid Substrate for Mesh Intelligence. <em>arXiv:</em><a href="https://arxiv.org/abs/2606.28413" class="text-purple-400 hover:text-purple-300 transition-colors">2606.28413</a>. The adaptive-timescale and elapsed-gap conditions any fixed-weight agent must meet to fold irregular peer arrivals online (Section 13).</p> <p><span class="text-white/70">[SVAF]</span> Xu, H. (2026). Symbolic-Vector Attention Fusion for Collective Intelligence. <em>arXiv:</em><a href="https://arxiv.org/abs/2604.03955" class="text-purple-400 hover:text-purple-300 transition-colors">2604.03955</a> [cs.MA, cs.AI]. Receiver admission with per-category evaluation evidence (Section 9).</p> <p><span class="text-white/70">[MMP-Paper]</span> Xu, H. (2026). Mesh Memory Protocol: Semantic Infrastructure for Multi-Agent LLM Systems. <em>arXiv:</em><a href="https://arxiv.org/abs/2604.19540" class="text-purple-400 hover:text-purple-300 transition-colors">2604.19540</a>. The protocol described at v0.2.x; this specification covers the same contracts.</p> <p><span class="text-white/70">[MeloTune]</span> Xu, H. (2026). MeloTune: On-Device Arousal Learning and Peer-to-Peer Mood Coupling. <em>arXiv:</em><a href="https://arxiv.org/abs/2604.10815" class="text-purple-400 hover:text-purple-300 transition-colors">2604.10815</a>. The first deployed reference.</p> </div> <h3 class="font-display text-base text-white/90 mb-3" id="informative">21.3 Informative References</h3> <div class="space-y-2 text-sm text-white/50 mb-8"> <p><span class="text-white/70">[CfC]</span> Hasani, R. et al. (2022). Closed-form continuous-time neural networks. <em>Nature Machine Intelligence</em>, 4, 992&ndash;1003. The continuous-time substrate of Layer 6.</p> <p><span class="text-white/70">[Kuramoto]</span> Kuramoto, Y. (1975). Self-entrainment of a population of coupled non-linear oscillators. <em>Lecture Notes in Physics</em>, 39, 420&ndash;422. Conceptual model of coupled convergence.</p> <p><span class="text-white/70">[Russell]</span> Russell, J. A. (1980). A circumplex model of affect. <em>Journal of Personality and Social Psychology</em>, 39(6), 1161&ndash;1178. The valence/arousal basis of the mood category.</p> <p><span class="text-white/70">[Autopoiesis]</span> Maturana, H. &amp; Varela, F. (1980). Autopoiesis and Cognition: The Realization of the Living. <em>D. Reidel Publishing</em>. Conceptual framing of a node as a self-producing boundary.</p> </div> <h3 class="font-display text-base text-white/90 mb-3" id="implementations">21.4 Reference Implementations</h3> <div class="space-y-2 text-sm text-white/50"> <p><span class="text-white/70">[SYM]</span> Open reference implementation (Node.js, package <code class="text-purple-300/80">@sym-bot/sym</code>): <a href="https://github.com/sym-bot/sym" class="text-purple-400 hover:text-purple-300 transition-colors">github.com/sym-bot/sym</a></p> <p><span class="text-white/70">[XMESH-CORE]</span> Proprietary conforming runtime used to validate implementation boundaries. Its source is not part of the open specification and is not required for independent conformance.</p> <p><span class="text-white/70">[SYM-Swift]</span> Reference implementation (Swift): <a href="https://github.com/sym-bot/sym-swift" class="text-purple-400 hover:text-purple-300 transition-colors">github.com/sym-bot/sym-swift</a></p> </div> </section>  </div>
+  </section>
+
+  <section id="section-23" class="spec-section">
+    <p class="section-tag">Extension: mesh-room-v0.2.0 (Proposal)</p>
+     <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <div class="spec-md"> <h1 id="mesh-room-mmp-extension-mesh-room">MMP Extension: Mesh Room</h1>
+<p><strong>Generic Transient Subgroup Primitive for the Mesh Memory Protocol</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Version</td><td>0.2.0</td></tr><tr><td>Status</td><td>Draft — Candidate Extension</td></tr><tr><td>Date</td><td>15 April 2026</td></tr><tr><td>Author</td><td>Hongwei Xu &#x3C;<a href="mailto:hongwei@sym.bot">hongwei@sym.bot</a>>, SYM.BOT</td></tr><tr><td>Extends</td><td><a href="/spec/mmp">MMP v2.0</a> — formalises §5.8 (Mesh Rooms) without changes to the core wire format</td></tr><tr><td>Canonical URL</td><td><a href="https://meshcognition.org/spec/mmp/extensions/mesh-room">https://meshcognition.org/spec/mmp/extensions/mesh-room</a></td></tr><tr><td>Licence</td><td>CC BY 4.0 (specification text)</td></tr></tbody></table>
+<hr>
+<blockquote>
+<p><strong>Renamed in 0.2.0 (15 September 2026).</strong> The core protocol calls this concept a
+<strong>room</strong>: §5.8 is <em>Mesh Rooms</em>, the handshake field is <code>room</code>, and the published handshake schema has
+no <code>group</code> field. This extension was written before that rename and kept the old word throughout,
+which left the specification saying two things. Everything here now says room, including the
+identifiers: <code>groupId</code> → <code>roomId</code>, <code>group_id</code> → <code>room_id</code>, <code>group_label</code> → <code>room_label</code>, <code>group_token</code> → <code>room_token</code>, Bonjour <code>_mmp-mesh-group._tcp</code> → <code>_mmp-mesh-room._tcp</code>. The previous identifier <code>mesh-group-v0.1.0</code> is superseded by <code>mesh-room-v0.2.0</code> and is not an alias —
+nothing implemented the old names (no engine, SDK or app references them), so there is no
+compatibility to preserve, and a silent alias would hide the rename from the next reader.</p>
+</blockquote>
+<h2 id="mesh-room-status">Status</h2>
+<p>This document is a <strong>Draft Candidate Extension</strong>. It defines an application-layer convention over MMP v2.0; it does not change the core MMP wire format and does not require an MMP version bump.</p>
+<p>Promotion to <strong>Published</strong> status in the MMP §16 Extensions registry requires a second independent implementer to ship interoperable software per the criteria in §10. Until promotion, this document is published for community visibility and review; it is not yet a registered MMP §16 Extension.</p>
+<p>This status discipline preserves the SYMBit whitepaper §4.1 commitment: SYMBit does not require changes to the MMP protocol specification. A Draft Candidate Extension introduces no protocol-level additions and no entries in the MMP §16 registry until promotion is earned.</p>
+<hr>
+<h2 id="mesh-room-abstract">Abstract</h2>
+<p>This extension defines a generic application-layer convention for a <strong>mesh room</strong> — a small set of MMP nodes that have explicitly joined a shared, named room within the broader mesh — and the canonical CMB conventions members use to broadcast state to the room.</p>
+<p>The convention does not change the core MMP wire format. CMBs remain schema-valid, signed MMP v2.0 records. This convention specifies how members agree on room identity, discover each other, bind room context inside authenticated application bytes, and bound room lifetime.</p>
+<p>The convention is the protocol primitive that real-world co-located room experiences are built on. The first use case (§9) is MeloTune’s “Mood Room” feature; the convention is intentionally generic so that other applications — room meditation, collaborative work sessions, multiplayer co-located experiences — can adopt it and interoperate at the protocol layer.</p>
+<hr>
+<h2 id="mesh-room-introduction">Introduction</h2>
+<p>MMP v2.0 §5.8 (Mesh Rooms) names mesh rooms as a structural concept but does not specify how a room is identified, discovered, or membership-managed. Implementers have adopted ad-hoc conventions, which has prevented cross-application interoperability.</p>
+<p>This extension formalises the conventions that §5.8 leaves underspecified:</p>
+<ul>
+<li>A canonical <code>roomId</code> committed inside <code>metadata.application</code> bytes.</li>
+<li>A Bonjour service type for LAN discovery and a relay channel pattern for WAN.</li>
+<li>A focus-prefix convention so multiple applications can share room infrastructure without colliding on state semantics.</li>
+<li>A receiver-side filtering rule for room-scoped CMBs.</li>
+<li>A membership lifecycle (join, heartbeat, leave, expire) covered by short, optional CMBs.</li>
+</ul>
+<p>Nothing in this extension changes the MMP v2.0 core wire format. The application payload is covered by the record assertion through §8.8’s application commitment, so a relay or peer cannot substitute room context without invalidating the signature.</p>
+<hr>
+<h2 id="mesh-room-1-motivation">1. Motivation</h2>
+<h3 id="mesh-room-11-the-58-gap">1.1 The §5.8 Gap</h3>
+<p>MMP v2.0 §5.8 introduces “mesh rooms” but treats them as an opaque concept. Two implementers reading §5.8 cannot independently produce code that joins each other’s rooms. The §5.8 text describes the semantic intent without specifying:</p>
+<ul>
+<li>The wire format of the room identifier.</li>
+<li>The discovery mechanism for finding co-members.</li>
+<li>The CMB tagging that lets receivers filter room-scoped traffic.</li>
+<li>The lifecycle events that mark joins, leaves, and expiration.</li>
+</ul>
+<p>This extension fills the gap by formalising the conventions that §5.8 leaves to implementers.</p>
+<h3 id="mesh-room-12-real-world-co-located-room-use-cases">1.2 Real-World Co-located Room Use Cases</h3>
+<p>Room experiences happen at human scale: a small number of people, briefly co-located, sharing some state. MeloTune’s Mood Room is one example: 2–6 listeners in the same physical space, each running MeloTune on their own device, each broadcasting their music-agent state into the shared room.</p>
+<p>Other use cases follow the same pattern: a room meditation app where N practitioners share breathing-cycle state; a collaborative work app where N team members share focus-context; a multiplayer co-located experience where N participants share game-state. All of these need the same protocol primitive: a transient, named, peer-discovered subgroup of the broader mesh.</p>
+<p>The mesh-room convention is intentionally generic so that an application implementing it for one use case interoperates at the protocol level with another application using it for an unrelated purpose. Each application defines its own state semantics (per §5.4 focus-prefix); the room-membership and CMB-routing primitives are shared.</p>
+<hr>
+<h2 id="mesh-room-2-mesh-room-model">2. Mesh Room Model</h2>
+<p>A mesh room is an explicit, transient grouping of MMP nodes. Membership is voluntary on both sides: a node joins by advertising its membership; the room exists from the moment its first member joins until either the last member leaves or an optional <code>expires_at</code> timestamp passes.</p>
+<p>The mesh room is <strong>not</strong> a long-lived addressable entity. It does not have a persistent state on any node beyond the transient list of currently-known members. A room that has zero members for more than a brief grace period is effectively terminated.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Term</th><th>Definition</th></tr></thead><tbody><tr><td>mesh room</td><td>A named, transient subgroup of the broader MMP mesh whose members have explicitly joined and are mutually discoverable.</td></tr><tr><td><code>roomId</code></td><td>Stable UUID identifier for a mesh room, carried in authenticated <code>metadata.application</code> bytes.</td></tr><tr><td>room token</td><td>OPTIONAL bearer token shared out-of-band among joiners; REQUIRED for WAN relay-mediated rooms, OPTIONAL for Bonjour-LAN rooms.</td></tr><tr><td>member</td><td>An MMP node with a joined session in the room. Identified by its standard MMP identity (Ed25519 public key per MMP §3.2).</td></tr><tr><td>room-scoped CMB</td><td>A CMB whose decoded, digest-verified application object names this extension and the room’s <code>roomId</code>.</td></tr><tr><td>lifetime</td><td>A room exists from the moment its first member joins until either the last member leaves OR the optional <code>expires_at</code> timestamp passes.</td></tr></tbody></table>
+<p>This document uses <a href="https://datatracker.ietf.org/doc/html/rfc2119">RFC 2119</a> keywords (MUST, SHOULD, MAY) as written in capital letters.</p>
+<hr>
+<h2 id="mesh-room-3-room-identity">3. Room Identity</h2>
+<p>A mesh room MUST have:</p>
+<ul>
+<li>A <code>room_id</code> (string, UUIDv4 RECOMMENDED).</li>
+</ul>
+<p>A mesh room MAY have:</p>
+<ul>
+<li>A <code>room_label</code> (human-readable string, ≤64 UTF-8 bytes).</li>
+<li>An <code>expires_at</code> (RFC 3339 timestamp).</li>
+<li>A <code>room_token</code> (opaque bearer string).</li>
+</ul>
+<p>The <code>room_token</code> is REQUIRED for WAN relay-mediated discovery (§4.2) and is OPTIONAL for Bonjour-LAN-mediated discovery (§4.1).</p>
+<p>The convention does not specify how <code>room_id</code>, <code>room_label</code>, <code>expires_at</code>, or <code>room_token</code> are agreed among members. Implementations typically distribute these out-of-band: one node generates them, and other nodes receive them via QR code, NFC tap, push notification, share-sheet link, or any other application-layer channel.</p>
+<hr>
+<h2 id="mesh-room-4-discovery">4. Discovery</h2>
+<h3 id="mesh-room-41-lan-discovery-via-bonjour">4.1 LAN Discovery via Bonjour</h3>
+<p>Members MUST advertise the room via Bonjour service type <code>_mmp-mesh-room._tcp</code> with the following TXT record:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>room_id        = &#x3C;UUIDv4></span></span>
+<span class="line"><span>room_label     = &#x3C;optional, ≤64 bytes></span></span>
+<span class="line"><span>mmp_version     = 2.0</span></span>
+<span class="line"><span>member_identity = &#x3C;Ed25519 public-key fingerprint, first 16 hex chars></span></span>
+<span class="line"><span></span></span></code></pre>
+<p>A node joining the room browses for <code>_mmp-mesh-room._tcp</code>, filters by matching <code>room_id</code> in TXT records, and connects to the discovered peers using standard MMP Layer 1 (TCP) transport.</p>
+<p><strong>Concrete TXT record example:</strong></p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>room_id        = 550e8400-e29b-41d4-a716-446655440000</span></span>
+<span class="line"><span>room_label     = Living Room Sunday</span></span>
+<span class="line"><span>mmp_version     = 2.0</span></span>
+<span class="line"><span>member_identity = a1b2c3d4e5f6a7b8</span></span>
+<span class="line"><span></span></span></code></pre>
+<p>Bonjour TXT records are key=value pairs of UTF-8 bytes; total record size MUST stay under the mDNS ~400-byte practical limit. <code>room_label</code> SHOULD be omitted if it would push the record over budget.</p>
+<h3 id="mesh-room-42-wan-discovery-via-relay-optional">4.2 WAN Discovery via Relay (OPTIONAL)</h3>
+<p>Rooms MAY operate LAN-only via Bonjour alone. Implementations without relay support interoperate with relay-aware implementations on the Bonjour path.</p>
+<p>When a relay is used, members register membership with the SYM relay by:</p>
+<ol>
+<li>Opening a WebSocket connection to the relay endpoint.</li>
+<li>Presenting <code>room_token</code> as a bearer credential in the connection handshake (<code>Authorization: Bearer &#x3C;room_token></code> header).</li>
+<li>Subscribing to the per-room channel named by <code>room_id</code>.</li>
+</ol>
+<p>The relay enforces token-based authorisation and forwards opaque peer frames only among members holding a valid token for that <code>room_id</code>. Endpoints, not the relay, decrypt and verify that the signed application bytes name the same room.</p>
+<p>Members SHOULD reconnect on disconnection with exponential backoff (default: 1 second initial, 60 seconds maximum).</p>
+<p>The relay protocol’s wire format is anchored in MMP v2.0 §4 transport conventions; a normative public-spec reference will be added at promotion time per §10.</p>
+<hr>
+<h2 id="mesh-room-5-cmb-tagging-conventions">5. CMB Tagging Conventions</h2>
+<h3 id="mesh-room-51-room-scoped-cmbs">5.1 Room-Scoped CMBs</h3>
+<p>A member’s CMB is “room-scoped” when its decoded <code>metadata.application</code> bytes are JSON containing
+<code>{"extension":"mesh-room-v0.2.0","roomId":"&#x3C;UUID>"}</code> and the application byte length, digest and
+data verify under §8.7–§8.8. The room object MAY add <code>event</code>, <code>roomLabel</code> and application-owned state.</p>
+<p>Members MAY emit:</p>
+<ul>
+<li><strong>Room-scoped CMBs</strong> — authenticated application bytes name this extension and a <code>roomId</code>.</li>
+<li><strong>Un-scoped CMBs</strong> — application bytes do not name this extension, and ordinary MMP routing applies.</li>
+</ul>
+<p>A member MAY filter inbound CMBs by the verified application <code>roomId</code>. It MUST verify the application digest and record signature before acting on that value. Receivers are not required to support this candidate convention.</p>
+<h3 id="mesh-room-52-application-focus-prefix-convention">5.2 Application Focus-Prefix Convention</h3>
+<p>For inter-application interoperability, room members MAY use a <code>categories.focus.text</code> prefix to indicate the kind of room state being broadcast. The prefix format is <code>&#x3C;app>:&#x3C;state-type></code>. Examples:</p>
+<ul>
+<li>MeloTune Mood Room: <code>categories.focus.text: "melotune-room:state"</code>, <code>"melotune-room:peer"</code></li>
+<li>(hypothetical) Room meditation: <code>categories.focus.text: "meditation:phase"</code></li>
+<li>(hypothetical) Collaborative work: <code>categories.focus.text: "cowork:status"</code></li>
+</ul>
+<p>This is a RECOMMENDED convention, not a requirement. Applications MAY use any focus content. Inter-application namespace registration is deferred to a future version of this extension (§11).</p>
+<hr>
+<h2 id="mesh-room-6-membership-lifecycle">6. Membership Lifecycle</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Event</th><th>Behaviour</th></tr></thead><tbody><tr><td>Join</td><td>Member begins advertising via Bonjour AND/OR registering with relay. Member SHOULD emit one room-scoped CMB with <code>categories.focus.text: "mesh-room:join"</code>, application <code>event: "join"</code>, and neutral mood.</td></tr><tr><td>Heartbeat</td><td>Member SHOULD re-advertise Bonjour at default mDNS cadence. No required heartbeat CMB; absence-of-CMB is detected at the application layer per receiver policy.</td></tr><tr><td>Leave</td><td>Member ceases Bonjour advertisement and unregisters from relay. Member SHOULD emit one room-scoped CMB with <code>categories.focus.text: "mesh-room:leave"</code>, application <code>event: "leave"</code>, and neutral mood.</td></tr><tr><td>Expire</td><td>At <code>expires_at</code> if set, members SHOULD treat the room as terminated and stop emitting room-scoped CMBs. Receivers SHOULD discard room-scoped CMBs received after <code>expires_at</code>.</td></tr></tbody></table>
+<p>The recommended <code>mesh-room:join</code> and <code>mesh-room:leave</code> CMBs are convention-level; applications MAY detect membership changes via Bonjour churn alone.</p>
+<hr>
+<h2 id="mesh-room-7-receiver-behaviour">7. Receiver Behaviour</h2>
+<p>A node receiving a room-scoped CMB SHOULD verify:</p>
+<ol>
+<li>The sender’s identity is currently a known member of the room (via the Bonjour browse list AND/OR relay registration).</li>
+<li>The CMB is received before <code>expires_at</code> (if set).</li>
+</ol>
+<p>A node MAY accept room-scoped CMBs from unknown senders if the application context warrants it (for example, a listener entering a Mood Room mid-session may not yet have observed the original joiner’s announcement).</p>
+<hr>
+<h2 id="mesh-room-8-failure-modes">8. Failure Modes</h2>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Failure</th><th>RECOMMENDED Behaviour</th></tr></thead><tbody><tr><td><code>expires_at</code> passes during active broadcasts</td><td>Members SHOULD stop emitting room-scoped CMBs at the timestamp; receivers compare it with their own authenticated-session receive clock, never an author-asserted timestamp. Active media playback or application sessions are not terminated by this specification — applications decide their own response.</td></tr><tr><td><code>room_token</code> rejected by relay mid-session</td><td>Member SHOULD treat as a room-leave event and surface the failure to the application layer. Reconnection policy is application-defined.</td></tr><tr><td>Bonjour advertisement fails (mDNS error, sandbox rejection)</td><td>Member MAY fall back to relay-only registration if <code>room_token</code> is available. If neither path works, the member is effectively isolated; the failure SHOULD be surfaced to the application layer rather than silently absorbed.</td></tr><tr><td>Two members generate the same <code>room_id</code> independently</td><td>UUIDv4 collision probability is negligible; if observed, the second-joining member SHOULD detect via Bonjour (existing TXT record with the same <code>room_id</code> from a different <code>member_identity</code>) and refuse to join.</td></tr><tr><td>Room has zero members for more than 60 seconds</td><td>Room is effectively terminated. Receivers MAY ignore subsequent late-arriving CMBs from a member that had not yet observed the empty state.</td></tr></tbody></table>
+<p>The interop test specification for the §10 promotion criterion (“two implementations interoperate”) is <strong>deferred to post-v0.1.0</strong> and will be specified jointly with the second implementer when adoption occurs. The test suite will minimally cover Bonjour discovery of cross-implementation peers, room-scoped CMB delivery via both Bonjour-LAN and (where supported) relay-WAN paths, and <code>mesh-room:join</code> / <code>mesh-room:leave</code> lifecycle event observation across implementations.</p>
+<hr>
+<h2 id="mesh-room-9-first-use-case--melotune-mood-room">9. First Use Case — MeloTune Mood Room</h2>
+<p>MeloTune’s “Mood Room” is the first use case of this extension. The MeloTune product:</p>
+<ol>
+<li>Generates a <code>room_id</code> UUID per Mood Room.</li>
+<li>Sets <code>room_label</code> to the room’s user-facing name (e.g., “Living Room Sunday”).</li>
+<li>Sets <code>expires_at</code> to 24 hours after creation (configurable in MeloTune settings).</li>
+<li>Distributes <code>room_token</code> to invited listeners via the in-app share sheet (Bonjour-LAN rooms can omit token; relay-WAN rooms require it).</li>
+<li>Each MeloTune instance joins the room, advertises via Bonjour <code>_mmp-mesh-room._tcp</code> and registers with the relay, and emits room-scoped CMBs with <code>categories.focus.text: "melotune-room:state"</code> plus authenticated application state.</li>
+<li>Each MeloTune instance receives the other listeners’ <code>melotune-room:state</code> CMBs and feeds them into MeloTune’s Personal Arousal Function for music curation.</li>
+</ol>
+<p>The MeloTune-product naming, UX, and music semantics are MeloTune-specific and are NOT part of this extension. Other applications adopting this extension would use their own focus prefixes and their own state semantics.</p>
+<hr>
+<h2 id="mesh-room-10-promotion-criteria">10. Promotion Criteria</h2>
+<p>This document is a Draft Candidate Extension. Promotion to Published status in the MMP §16 Extensions registry requires:</p>
+<ol>
+<li><strong>A second independent implementer adopts.</strong> At least one application outside MeloTune ships a working implementation. “Implementer” means a distinct codebase, not a MeloTune-derived fork.</li>
+<li><strong>Two implementations interoperate.</strong> Demonstrated via documented interop test vectors, not anecdotal co-presence. The test vectors minimally cover Bonjour discovery of cross-implementation peers, room-scoped CMB delivery via both Bonjour-LAN and (where supported) relay-WAN paths, and <code>mesh-room:join</code> / <code>mesh-room:leave</code> lifecycle observation across implementations.</li>
+<li><strong>No accumulated breaking changes.</strong> If the convention has been revised to v0.2.0 or later during the wait, promote the stable v0.x.0 that both implementers ran against.</li>
+</ol>
+<p>When the promotion criteria are met, this document moves from candidate status to a Published §16 Extension. The Status field above changes from “Draft — Candidate Extension” to “Published”; an “Adopters” section replaces this Promotion Criteria section; the spec body (§§1–9, 11, 12) is unchanged at promotion.</p>
+<p>Until promotion, this document does NOT establish a formal MMP extension. The SYMBit whitepaper §4.1 (“SYMBit does not require changes to the MMP protocol specification”) remains strictly true: this extension does not add MMP wire format, does not add §16 registry entries, does not require the MMP version to bump.</p>
+<hr>
+<h2 id="mesh-room-11-future-work">11. Future Work</h2>
+<p>Items deferred past initial draft:</p>
+<ul>
+<li><strong>Cryptographic room membership.</strong> Replace shared bearer token with per-member capability tokens signed by a designated room authority.</li>
+<li><strong>Room key agreement.</strong> TLS-style session key derivation between members for end-to-end encryption of room-scoped CMBs.</li>
+<li><strong>Room state persistence.</strong> Currently transient (<code>expires_at</code> then gone). v0.2.0+ MAY add optional persistent room state (rejoinable, history-replayable).</li>
+<li><strong>Multi-app room interop.</strong> Once two or more applications adopt the convention, formalise focus-prefix registration so applications do not collide on the <code>&#x3C;app>:&#x3C;state-type></code> namespace.</li>
+<li><strong>IANA service-type registration.</strong> A formal RFC track would require Bonjour service type <code>_mmp-mesh-room._tcp</code> registration with IANA per RFC 6335. Out of scope for v0.1.0; named here as post-promotion work.</li>
+<li><strong>Rate limiting and DoS considerations.</strong> A malicious or buggy member could flood the room with CMBs at rates that overwhelm receivers. v0.2.0+ defines per-member rate-limit guidance and receiver-side back-pressure semantics.</li>
+<li><strong>Versioning strategy.</strong> Co-existence rules for v0.1 and v0.2+ implementations in the same room. Forward-compatibility (v0.1 receiver tolerates v0.2 fields it does not understand) and backward-compatibility (v0.2 emitter degrades gracefully when a v0.1 receiver is detected via TXT record).</li>
+<li><strong>Bonjour and relay membership reconciliation.</strong> When the same <code>room_id</code> returns conflicting membership lists from Bonjour browse and relay subscription, this v0.1.0 convention does not specify resolution. v0.2.0+ defines the canonical merge rule.</li>
+</ul>
+<hr>
+<h2 id="mesh-room-12-security-considerations">12. Security Considerations</h2>
+<ul>
+<li><strong>Room token distribution is out-of-band.</strong> Compromise of the token allows a third party to join the room and observe or inject CMBs. v0.1.0 does not protect against this; v0.2.0+ adds capability tokens.</li>
+<li><strong>Bonjour discovery is unauthenticated.</strong> Any node on the local network can browse <code>_mmp-mesh-room._tcp</code> and learn <code>room_id</code> values. Confidential room identity requires the WAN-relay path with <code>room_token</code>.</li>
+<li><strong>CMB content is not encrypted at this layer.</strong> Existing MMP transport security (per MMP §18.2) applies between adjacent peers; end-to-end encryption among room members requires the room key agreement deferred to v0.2.0+.</li>
+<li><strong>No per-member access control.</strong> All members see all room-scoped CMBs in v0.1.0. Per-member ACLs are out of scope.</li>
+</ul>
+<p>These limitations are documented openly because this is a Draft Candidate Extension. They will be addressed in subsequent versions before this extension is recommended for safety-critical or high-confidentiality deployments.</p>
+<hr>
+<h2 id="mesh-room-13-conformance">13. Conformance</h2>
+<p>A conforming implementation MUST:</p>
+<ol>
+<li>Support <code>roomId</code> as a UUID string inside digest-verified, assertion-bound <code>metadata.application</code> bytes.</li>
+<li>Advertise room membership via Bonjour service type <code>_mmp-mesh-room._tcp</code> with the TXT record format in §4.1.</li>
+<li>Verify the CMB and application commitment before filtering room-scoped CMBs by <code>roomId</code>.</li>
+<li>Honour <code>expires_at</code> if set: cease emitting room-scoped CMBs after the timestamp; discard inbound room-scoped CMBs received after the timestamp.</li>
+</ol>
+<p>A conforming implementation SHOULD:</p>
+<ol>
+<li>Emit <code>mesh-room:join</code> and <code>mesh-room:leave</code> CMBs at lifecycle boundaries.</li>
+<li>Re-advertise Bonjour at the default mDNS cadence.</li>
+<li>Implement the receiver-side membership verification rules in §7.</li>
+<li>Surface failure modes from §8 to the application layer rather than absorbing them silently.</li>
+</ol>
+<p>A conforming implementation MAY:</p>
+<ol>
+<li>Support WAN relay-mediated discovery per §4.2.</li>
+<li>Accept room-scoped CMBs from unknown senders if the application context warrants it.</li>
+<li>Use the application focus-prefix convention from §5.2.</li>
+</ol>
+<hr>
+<h2 id="mesh-room-14-change-log">14. Change Log</h2>
+<ul>
+<li><strong>v0.1.0</strong> (2026-04-15) — Initial Draft Candidate Extension. Authored by Hongwei Xu (SYM.BOT) with design review from <code>claude-strategic-win</code> (operations) and <code>claude-research-win</code> (research) under Hongwei’s direction. First use case: MeloTune Mood Room.</li>
+</ul>
+<hr>
+<h2 id="mesh-room-15-references">15. References</h2>
+<ol>
+<li><a href="/spec/mmp">MMP v2.0 — Mesh Memory Protocol Specification</a>. Particularly §3 (Identity), §4 (Transport), §5.8 (Mesh Rooms), §8.8 (record assertions), and §16 (Extensions).</li>
+<li><a href="https://datatracker.ietf.org/doc/html/rfc2119">RFC 2119 — Key words for use in RFCs to Indicate Requirement Levels</a>.</li>
+<li><a href="https://datatracker.ietf.org/doc/html/rfc6335">RFC 6335 — IANA Procedures for Service Name and Transport Protocol Port Number Registry</a>. Cited in §11 for the IANA service-type registration future-work item.</li>
+<li>Xu, H. (2026). <em>Symbolic-Vector Attention Fusion for Collective Intelligence.</em> arXiv:<a href="https://arxiv.org/abs/2604.03955">2604.03955</a> [cs.MA, cs.AI]. The cognitive-coupling layer that consumes CMBs delivered via this convention.</li>
+</ol>
+<hr>
+<h2 id="mesh-room-acknowledgements">Acknowledgements</h2>
+<p>Spec design and review under SYM.BOT’s CTO/COO/CMO peer-audit cycle. No external implementer adoption at v0.1.0 publication; promotion criteria in §10 govern progression to Published status.</p> </div>  </div>
+  </section>
+
+  <section id="section-24" class="spec-section">
+    <p class="section-tag">Extension: room-directory-v0.2.0 (Draft)</p>
+     <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <div class="spec-md"> <h1 id="room-directory-mmp-extension-room-directory-draft">MMP Extension: Room Directory (Draft)</h1>
+<p><strong>Persistent Room Metadata, Admin Approval, and Directory Enumeration for Cognitive Mesh Coupling</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Version</td><td>0.2.0-DRAFT</td></tr><tr><td>Status</td><td>Draft — not yet published, not yet implemented</td></tr><tr><td>Date</td><td>19 April 2026</td></tr><tr><td>Author</td><td>Hongwei Xu <a href="mailto:hongwei@sym.bot">hongwei@sym.bot</a>, SYM.BOT</td></tr><tr><td>Extends</td><td><a href="/spec/mmp">MMP v2.0</a> — Section 5.8 (Mesh Rooms) and the mesh-room candidate convention</td></tr><tr><td>Depends on</td><td><a href="https://github.com/sym-bot/sym-relay">sym-relay</a> — token-channel isolation (already shipped)</td></tr><tr><td>Canonical URL</td><td><a href="https://sym.bot/spec/mmp-room-directory">https://sym.bot/spec/mmp-room-directory</a> (not yet live)</td></tr><tr><td>Licence</td><td>CC BY 4.0 (specification text)</td></tr><tr><td>Motivation context</td><td><a href="https://github.com/sym-bot/sym-mesh-channel/pull/0">sym-mesh-channel conversation, 19 Apr 2026</a></td></tr></tbody></table>
+<hr>
+<blockquote>
+<p><strong>Renamed in 0.2.0-DRAFT (15 September 2026).</strong> The core protocol calls this concept a <strong>room</strong>:
+§5.8 is <em>Mesh Rooms</em>, the handshake field is <code>room</code>, and the published handshake schema has no
+<code>group</code> field. This draft was written before that rename and kept the old word throughout.
+Everything here now says room, including every identifier this extension proposes:
+<code>group_id</code> → <code>room_id</code>, <code>group_token</code> → <code>room_token</code>, the MCP tools
+(<code>sym_rooms_browse</code>, <code>sym_room_create</code>, <code>sym_room_request_join</code>, <code>sym_room_approve_member</code>,
+<code>sym_room_reject_member</code>, <code>sym_room_revoke_member</code>), the SDK calls
+(<code>SymNode.listRooms()</code>, <code>SymNode.createRoom()</code>), and the extension identifier itself,
+<code>group-directory-v0.1.0</code> → <code>room-directory-v0.2.0</code>. Three names that this draft described as
+ALREADY SHIPPED were also wrong against the code rather than merely old, and are corrected to
+what ships: the environment variable is <code>SYM_ROOM</code>, and the tools are <code>sym_join_room</code> and
+<code>sym_rooms_discover</code>. Not an alias — nothing implemented the old names, so there is no
+compatibility to preserve, and a silent alias would hide the rename from the next reader.</p>
+</blockquote>
+<h2 id="room-directory-abstract">Abstract</h2>
+<p>MMP §5.8 mesh rooms give cognitive meshes an isolation primitive: nodes in
+different rooms do not discover each other at mDNS or relay level. This is
+sufficient for small dev teams who already know each other’s room names
+and coordinate the shared secret out of band.</p>
+<p>It is <strong>not</strong> sufficient for the UX model end users expect from chat
+platforms (Telegram, Discord, Slack): browse a list of rooms, see who is
+in them, request to join, wait for admin approval, get accepted or denied.</p>
+<p>This extension specifies the protocol additions needed to bridge that gap:
+<strong>persistent room metadata</strong> (rooms visible even when every member is
+offline), <strong>admin approval</strong> (pending-member queue, admin identity, accept
+/ reject actions), and <strong>directory enumeration</strong> (browse public rooms
+through a known directory endpoint). The extension is opt-in per room —
+MMP §5.8 bare rooms continue to work unchanged for any team that wants
+the minimal primitive.</p>
+<hr>
+<h2 id="room-directory-introduction">Introduction</h2>
+<h3 id="room-directory-what-mmp-58-already-provides">What MMP §5.8 already provides</h3>
+<ul>
+<li><strong>LAN rooms</strong>: a node setting <code>SYM_ROOM=&#x3C;name></code> advertises on
+<code>_&#x3C;name>._tcp</code> via Bonjour/mDNS. Nodes in different rooms never see
+each other at mDNS. Membership is per-process, constructor-locked.</li>
+<li><strong>Relay channels</strong>: the <code>sym-relay</code> server maps tokens to channels
+(<code>SYM_RELAY_CHANNELS=token1:channel1,...</code>). Each token reaches exactly
+one channel; channels are isolated routes on the relay. Peers on the
+same token see each other’s presence (gossiped connected + offline
+peers with wake channels) and exchange CMBs. Peers on different
+tokens never see each other.</li>
+</ul>
+<p>The primitives above give isolation and per-token peer visibility <em>within</em>
+a room. They do not give any cross-room visibility, public browsing,
+admin authority, or persistent state that survives all members going
+offline.</p>
+<h3 id="room-directory-what-this-extension-adds">What this extension adds</h3>
+<ol>
+<li>
+<p><strong>Persistent room metadata</strong> — a room has a canonical name,
+optional description, creation timestamp, admin node-id(s),
+visibility flag (public / private), and a creation-protected
+relay-channel binding. This metadata outlives member presence.</p>
+</li>
+<li>
+<p><strong>Admin approval gate</strong> — joining a private room is a two-step
+request / accept flow. The requester’s node-id enters a pending
+queue visible to admin(s). Admin issues accept (grants channel
+token) or reject (notifies requester). Public rooms skip the
+approval gate but still record membership.</p>
+</li>
+<li>
+<p><strong>Directory enumeration</strong> — a well-known endpoint on the relay
+(<code>/rooms</code>) returns the list of public rooms with metadata.
+Private rooms are absent from this listing (visible only to
+members and pending requesters).</p>
+</li>
+<li>
+<p><strong>Room lifecycle operations</strong> — create (become first admin),
+transfer admin, revoke member, delete room (admin only).</p>
+</li>
+</ol>
+<p>All four are opt-in: a bare MMP §5.8 room as shipped in sym-mesh-channel
+0.1.23 continues to work exactly as it does today. A room becomes
+<em>directory-registered</em> only when an admin explicitly creates it on a
+relay that supports this extension.</p>
+<hr>
+<h2 id="room-directory-design">Design</h2>
+<h3 id="room-directory-data-model">Data model</h3>
+<p>A directory-registered room is represented on the relay as:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="plaintext"><code><span class="line"><span>Room {</span></span>
+<span class="line"><span>  id:                  string              # UUID v7, issued by relay on creation</span></span>
+<span class="line"><span>  name:                string              # kebab-case, unique within the relay host</span></span>
+<span class="line"><span>  description:         string?             # optional, ≤ 280 chars</span></span>
+<span class="line"><span>  visibility:          "public" | "private"</span></span>
+<span class="line"><span>  created_at:          ISO 8601 timestamp</span></span>
+<span class="line"><span>  admins:              [node_id]           # one or more; first = creator</span></span>
+<span class="line"><span>  members:             [node_id]           # accepted members</span></span>
+<span class="line"><span>  pending_requests:    [PendingRequest]    # present only for admins' view</span></span>
+<span class="line"><span>  channel_token:       string              # shared secret granted to accepted members</span></span>
+<span class="line"><span>  service_type:        string              # _&#x3C;kebab-name>._tcp for LAN bridge (optional)</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span>
+<span class="line"><span>PendingRequest {</span></span>
+<span class="line"><span>  node_id:             string              # requester's full node-id</span></span>
+<span class="line"><span>  name:                string              # requester's display name (self-reported)</span></span>
+<span class="line"><span>  public_key:          string              # Ed25519 hex, for attestation of accept action</span></span>
+<span class="line"><span>  requested_at:        ISO 8601 timestamp</span></span>
+<span class="line"><span>  message:             string?             # optional prose from requester</span></span>
+<span class="line"><span>}</span></span>
+<span class="line"><span></span></span></code></pre>
+<p>Persistence: relay writes <code>Room</code> records to disk (SQLite is sufficient —
+low write volume, single-digit-MB scale even at thousands of rooms).
+Room records survive relay restart; member presence does not (presence
+is ephemeral, already gossiped through existing <code>relay-peers</code> frames).</p>
+<h3 id="room-directory-protocol-frames-proposed">Protocol frames (proposed)</h3>
+<p>These proposed frames are JSON-encoded and follow the extension type naming rule from MMP §16.
+They MUST NOT be sent unless the relay and client have authenticated and explicitly selected
+<code>room-directory-v0.2.0</code>. This draft does not yet define that relay-capability negotiation, so the
+section is a design target rather than an interoperable wire contract; promotion is blocked until
+the negotiation and schemas are published.</p>
+<p><strong>From client to relay:</strong></p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="jsonc"><code><span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-create"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"name"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"backend-team"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"description"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"..."</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "visibility"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"private"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-list"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"visibility"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"public"</span><span style="color:#E1E4E8"> }   </span><span style="color:#6A737D">// public only — admin auth</span></span>
+<span class="line"><span style="color:#6A737D">                                                   // required for "private" list</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-join-request"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"message"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"..."</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-accept"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"node_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8"> }   </span><span style="color:#6A737D">// admin only</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-reject"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"node_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"reason"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"..."</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-leave"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-revoke"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"node_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8"> }   </span><span style="color:#6A737D">// admin only</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-transfer-admin"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"new_admin"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-delete"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8"> }   </span><span style="color:#6A737D">// admin only</span></span>
+<span class="line"></span></code></pre>
+<p><strong>From relay to client:</strong></p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="jsonc"><code><span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-created"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room"</span><span style="color:#E1E4E8">: { </span><span style="color:#FDAEB7;font-style:italic">...</span><span style="color:#E1E4E8"> } }         </span><span style="color:#6A737D">// response to create</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-list-result"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"rooms"</span><span style="color:#E1E4E8">: [ </span><span style="color:#FDAEB7;font-style:italic">...</span><span style="color:#E1E4E8"> ] }    </span><span style="color:#6A737D">// response to list</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-join-pending"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8"> }     </span><span style="color:#6A737D">// requester waits</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-join-accepted"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"channel_token"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-join-rejected"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"reason"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-member-joined"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"node_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8"> }   </span><span style="color:#6A737D">// fanout</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-member-left"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"node_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-pending-update"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "pending"</span><span style="color:#E1E4E8">: [ </span><span style="color:#FDAEB7;font-style:italic">PendingRequest</span><span style="color:#E1E4E8">, </span><span style="color:#FDAEB7;font-style:italic">...</span><span style="color:#E1E4E8"> ] }                              </span><span style="color:#6A737D">// admin only</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-admin-transferred"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "old_admin"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"new_admin"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"></span>
+<span class="line"><span style="color:#E1E4E8">{ </span><span style="color:#79B8FF">"type"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"room-directory-deleted"</span><span style="color:#E1E4E8">, </span><span style="color:#79B8FF">"room_id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"…"</span><span style="color:#E1E4E8"> }</span></span>
+<span class="line"></span></code></pre>
+<h3 id="room-directory-authorisation">Authorisation</h3>
+<ul>
+<li><strong>Create</strong>: any authenticated node can create. Creator is sole initial admin.</li>
+<li><strong>List public</strong>: any authenticated node. Anonymous listing is out of scope
+for v0.1.0 (requires a separate unauthenticated endpoint with rate limiting).</li>
+<li><strong>List private</strong>: admin of the target room only, or member for their
+own memberships.</li>
+<li><strong>Accept / reject / revoke / delete / transfer-admin</strong>: admin only, verified
+by the <code>node_id</code> in the WebSocket’s authenticated session matching the
+room’s <code>admins</code> list.</li>
+<li><strong>Join request</strong>: any authenticated node. Request queues for admin review.</li>
+<li><strong>Leave</strong>: any current member.</li>
+</ul>
+<h3 id="room-directory-directory-discovery">Directory discovery</h3>
+<p>The relay exposes an HTTP GET endpoint <code>/rooms</code> returning the list of
+public rooms as JSON:</p>
+<pre class="astro-code github-dark" style="background-color:#24292e;color:#e1e4e8; overflow-x: auto;" tabindex="0" data-language="json"><code><span class="line"><span style="color:#E1E4E8">{</span></span>
+<span class="line"><span style="color:#79B8FF">  "relay"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"sym-relay.onrender.com"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">  "rooms"</span><span style="color:#E1E4E8">: [</span></span>
+<span class="line"><span style="color:#E1E4E8">    {</span></span>
+<span class="line"><span style="color:#79B8FF">      "id"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"0193..."</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "name"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"sym-research"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "description"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"Open discussion of mesh cognition research"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "created_at"</span><span style="color:#E1E4E8">: </span><span style="color:#9ECBFF">"2026-04-20T12:34:56Z"</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "member_count"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">7</span><span style="color:#E1E4E8">,</span></span>
+<span class="line"><span style="color:#79B8FF">      "online_now"</span><span style="color:#E1E4E8">: </span><span style="color:#79B8FF">3</span></span>
+<span class="line"><span style="color:#E1E4E8">    }</span></span>
+<span class="line"><span style="color:#E1E4E8">  ]</span></span>
+<span class="line"><span style="color:#E1E4E8">}</span></span>
+<span class="line"></span></code></pre>
+<p>This endpoint has no auth by design (public discovery). Rate-limited to
+10 requests per minute per source IP. Private rooms are never included.</p>
+<p>An MCP client implementing this extension adds <code>sym_rooms_browse</code> tool
+that hits this endpoint on the configured relay host and returns the
+list in human-readable form.</p>
+<h3 id="room-directory-relationship-to-existing-primitives">Relationship to existing primitives</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th>Primitive</th><th>Status</th><th>Relationship to this extension</th></tr></thead><tbody><tr><td>MMP §5.8 bare LAN room</td><td>Shipped (v0.1.23)</td><td>Unchanged. Bare rooms remain in-band (mDNS only), not registered with any relay, invisible to <code>/rooms</code>.</td></tr><tr><td>sym-relay token/channel isolation</td><td>Shipped</td><td>This extension uses token/channel as the transport primitive for directory-registered private rooms. Creation emits a token; accept hands the token to the accepted member.</td></tr><tr><td><code>sym_invite_create</code> / <code>sym_invite_info</code></td><td>Shipped (v0.1.23)</td><td>URL-based invite flow remains as the <strong>private</strong> join path — admin generates invite, shares out of band, each invite bundles the channel token. Works with or without directory registration.</td></tr><tr><td><code>sym_join_room</code></td><td>Shipped (v0.1.23)</td><td>Extended: for directory-registered rooms, <code>sym_join_room</code> becomes multi-step — issues <code>room-join-request</code>, waits for accept, then hot-swaps with the granted token.</td></tr></tbody></table>
+<h3 id="room-directory-implementation-surface">Implementation surface</h3>
+<p>Estimated size (rough):</p>
+<ul>
+<li><strong>sym-relay</strong>: ~800 LOC additional (SQLite schema, room CRUD handlers,
+admin auth, fanout on room-member events, <code>/rooms</code> HTTP endpoint,
+rate limiting). Existing peer gossip infra reused.</li>
+<li><strong>@sym-bot/sym</strong>: ~300 LOC additional (protocol frames on SymNode,
+admin-side events, pending-queue subscription, request/accept state
+machine).</li>
+<li><strong>sym-mesh-channel</strong>: 4–6 new MCP tools (~200 LOC):
+<ul>
+<li><code>sym_rooms_browse</code> — GET /rooms on configured relay</li>
+<li><code>sym_room_create</code> — creates on relay, becomes admin</li>
+<li><code>sym_room_request_join</code> — sends join-request, waits for result</li>
+<li><code>sym_room_approve_member</code> — admin action on pending request</li>
+<li><code>sym_room_reject_member</code> — admin action on pending request</li>
+<li><code>sym_room_revoke_member</code> — admin action post-accept</li>
+<li>(extensions to existing <code>sym_rooms_discover</code> to include
+directory-registered rooms on configured relays)</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="room-directory-open-questions">Open questions</h2>
+<ol>
+<li>
+<p><strong>Multi-admin conflict</strong>: what happens if two admins simultaneously
+accept/reject the same pending member? Last-writer-wins is simplest;
+need to verify it doesn’t cause token leaks to rejected members.</p>
+</li>
+<li>
+<p><strong>Relay federation</strong>: the spec above assumes a single relay host
+per room. Federated relays (rooms discoverable across multiple
+relay hosts) is possible but substantially increases complexity.
+Recommend single-relay v0.1.0, federation in v0.2+.</p>
+</li>
+<li>
+<p><strong>Public-room enumeration abuse</strong>: <code>/rooms</code> is unauthenticated for
+public discovery. A popular relay could become a discovery target
+for spam or scraping. Rate limits help; stronger mitigations
+(proof-of-work tokens, captcha) may be needed if this matters at
+scale. Private relays don’t have this problem.</p>
+</li>
+<li>
+<p><strong>Room name collisions across relays</strong>: names are unique per relay
+host. Cross-relay, two unrelated rooms can share a name. This is
+acceptable in v0.1.0 — invite URLs already carry the relay host as
+the authority.</p>
+</li>
+<li>
+<p><strong>Token rotation</strong>: if a member is revoked, the channel token is
+shared with remaining members unchanged; the revoked ex-member
+technically retains the token until the relay forces reconnection
+and rejects the now-revoked node-id. Safer: rotate the channel
+token on every revoke. Trade-off: momentary re-handshake for all
+remaining members. Recommend rotate-on-revoke.</p>
+</li>
+<li>
+<p><strong>Bootstrap admin on existing bare room</strong>: how does a team
+currently using a bare MMP §5.8 room “upgrade” to a directory-
+registered room without losing presence? Likely answer: create
+the new directory-registered room, migrate members one at a time
+via invite URLs, decommission the bare room. Document in a
+migration guide, not in the protocol.</p>
+</li>
+<li>
+<p><strong>Mobile / sleeping peers</strong>: MMP §16 (SYMBit) and related extensions
+contemplate sleeping peers. Pending-member queue for a sleeping
+admin is a known gap — admin’s client must be online to process
+requests. Future: relay-side “admin delegate” role for long-sleep
+scenarios. Out of scope for v0.1.0.</p>
+</li>
+</ol>
+<hr>
+<h2 id="room-directory-rollout-plan">Rollout plan</h2>
+<p>Three stages, each independently valuable:</p>
+<h3 id="room-directory-stage-1--relay-directory-endpoint--public-room-crud-v010-alpha">Stage 1 — relay directory endpoint + public-room CRUD (v0.1.0-alpha)</h3>
+<ul>
+<li><code>sym-relay</code>: schema, <code>/rooms</code> HTTP, room-create / room-list / room-delete.</li>
+<li><code>@sym-bot/sym</code>: <code>SymNode.listRooms()</code> / <code>SymNode.createRoom()</code>.</li>
+<li><code>sym-mesh-channel</code>: <code>sym_rooms_browse</code>, <code>sym_room_create</code>.</li>
+<li><strong>UX delivered</strong>: users can browse public rooms on a relay, create
+new public rooms, and share direct invite URLs. No admin approval yet —
+public rooms are open-join.</li>
+</ul>
+<h3 id="room-directory-stage-2--admin-approval-gate-v010-beta">Stage 2 — admin approval gate (v0.1.0-beta)</h3>
+<ul>
+<li><code>sym-relay</code>: pending-request queue, admin-only frames (accept, reject,
+revoke), fanout on member changes.</li>
+<li><code>@sym-bot/sym</code>: admin-side events, request state machine.</li>
+<li><code>sym-mesh-channel</code>: <code>sym_room_request_join</code>, <code>sym_room_approve_member</code>,
+<code>sym_room_reject_member</code>, <code>sym_room_revoke_member</code>.</li>
+<li><strong>UX delivered</strong>: private rooms with gated membership. Full Telegram-
+style team management within a single relay.</li>
+</ul>
+<h3 id="room-directory-stage-3--polish-migration-security-hardening-v010">Stage 3 — polish, migration, security hardening (v0.1.0)</h3>
+<ul>
+<li>Token rotation on revoke.</li>
+<li>Multi-admin race resolution.</li>
+<li>Migration guide for upgrading bare §5.8 rooms.</li>
+<li>Rate-limiting on <code>/rooms</code>.</li>
+<li>Move spec from DRAFT to Published. Publish canonical URL
+<code>https://sym.bot/spec/mmp-room-directory</code>.</li>
+</ul>
+<hr>
+<h2 id="room-directory-notes-for-future-me">Notes for future-me</h2>
+<p><strong>Motivation context</strong> (19 April 2026): we shipped sym-mesh-channel 0.1.23
+with hot-swap room join + invite-URL flow. User feedback was that the
+ideal UX is Telegram-like (browse, request, admin approves) but that
+requires server-side persistent state — the existing P2P + token-channel
+relay handles isolation but not directory or admin. This extension is the
+design for that missing layer.</p>
+<p><strong>Why this is a protocol extension and not just a relay feature</strong>: the
+room-member lifecycle frames (<code>room-join-request</code>, <code>room-member-joined</code>,
+etc.) need to interoperate between different client implementations —
+sym-mesh-channel (Node.js), sym-swift (iOS/macOS), any future client. The
+relay is the reference implementation, but the protocol frames belong to
+MMP. Hence the extension-document home rather than a relay-repo design doc.</p>
+<p><strong>What not to build</strong>: resist adding rich chat features (text formatting,
+reactions, read receipts) — these are out of scope and would blur the line
+between MMP (cognitive state exchange) and chat platforms (human
+messaging). Room-directory stays narrowly about membership, not content.</p>
+<p><strong>Pick-up signal for later</strong>: when either (a) a user explicitly asks for
+admin-approval UX, or (b) we have more than ~50 dev teams using bare §5.8
+rooms and confusion about “where’s my room?” becomes a support issue,
+that’s the signal to pick this up.</p> </div>  </div>
+  </section>
+
+  <section id="section-25" class="spec-section">
+    <p class="section-tag">Extension: error-handling-v0.2.0 (Draft — Candidate Extension)</p>
+     <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <div class="spec-md"> <h1 id="error-handling-mmp-extension-error-handling">MMP Extension: Error Handling</h1>
+<p><strong>Failure as a First-Class Cognition Event</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Version</td><td>0.2.0</td></tr><tr><td>Status</td><td>Draft — Candidate Extension</td></tr><tr><td>Date</td><td>24 July 2026</td></tr><tr><td>Author</td><td>Hongwei Xu &#x3C;<a href="mailto:hongwei@sym.bot">hongwei@sym.bot</a>>, SYM.BOT</td></tr><tr><td>Extends</td><td><a href="/spec/mmp">MMP v2.0</a> — application-layer convention over §6.7 (grounding), §9.2 (receiver-autonomous SVAF), and §13 (cognitive state); no changes to the wire format</td></tr><tr><td>Canonical URL</td><td><a href="https://meshcognition.org/spec/mmp/extensions/error-handling">https://meshcognition.org/spec/mmp/extensions/error-handling</a></td></tr><tr><td>Licence</td><td>CC BY 4.0 (specification text)</td></tr></tbody></table>
+<hr>
+<h2 id="error-handling-1-status">1. Status</h2>
+<p>This document is a <strong>Draft Candidate Extension</strong>. It defines an application-layer convention over MMP v2.0; it does not change the MMP wire format and does not require an MMP version bump. Promotion to <strong>Published</strong> status in the MMP §16 Extensions registry requires a second independent implementer to ship interoperable software per the criteria in §11 (Promotion Criteria). Until promotion, this document is published for community visibility and review; it is not yet a registered MMP §16 Extension. A Draft Candidate Extension introduces no protocol-level additions and no entries in the MMP §16 registry until promotion is earned.</p>
+<p><strong>Maturity note (v0.2.0).</strong> Sections §1–§5 and §9–§10 describe the failure-event convention, of which a reference deployment reports an experimental implementation (§10). Sections <strong>§6–§8 — field-level accountability and the Adaptation-on-Failure loop — are a newer, lower-maturity addition: specified here but not part of any reported implementation, and not yet demonstrated.</strong> Their promotion gate is an unrun, register-first experiment (the router-validation study, §11). Nothing in §6–§8 should be read as a shipped capability.</p>
+<h2 id="error-handling-2-conventions-and-conformance">2. Conventions and conformance</h2>
+<p>The key words MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY in this document are to be interpreted as described in RFC 2119 and RFC 8174 when, and only when, they appear in all capitals. Conformance is claimed by a <strong>publisher</strong> (the harness that publishes failure events) and by a <strong>receiver</strong> (a node that admits and may act on them).</p>
+<h2 id="error-handling-3-abstract">3. Abstract</h2>
+<p>Agent frameworks conventionally treat failure as an exception to suppress: retry the same agent, fall back, or escalate. A retry that keeps the failed attempt inside its own control flow and records only the final result destroys three things the failure produced — the <strong>evidence</strong> (the failing check’s output), the <strong>record</strong> (a repaired result becomes indistinguishable from a first-pass success), and the <strong>choice of who fixes it</strong> (pre-empted in favour of the agent that just failed). A deployment that assigns every repair to a fixed agent also bypasses receiver-autonomous volunteering for that repair.</p>
+<p>This extension specifies the alternative: <strong>failure is a cognition event</strong>. A mechanically detected failure on a completed claim is published to the mesh as an ordinary CMB carrying its evidence, with the failed claim in its lineage. From there the protocol’s existing machinery operates unchanged: every receiver’s own admission (§9.2) judges relevance, an admitting agent may take the corrective as work — nobody assigns — and the failure and any subsequent fix ground as <strong>separate</strong> §6.7 outcomes against the claimer and the fixer respectively. A proposed extension of this loop (§6–§8) lets a failure also <em>change what a receiver admits or holds</em> — the admission-side adaptation the base convention names but does not define.</p>
+<h2 id="error-handling-4-the-failure-event">4. The failure event</h2>
+<p>When mechanical checks — executed and tallied by the harness outside the claimer’s generation step — fail on a completion claim, the harness SHOULD publish a <strong>corrective request CMB</strong>:</p>
+<ul>
+<li><strong>lineage</strong> — <code>lineage.parents</code> MUST contain the key of the failed completion claim. Parentage travels in lineage, never only in prose.</li>
+<li><strong>focus</strong> — a plain statement that completed work failed its checks, followed by the <strong>evidence</strong> (§4.1), followed by bounded context from the original task.</li>
+<li><strong>intent</strong> — <code>request</code>. The failure event is an <em>open invitation</em>, not an assignment.</li>
+<li><strong>commitment</strong> — the acceptance criteria of the original work, carried <strong>byte-for-byte inside a clearly delimited block</strong>, so the <em>same criteria govern the fix</em> — repaired means repaired, by the original bar.</li>
+<li><strong>issue</strong> — ordinary descriptive text (e.g. <code>check-failure</code>); it carries no normative routing semantics.</li>
+<li><strong>addressing</strong> — the corrective request MUST be a room-bound broadcast with no directed recipient, so §9.2 receiver-autonomous delivery and admission remain operative.</li>
+</ul>
+<h3 id="error-handling-41-evidence">4.1 Evidence</h3>
+<p>The event MUST carry the failed check identifiers together with their captured <code>stdout</code>/<code>stderr</code>, subject to an operator-configured, non-zero byte limit per stream; when either stream is shortened, the event MUST carry an explicit truncation indicator. The numeric limit is implementation-defined. (Conformance test: a known <code>stderr</code> sentinel survives publication intact; oversized output arrives marked truncated.)</p>
+<h3 id="error-handling-42-what-must-not-happen">4.2 What MUST NOT happen</h3>
+<ul>
+<li>Publication of a failure event MUST NOT suppress the original completion claim or its <code>failed:</code> grounding (§5). Error handling never hides the error.</li>
+<li>The publisher MUST NOT route, rank, or assign the repair. Publication is mechanical duty; coordination belongs to admission.</li>
+<li>A completion whose only failed checks are <strong>fabricable</strong> — satisfiable by the claimer’s own unverified action, such as bare file-existence checks — SHOULD NOT spawn a corrective event: there is no independent evidence to ground a fix on.</li>
+</ul>
+<p><em>Informative:</em> deployments typically also surface open, untaken correctives to a human operator through their normal attention surfaces; this document does not standardise that surface.</p>
+<h2 id="error-handling-5-grounding--the-double-record">5. Grounding — the double record</h2>
+<p>The failure and the fix are <strong>separate grounded outcomes</strong>, each an ordinary §6.7 grounding CMB:</p>
+<ul>
+<li>the initial failure grounds against the <strong>claimer</strong>: a grounding CMB with a <code>failed:</code> commitment prefix whose <code>lineage.parents</code> names the original completion claim;</li>
+<li>a corrective’s result grounds against the <strong>fixer</strong>: a grounding CMB with a <code>verified:</code> or <code>failed:</code> commitment prefix whose <code>lineage.parents</code> names the corrective completion.</li>
+</ul>
+<p>Accountability follows the signed authors of those distinct CMBs. An implementation MUST NOT collapse the two into a single record: <em>who broke what and who fixed it</em> is precisely the signal a trust economy needs, and it is what a record-discarding retry destroys.</p>
+<h2 id="error-handling-6-field-level-accountability-extends-5">6. Field-level accountability (extends §5)</h2>
+<blockquote>
+<p><strong>Status: proposed, not demonstrated (see §1 Maturity note).</strong> §6–§8 specify a receiver-local adaptation loop that no reported implementation yet includes.</p>
+</blockquote>
+<p>Beyond author grounding (§5), the receiver that was driven to failure by an admitted CMB SHOULD attribute the failure to the accountable <strong>field(s)</strong> of that CMB. This is what lets a failure act on the gate that admitted it, rather than only on the trust economy.</p>
+<ul>
+<li><strong>Accountability</strong> <code>a(x, r)</code>: the semantic match between an admitted field’s content <code>x</code> and the failure’s root cause <code>r</code>, where <code>r</code> is derived from the §4.1 evidence (failed check identifiers, captured <code>stdout</code>/<code>stderr</code>) and the corrective’s <code>focus</code>.</li>
+<li>The attribution MUST be validated by <strong>counterfactual ablation</strong>: re-evaluate the completed claim with the attributed field withheld. If the failure does not recur, accountability is confirmed; otherwise the attribution is rejected. Counterfactual ablation, not a model’s self-reported root cause, is the normative guard — root-cause narration MAY confabulate.</li>
+<li>A confirmed attribution is recorded as a field-accountability entry grounded against the <strong>admitting receiver’s own policy</strong> (distinct from the claimer/fixer author records of §5).</li>
+</ul>
+<h2 id="error-handling-7-adaptation-on-failure-fulfils-coordination-belongs-to-admission">7. Adaptation on failure (fulfils “coordination belongs to admission”)</h2>
+<blockquote>
+<p><strong>Status: proposed, not demonstrated (see §1 Maturity note).</strong></p>
+</blockquote>
+<p>A receiver holds two <em>distinct</em> mutable objects: its <strong>SVAF admission weights</strong> (the gate, §9.2) and its <strong>cognitive state</strong> (a local CfC liquid net, §13, which never crosses the wire). Admitted signals already evolve the state; the gate is, per the paper-1 gate audit, a hand-set static constant. So a failure has two possible learning targets, and the receiver MUST choose between them per failure. This is the admission-side adaptation §4.2 names (“coordination belongs to admission”) but the base convention leaves undefined.</p>
+<p>On a confirmed field accountability (§6), the receiver MUST route to <strong>exactly one</strong> adaptation, chosen receiver-locally, where the <strong>competence-distance</strong> <code>d(x, s)</code> is computed from the receiver’s own §13.2 cognitive-state outputs (<code>trajectory</code>, <code>patterns</code>, <code>anomaly</code>, <code>coherence</code>) — how far the accountable field sits from what this receiver can hold.</p>
+<ul>
+<li><strong>(a) Admission adaptation (gate).</strong> If <code>d</code> is large (the field is outside this receiver’s competence), the receiver MUST decrement its per-field SVAF weight for that <code>(source, field)</code> (§9.2). The gate lowers; future such fields are rejected. This <em>records the receiver’s boundary of responsibility</em>.</li>
+<li><strong>(b) State adaptation (cognitive state).</strong> If <code>d</code> is small (the field is within reach but the state was unprepared), the receiver SHOULD ingest the field into its local cognitive state via the §13.6 <code>ingestSignal</code> API to evolve <code>h</code>, and MUST NOT modify the SVAF weight. This grows capability with the gate left open.</li>
+</ul>
+<p>The two channels MUST NOT both fire on one failure event: boundary-learning (gate) and capability-learning (state) are separated so that <em>“not mine”</em> and <em>“mine, now handled”</em> remain distinct outcomes. The routing threshold on <code>d</code> is receiver-local and MUST NOT be assigned by any coordinator — §9.2 receiver-autonomy is preserved throughout; no coordinator is introduced anywhere in this loop.</p>
+<p><strong>Circularity.</strong> <code>d(x, s)</code> judges competence using <code>s</code> while <code>s</code> is itself being updated; an implementation MUST specify the reference state (the pre-update <code>s</code>) used for routing.</p>
+<h2 id="error-handling-8-validation-rollback-and-exploration">8. Validation, rollback, and exploration</h2>
+<blockquote>
+<p><strong>Status: proposed, not demonstrated (see §1 Maturity note).</strong></p>
+</blockquote>
+<ul>
+<li>Every adaptation is <strong>provisional and outcome-audited</strong>: it is confirmed only by a subsequent reduction in same-class failures, and reverted otherwise.</li>
+<li>A state adaptation (§7b) that raises <code>anomaly</code> or lowers <code>coherence</code> beyond an operator-configured bound MUST be <strong>rollback-able</strong> (atomic). This makes state growth safe against catastrophic absorption.</li>
+<li>A gate decrement (§7a) MUST retain an <strong>exploration allowance</strong>: a decremented <code>(source, field)</code> is re-admitted at a bounded rate, so permanent rejection cannot foreclose the evidence that would reverse it. Without this, a boundary can only ever tighten — the abstention trap.</li>
+</ul>
+<h2 id="error-handling-9-depth-rail">9. Depth rail</h2>
+<p>A corrective whose own checks fail MUST NOT spawn a further autonomous corrective. One level: a failed repair returns to human judgment. The bound comes from the grammar, not from a retry counter inside any agent.</p>
+<p><strong>Exhaustion → boundary → open gap (proposed, §6–§8).</strong> When the one-level limit is reached and a failure returns to human judgment, a receiver implementing §7 MUST also record a boundary decrement (§7a) for the accountable field: work the mesh could not hold leaves the receiver’s responsibility and, having no taker, surfaces as an open gap — an unclaimed corrective request. That open gap is the trigger condition for a new capability to be admitted at the mesh scale.</p>
+<h2 id="error-handling-10-reference-implementations">10. Reference implementations</h2>
+<p>A reference deployment reports an experimental implementation as of 2026-07-13, in which a published failure event carrying captured <code>stderr</code> was taken by a <em>different</em> agent than the one that failed, a failed corrective stopped at the depth rail, and claimer and fixer were grounded separately. <strong>That report covers §4–§5 and §9 only. The Adaptation-on-Failure loop (§6–§8) is specified here but is not part of any reported implementation; it is registered and awaits the router-validation study (§11).</strong> Independent interoperability has not yet been established. A plain-English companion: <a href="https://sym.bot/blog/failure-first-class-cognition">Failure Is a First-Class Cognition Event</a>.</p>
+<h2 id="error-handling-11-promotion-criteria">11. Promotion Criteria</h2>
+<p>Promotion of the <strong>base convention (§4–§5, §9)</strong> to <strong>Published</strong> status in the MMP §16 registry requires all of:</p>
+<ol>
+<li><strong>A second independent implementation</strong> — a distinct codebase not derived from the reference deployment, maintained by a different implementer.</li>
+<li><strong>A cross-implementation conformance exchange</strong> — a documented run in which a failure event published by one implementation is admitted and repaired by an agent of the other, demonstrating: evidence carriage with the truncation indicator (§4.1), lineage-borne parentage (§4), separate claimer/fixer grounding (§5), and the depth rail (§9).</li>
+<li><strong>Review</strong> — maintainer and community review of this document against the exchange results.</li>
+</ol>
+<p>The <strong>Adaptation-on-Failure loop (§6–§8)</strong> carries a distinct, earlier promotion gate, and it is empirical, not interoperability-based:</p>
+<ol start="4">
+<li><strong>The router-validation study</strong> — a register-first experiment showing that failure-driven routing lowers the exception rate while preserving coverage, with attribution confirmed by counterfactual ablation (§6) and a reference calibration of the <code>d</code> threshold (§7). Until this study passes, §6–§8 remain proposed and MUST NOT be reported as an implemented capability.</li>
+</ol>
+<p>On promotion, the Status section is rewritten to <strong>Published</strong>, an Adopters list is added, and the §16.4 registry row is updated. No other sections change at promotion.</p> </div>  </div>
+  </section>
+
+  <section id="section-26" class="spec-section">
+    <p class="section-tag">Extension: trust-horizon-v0.1.0 (Draft — Candidate Extension)</p>
+     <div class="space-y-10 text-white/70 leading-relaxed text-[15px]">  <div class="spec-md"> <h1 id="trust-horizon-mmp-extension-cmb-trust-horizon">MMP Extension: CMB Trust Horizon</h1>
+<p><strong>Knowledge-Scoped Trust-Weight Horizon</strong></p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<table><thead><tr><th></th><th></th></tr></thead><tbody><tr><td>Version</td><td>0.1.0</td></tr><tr><td>Status</td><td>Draft — Candidate Extension</td></tr><tr><td>Date</td><td>13 July 2026</td></tr><tr><td>Author</td><td>Hongwei Xu &#x3C;<a href="mailto:hongwei@sym.bot">hongwei@sym.bot</a>>, SYM.BOT</td></tr><tr><td>Extends</td><td><a href="/spec/mmp">MMP v2.0</a> — application-layer convention over §6.3 (Canon tier), §6.4 (lifecycle), and §6.7 (grounding); no changes to the wire format</td></tr><tr><td>Canonical URL</td><td><a href="https://meshcognition.org/spec/mmp/extensions/trust-horizon">https://meshcognition.org/spec/mmp/extensions/trust-horizon</a></td></tr><tr><td>Licence</td><td>CC BY 4.0 (specification text)</td></tr></tbody></table>
+<hr>
+<h2 id="trust-horizon-1-status">1. Status</h2>
+<p>This document is a <strong>Draft Candidate Extension</strong>. It defines an application-layer convention over MMP v2.0; it does not change the MMP wire format and does not require an MMP version bump. Promotion to <strong>Published</strong> status in the MMP §16 Extensions registry requires a second independent implementer to ship interoperable software per the criteria in §7 (Promotion Criteria). Until promotion, this document is published for community visibility and review; it is not yet a registered MMP §16 Extension. A Draft Candidate Extension introduces no protocol-level additions and no entries in the MMP §16 registry until promotion is earned.</p>
+<h2 id="trust-horizon-2-conventions-and-conformance">2. Conventions and conformance</h2>
+<p>The key words MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY in this document are to be interpreted as described in RFC 2119 and RFC 8174 when, and only when, they appear in all capitals. Conformance is claimed by a <strong>receiver</strong>: a node that advertises support for this extension and applies §5’s invariants to grants it has authenticated and admitted.</p>
+<h2 id="trust-horizon-3-abstract">3. Abstract</h2>
+<p>How long should validated knowledge influence a mesh’s choices? Any single global answer is wrong in both directions, because knowledge in different domains ages at different rates — and the <strong>same agent</strong> may produce knowledge in several domains. Influence lifetime is therefore a property of the <strong>knowledge</strong>, not of the agent.</p>
+<p>This extension specifies <strong>verdict-time trust-horizon grants</strong>: when a validator authors a validation CMB (§6.4), it MAY include an opaque, policy-governed statement of how that knowledge’s <em>weight</em> should persist. The grant travels inside ordinary CAT7 text — covered by the existing CMB content address and signature — and each receiver interprets it under its own operator policy. Decay of weight is never decay of memory: Canon-tier retention (§6.3) is untouched.</p>
+<h2 id="trust-horizon-4-the-grant">4. The grant</h2>
+<h3 id="trust-horizon-41-carriage--inside-existing-content-bound-cmb-text">4.1 Carriage — inside existing, content-bound CMB text</h3>
+<p>A validator granting a trust horizon MUST encode it as a versioned clause inside the validation CMB’s ordinary CAT7 text (RECOMMENDED: a <code>trust-horizon/1: &#x3C;opaque policy token></code> clause in <code>categories.commitment.text</code>). Because CAT7 text is part of the CMB’s §8.2.1 content address, the grant is bound by the existing CMB key and assertion signature — <strong>no new frame type, handshake field, CMB schema field, key construction, or signing construction is introduced</strong>. A receiver that does not support this extension processes the validation CMB as an ordinary MMP v2.0 CMB.</p>
+<p>The <code>&#x3C;opaque policy token></code> identifies a horizon under the <strong>operator’s policy</strong>; its interpretation (durations, curves, parameters) is private to each deployment and out of scope for this document. The clause SHOULD also carry the operator policy version it was granted under, so later policy changes remain auditable without rewriting history.</p>
+<h3 id="trust-horizon-42-non-negotiable-rails">4.2 Non-negotiable rails</h3>
+<ul>
+<li><strong>The claimer never grants.</strong> A horizon clause is meaningful only in a CMB authored by a validator the receiver recognises for the target (per the receiver’s own §6.4 authority resolution) or in a signed operator-policy record. Horizon clauses authored by the claimer of the work MUST be ignored.</li>
+<li><strong>Grants are policy-governed.</strong> A receiver MUST interpret grant tokens only through its operator’s policy; tokens outside that policy have no effect.</li>
+<li><strong>Grants are append-only.</strong> A correction, revocation, or supersession is a <strong>new</strong> validator-authored CMB referencing the earlier one through ordinary lineage; recorded grants are never rewritten. This keeps supersession itself on the record — essential in domains where <em>that something was superseded</em> is part of the knowledge.</li>
+</ul>
+<h3 id="trust-horizon-43-receiver-autonomy">4.3 Receiver autonomy</h3>
+<p>Validation and grounding remain ordinary, receiver-relative CMBs. A receiver claiming conformance independently authenticates, admits (§9.2), and interprets a grant under local policy; a grounding CMB (§6.7) MAY reference the granting validation through ordinary lineage, but nothing is automatically copied between them, and receipt of a grant never advances any lifecycle by itself.</p>
+<h2 id="trust-horizon-5-consumption-invariants">5. Consumption invariants</h2>
+<p>A receiver claiming conformance MUST uphold, for any use of grants in deriving influence (authority, ranking, recall weight):</p>
+<ol>
+<li><strong>No minting.</strong> A horizon MUST NOT create initial influence, improve initial rank, or change any CMB’s lifecycle. It governs only how already-earned, grounded influence persists.</li>
+<li><strong>Symmetric semantics.</strong> Positive and negative grounded outcomes referencing the same knowledge MUST receive the same horizon semantics — long-lived merit implies long-lived accountability.</li>
+<li><strong>No implicit cross-domain transfer.</strong> Influence derived within one operator-created domain scope MUST NOT be presented in another except through the receiving operator’s explicit policy.</li>
+<li><strong>Consistent treatment.</strong> Where grounded influence affects more than one consumption path (e.g. both authority derivation and recall ranking), the same attested grant MUST NOT be given conflicting interpretations across those paths.</li>
+<li><strong>Retention separation.</strong> This extension MUST NOT itself delete, expire, archive, or demote a CMB; §6.3 retention remains governed only by lifecycle.</li>
+</ol>
+<p>How influence is aggregated — curves, parameters, budgets, caps, defaults, and cross-domain policy shapes — is implementation-defined and deliberately out of scope: the invariants above are the entire conformance surface.</p>
+<h2 id="trust-horizon-6-reference-implementations">6. Reference implementations</h2>
+<p>A reference deployment reports an experimental implementation of this convention as of 2026-07-13; independent interoperability has not yet been established.</p>
+<h2 id="trust-horizon-7-promotion-criteria">7. Promotion Criteria</h2>
+<p>Promotion to <strong>Published</strong> status in the MMP §16 registry requires all of:</p>
+<ol>
+<li><strong>A second independent implementation</strong> — a distinct codebase not derived from the reference deployment, maintained by a different implementer.</li>
+<li><strong>A cross-implementation conformance exchange</strong> — a documented run in which a grant authored by one implementation is authenticated, admitted, and interpreted by the other, and each §5 invariant is demonstrated by an observable test (e.g. a grant demonstrably failing to mint initial influence; a claimer-authored clause demonstrably ignored).</li>
+<li><strong>Review</strong> — maintainer and community review of this document against the exchange results.</li>
+</ol>
+<p>On promotion, the Status section is rewritten to <strong>Published</strong>, an Adopters list is added, and the §16.4 registry row is updated. No other sections change at promotion.</p> </div>  </div>
   </section>
 
   <footer style="margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--rule); font-size: 12px; color: var(--mute); font-family: ui-monospace, SFMono-Regular, monospace;">
