@@ -2,7 +2,7 @@
 
 > A Mesh Protocol for Collective Intelligence
 >
-> **Version:** 2.0  ·  **Published:** 27 March 2026  ·  **Last updated:** 14 September 2026  ·  **Editor:** Hongwei Xu  ·  **License:** CC BY 4.0
+> **Version:** 2.0  ·  **Published:** 27 March 2026  ·  **Last updated:** 8 October 2026  ·  **Editor:** Hongwei Xu  ·  **License:** CC BY 4.0
 >
 > **Canonical:** https://meshcognition.org/spec/mmp  ·  **arXiv:** https://arxiv.org/abs/2604.19540
 
@@ -69,7 +69,7 @@ First published
 
 This version
 
-14 September 2026
+8 October 2026
 
 Author
 
@@ -155,7 +155,7 @@ Proprietary cognition runtime. Its public MMP boundary, safety invariants and au
 
 ## Change Log
 
-**Current — 2.0 “Re-derived from the implementation” (14 September 2026):** the record model advanced in the runtime while the published text continued to describe the earlier shape, and 2.0 closes that gap. Corrected [§8.8 Record Model](/spec/mmp/cmb#record) gives the two-section record, the byte-exact content address (a promote-odd Merkle root over the seven per-category keys) and the byte-exact signature payload. The normative address form is corrected to `cmb-` + 64 lowercase hex — 1.x declared a version-tagged prefix instead, which the runtime rejects. Admission wording is corrected to per-category _evaluation_ on which the receiver decides for itself; receiver autonomy is unchanged. CAT7 members are named **categories** throughout, and the wire key is untouched.
+**Current — 2.0 “Re-derived from the implementation” (8 October 2026):** the record model advanced in the runtime while the published text continued to describe the earlier shape, and 2.0 closes that gap. Corrected [§8.8 Record Model](/spec/mmp/cmb#record) gives the two-section record, the byte-exact content address (a promote-odd Merkle root over the seven per-category keys) and the byte-exact signature payload. The normative address form is corrected to `cmb-` + 64 lowercase hex — 1.x declared a version-tagged prefix instead, which the runtime rejects. Admission wording is corrected to per-category _evaluation_ on which the receiver decides for itself; receiver autonomy is unchanged. CAT7 members are named **categories** throughout, and the wire key is untouched.
 
 **1.1.0 “The Work Layer” (2026-07-05, updated 2026-07-07):** grounding cognition in reality — §6.7 outcomes carried by lineage, the §6.3 Canon tier, §14.12 work sessions as mesh members, plus the folded-in full-corpus coherence errata. The 2026-07-07 update folds in the **soundness & completeness amendments from the formalization of the open-source runtime**: §9.2.1 redundancy invariants pinned to the nearest-anchor basis, the §9.2 evaluation-time-dependence disclosure, the cold-start-capture threat row, §6.7 repeat verification and the load-bearing failure channel, and the §15.8 lineage tether. Wire-compatible with 1.0.x.
 
@@ -186,6 +186,14 @@ Version
 Date
 
 Changes
+
+2.0
+
+2026-10-08
+
+**§6.6 authority by reference: grants, revokes and endorsements resolved as a set (2026-10-08; no version bump; replaces the `role-grant` and `role-revoke` frames with four `authority-*` frames; adds the authority-v2 and ed25519-strict-v2 vectors and ten §19.1 constants).** §6.6 resolved a role at a time _T_ by replaying grants and revokes in the order of times their signers chose, with delegation at any depth, gossip in any order and cascading revocation. That is consensus without a consensus mechanism, and the reference runtime’s implementation of it failed three independent reviews on exactly that: arrival-order divergence, backdated revokes, flooding and eviction of honest records, and exponential resolution of cyclic revoke patterns. Authority is now a function of the set of verified statements a node holds, and no timestamp takes part. A grant, a revoke and an endorse are each identified by the SHA-256 of their canonical signed bytes (`mmp-authority-v1`), and each names the grant it is made under (`authorisedBy`) and its targets by those ids, so the statements form a DAG. A revoke removes a grant when its signer is the anchor or stands above that grant on its chain. An endorse keeps grants and revokes alive once a revoke has cut them off, never what a quota dropped, and never restores their signer; its bucket keeps what it rescues, against its own quotas. Resolution runs depth by depth in linear time. Each grant’s bucket keeps at most 256 statements, revokes and endorses first, by ascending id, and at most 16 delegating grants, so no signer can displace another, and at most 69,888 statements can be in force below a compromised depth-1 holder, which the section proves. The anchor is a pinned key set with a threshold; a single key is the 1-of-1 case. Delegation stops at depth 4 (anchor, deployment admin, world admin, seat issuer, seat). New roles: `admin` takes over the granted anchor role, and `issuer` admits nodes with no lifecycle authority. A grant may carry a scope, an opaque path compared exactly and never normalised, which only narrows down a chain and limits lifecycle authority to CMBs inside it. Every node verifies statements by one Ed25519 rule (§18.3.2: canonical encodings, keys and _R_ of prime order, _S_ < _L_, cofactorless), and a nodeId is signed in its one canonical form. Anti-entropy is set union, compared by an authority root over the in-force set and the pin, which an environment records, with its live set, to bind a run or a decision to the authority it was taken under. Outcomes that must be agreed are decided once by their environment; mesh weights are judged by the receiver when it applies them, inside a deterministic run against the root of the tick. Migration is a flag day: anchor grants are re-issued one for one and deeper chains within the cap, 0.13 grant entries stay legacy claims, and the revoke cutoff and every time rule are removed. This supersedes drafts #21, #32, #33 and #36.
+
+**§3.4/§5.2 identity conflict (carried from draft #21; adds error 1009).** The specification said nothing about a bound nodeId presenting a different proven key, and contradicted itself on a same-key one: §3.4 closed a second connection for a nodeId with 1005, §4.6 required it to be kept as a second path, and §4.4.7 let the relay replace the first. §3.4 now binds each nodeId to one key, from a handshake, the anchor, an in-force grant or an operator-accepted pin, and no source overrides a different key. A session that proves a different key for a bound nodeId is an identity conflict: closed with the new error 1009 `IDENTITY_CONFLICT`, recorded with both keys, reported to the operator, and resolved only by an operator act. A conflict changes bindings, never authority. A session that proves the bound key is the same peer and is never refused as a duplicate: on another transport it is a second path, and on the same transport a newer confirmed session supersedes the older. 1005 remains for Legacy Import only.
 
 2.0
 
@@ -409,7 +417,7 @@ Evidence, where validation is judgment: a grounding CMB records that its author 
 
 Earned Authority
 
-Lifecycle roles (participant → validator → anchor) conferred by signed, revocable role-grants rooted at a pinned anchor. A node’s role is resolved through the grant chain, never taken from its advertised handshake role (Sections 6.5–6.6).
+Lifecycle roles (participant → validator → admin) conferred by signed, revocable grants under a pinned anchor key set. A node’s role is resolved from the set of authority statements it holds, linked by hash and read without clocks, never taken from its advertised handshake role (Sections 6.5–6.6).
 
 Mesh Cognition
 
@@ -798,17 +806,35 @@ Generate fresh identity
 
 Old nodeId abandoned; treated as new node
 
-Clone detection
+Same nodeId, same proven key (restart, a second transport, a second copy of the identity)
 
-Duplicate nodeId rejected (error 1005)
+One peer: a session on another transport is a secondary path (§4.6); a newer confirmed session on the same transport supersedes the older one (§5.3)
 
-Second connection closed; first connection remains
+The binding is unchanged; no error is sent
 
-MMP does not define an _identity_ rotation or revocation mechanism: a node whose _key_ is compromised MUST generate a fresh identity (new nodeId and keypair), and the old identity becomes permanently orphaned. This is distinct from withdrawing a node’s _authority_ — that is role revocation (`role-revoke`, §6.6), which needs no new identity and cascades through the grant chain. Implementations SHOULD document the identity limitation to operators.
+Same nodeId, different proven key (a squatter, or a key replaced without a new nodeId)
+
+Identity conflict: refused (error 1009), recorded, reported to the operator
+
+The existing binding stands; nothing is learned from the refused session
+
+MMP does not define an _identity_ rotation or revocation mechanism: a node whose _key_ is compromised MUST generate a fresh identity (new nodeId and keypair), and the old identity becomes permanently orphaned. This is distinct from withdrawing a node’s _authority_ — that is a revoke statement (§6.6.5), which needs no new identity and takes with it everything the removed grant authorised. Implementations SHOULD document the identity limitation to operators.
+
+One key per nodeId, bound once. Because the key never rotates, a receiver binds each nodeId to exactly one Ed25519 identity key. A binding comes from one of: a confirmed handshake (§5.2), the pinned anchor (§6.6.1), an in-force grant that names the nodeId with its key (§6.6.9; such a binding lasts only while that grant is in force, and never covers the receiver’s own nodeId), or an out-of-band pin the operator accepted (an invitation or configured route that names the nodeId and its key). Discovery records, relay data and unproven hellos never bind (§18.3). A legacy claim — a key that a pre-0.14 implementation recorded for a nodeId from an unproven hello or from a grant — does not bind either: it is the key the receiver expects for that nodeId, so a session proving it binds it and a session proving a different key is an identity conflict, but by itself it verifies nothing and confers no authority (§6.6.11). A binding from any source MUST NOT be replaced by a different key from any other source — not by a later handshake, not by a grant, and not by a source ranked stronger. Sources differ in what they may _create_, never in what they may _override_.
+
+Identity conflict. When a session proves, or an in-force grant names, a key for a nodeId that is already bound to a different key, the receiver MUST refuse it. It MUST close the session with error 1009 (`IDENTITY_CONFLICT`, §7.2), or, for a grant, leave the binding as it is; it MUST NOT create or change any per-peer state for the refused key — keys, session or E2E secrets, room admission, attribution, budgets; it MUST record the conflict (the nodeId, both keys, the source of each and the time); and it SHOULD report the conflict to its operator. An implementation MUST NOT resolve a conflict by itself — not by recency, not by source rank, not by how many peers agree. Only an operator act resolves one, and the act is explicit and recorded. Re-pinning a fresh anchor out of band (§6.6.1) is such an act: the configured anchor is configuration, not a learned binding.
+
+A conflict changes bindings, never authority. Authority is resolved from the statement set alone, with each signer’s key taken from the grant that authorises it (§6.6.9), so every node resolves the same in-force set whatever keys it has bound. A grant whose key conflicts with a binding stays in force, and confers nothing at that receiver on the bound key: no record that verifies under the bound key is signed by the grant’s key.
+
+The refusing side sends error 1009 and then closes. The refused side MUST NOT retry automatically: a retry presents the same key and meets the same refusal, and a retry loop is noise in the record the operator must read. It SHOULD report the refusal to its own operator, since either party may be the one whose key is wrong.
+
+A conflict is recorded only once the different key has been _proven_: the receiver SHOULD complete the proofs of §5.2 before it refuses, so that what it records is a key someone holds and not a claim someone typed. A hello that merely names a different key MAY be dropped at once without a record, and it MUST NOT disturb an existing session for that nodeId.
+
+The same key is the same node. A confirmed session that proves a nodeId’s bound key MUST NOT be refused as a duplicate, on any transport. Duplicate detection happens only after both proofs, and an unproven hello naming a connected nodeId is evidence of nothing. Two live processes holding one identity cannot be told apart by any proof; each of them is the node, which §3.2 forbids deployments to arrange. An implementation SHOULD report repeated supersession between concurrent sessions for one (nodeId, key) as a probable copied identity. The relay’s replacement of a connection (§4.4.7) is a routing decision about which WebSocket carries a nodeId’s frames; it decides nothing about identity at an endpoint, which applies this section to the sessions it confirms. Error 1005 is retained for Legacy Import, where nothing is proven; Core Secure does not send it.
 
 ### 3.5 Node Lifecycle Role
 
-Each node has a `lifecycleRole` — participant (default), validator, or anchor — that determines which CMB lifecycle transitions it may perform. A role is earned, not asserted: its authority MUST be resolved from the signed role-grant chain rooting at the pinned anchor (§6.6), bound to the node’s cryptographic identity. The `lifecycleRole` a node advertises in its handshake is a discovery hint only; a receiver MUST NOT treat the advertised role as authority (see §3.5.1).
+Each node has a `lifecycleRole` — participant (default), validator, admin, or the anchor — that determines which CMB lifecycle transitions it may perform. A role is earned, not asserted: its authority MUST be resolved from the in-force grants that name the node’s nodeId and key (§6.6), and the anchor is pinned, never granted (§6.6.1). The `lifecycleRole` a node advertises in its handshake is a discovery hint only; a receiver MUST NOT treat the advertised role as authority (see §3.5.1).
 
 Role
 
@@ -834,7 +860,15 @@ CMBs, remixes, validation CMBs
 
 observed, remixed, **validated**
 
-anchor
+issuer
+
+No
+
+CMBs (observed), remixes; grants of non-authority roles such as seats (§6.6.2)
+
+observed, remixed
+
+admin
 
 No
 
@@ -842,11 +876,19 @@ CMBs, remixes, validation CMBs, canonization CMBs
 
 observed, remixed, validated, **canonical**
 
-Only a node whose _resolved_ role (§6.6) is validator or above may advance another CMB’s lifecycle to `validated`; `canonical` is reserved to a resolved anchor. A receiver MUST resolve the author’s role through the anchor-rooted grant chain — never the `name` field or the advertised handshake role — and MUST ignore, for lifecycle advancement, any validation CMB whose author does not resolve to the required role (the CMB is still stored as a normal remix). This applies equally to any authority-weighted treatment: a CMB’s admission weight (§6.4) derives from the author’s _resolved_ role, so a self-advertised role confers no elevation.
+anchor
+
+No
+
+CMBs, remixes, validation CMBs, canonization CMBs (as the author of a CMB only under a threshold of 1, §6.6.1)
+
+observed, remixed, validated, **canonical**
+
+Only a node whose _resolved_ role (§6.6) is validator or above may advance another CMB’s lifecycle to `validated`; `canonical` is reserved to a resolved admin or the anchor, and a scoped grant confers either only on CMBs inside its scope (§6.6.2). An issuer admits nodes and confers no lifecycle authority. A receiver MUST resolve the author’s role against its in-force set (§6.6) — never the `name` field or the advertised handshake role — and MUST ignore, for lifecycle advancement, any validation CMB whose author does not resolve to the required role (the CMB is still stored as a normal remix). This applies equally to any authority-weighted treatment: a CMB’s admission weight (§6.4) derives from the author’s _resolved_ role, so a self-advertised role confers no elevation.
 
 ### 3.5.1 Role Progression
 
-Lifecycle roles are not static. A participant node MAY be promoted to validator by an existing validator or anchor node. Promotion is a protocol frame, not an out-of-band configuration change.
+Lifecycle roles are not static. A participant node MAY be promoted to validator by an admin or the anchor. Promotion is a signed grant statement (§6.6.3), not an out-of-band configuration change.
 
 Transition
 
@@ -856,25 +898,25 @@ Conditions
 
 participant → validator
 
-Existing validator or anchor
+An admin or the anchor
 
-Node has produced CMBs that were remixed by peers (demonstrated quality). Granting node sends `role-grant` frame.
+Node has produced CMBs that were remixed by peers (demonstrated quality). The granting signer issues a `grant` statement naming its own authority (§6.6.3).
 
-validator → anchor
+validator → admin
 
-Existing anchor
+An admin or the anchor
 
-Node has validated CMBs that reached canonical state. Track record of quality validation.
+Node has validated CMBs that reached canonical state. Track record of quality validation. Within `MAX_DELEGATION_DEPTH` (§6.6.2).
 
 Bootstrap (root of trust)
 
 Out-of-band pin
 
-The root `anchor` is pinned out-of-band (its nodeId + public key), not self-declared — an unverifiable “first node wins” is a partition/eclipse hole. All other authority descends from it by grant (§6.6).
+The `anchor` is pinned out-of-band as a key set with a threshold (a single nodeId + public key is the 1-of-1 case), not self-declared — an unverifiable “first node wins” is a partition/eclipse hole. All other authority descends from it by grant (§6.6.1).
 
-Promotion is upward (participant → validator → anchor) and demotion is defined: a `role-revoke` frame (§6.6) pulls a granted role back down, and because a node’s role is re-resolved through the chain, revoking a grantor cascades to everything it granted. Role revocation is distinct from _identity_ compromise: a node whose signing _key_ is compromised still MUST generate a fresh identity (§3.4) — key rotation is not defined here — whereas a node whose _authority_ is withdrawn is handled by `role-revoke` without a new identity.
+Promotion is upward (participant → validator → admin) and demotion is defined: a `revoke` statement (§6.6.5) removes a grant, and everything the removed grant authorised is dead unless a signer above it endorses what should stand. Role revocation is distinct from _identity_ compromise: a node whose signing _key_ is compromised still MUST generate a fresh identity (§3.4) — key rotation is not defined here — whereas a node whose _authority_ is withdrawn is handled by a `revoke` without a new identity.
 
-A `role-grant` frame is signed by the grantor over the action, grantee, conferred role, grantor, time, and (optionally) the grantee’s vouched key (§6.6, §7). A receiver MUST verify the signature against the grantor’s key and confer the role only when the grantor’s own resolved role outranks-or-equals it and the chain roots at the pinned anchor — a grant a node was not entitled to make is stored but inert. Authority never rests on a self-asserted field; it is a signed fact resolvable to the root of trust. See §6.5–§6.6 for the full lifecycle.
+A `grant` statement is signed by its grantor over its kind, the authority it is made under (`authorisedBy`: the grantor’s own grant, or the anchor), the subject’s nodeId and key, the role and a nonce, and over no time that resolution reads (§6.6.3). A receiver MUST verify it with the key of the grant it names (or the pinned anchor keys) and treat it as in force only as §6.6.4 resolves it; a grant its signer was not permitted to make is invalid and discarded. Authority never rests on a self-asserted field; it is a signed fact resolvable to the root of trust. See §6.5–§6.6 for the full lifecycle.
 
 ### Q&A
 
@@ -892,7 +934,7 @@ Coupling is per-node. SVAF category weights (αf) are per-node. Memory stores ar
 
 What happens when two nodes have the same nodeId?
 
-The connection state machine rejects duplicate nodeIds (error code 1005). The second connection is closed. This prevents impersonation and ensures each nodeId maps to exactly one active node.
+It depends on the key they prove, and nothing is decided before they prove one (Section 3.4). Two sessions that prove the same key for one nodeId are the same node: a second transport is a second path to it, and a newer session replaces an older one, so a restarted node is never locked out by its own stale connection. A session that proves a different key for a nodeId already bound to a key is an identity conflict: it is refused with error 1009, the existing binding stands, and the conflict is recorded and reported to the operator, who alone resolves it. This prevents impersonation and ensures each nodeId maps to exactly one key.
 
 Why is Ed25519 mandatory?
 
@@ -900,7 +942,7 @@ Without cryptographic identity, any node can claim any nodeId. A relay could imp
 
 Why are lifecycle roles identity-bound, not content-based?
 
-If validation authority were determined by content (e.g. perspective category containing "founder"), any agent could spoof it. Binding roles to cryptographic identity means only nodes that have been explicitly promoted by existing validators can advance CMB lifecycle. The mesh knows who validated, not just what was said.
+If validation authority were determined by content (e.g. perspective category containing "founder"), any agent could spoof it. Binding roles to cryptographic identity, a nodeId together with its key, means only nodes that an admin or the anchor has granted a role can advance CMB lifecycle. The mesh knows who validated, not just what was said.
 
 Why is role progression earned, not configured?
 
@@ -908,7 +950,7 @@ An agent that produces quality remixes — remixes that other agents cite and bu
 
 Can a participant node dismiss a decision?
 
-A participant can produce a CMB with lineage pointing to a decision, but receiving nodes MUST NOT treat it as validation. The CMB is stored as a normal remix — it does not advance the parent CMB’s lifecycle. Only validator or anchor nodes can validate or dismiss decisions in a way that removes them from the decision queue.
+A participant can produce a CMB with lineage pointing to a decision, but receiving nodes MUST NOT treat it as validation. The CMB is stored as a normal remix — it does not advance the parent CMB’s lifecycle. Only nodes with validator role or above (validator, admin or the anchor) can validate or dismiss decisions in a way that removes them from the decision queue.
 
 
 
@@ -1346,9 +1388,10 @@ Only after client-finish verifies: CONNECTED
 -   —The signed transcript binds both nonces, nodeIds, names, identity keys, E2E keys, implementation identifiers, room, protocol version, both extension offers and the selected extension set.
 -   —Ed25519 proofs establish identity-key possession. HMAC-SHA256 confirmations under X25519/HKDF-derived finished keys establish E2E private-key possession.
 -   —No peer identity, key, role or room membership MUST be pinned before both required proofs validate. Failure closes the connection without retained peer state.
+-   —When both proofs validate, the peer’s nodeId is bound to its proven identity key (§3.4). If that nodeId is already bound to a different key, the handshake is an identity conflict: the connection MUST be closed with error 1009 and the conflict recorded; nothing else is retained. If it is bound to the same key, the session belongs to that peer and MUST NOT be refused as a duplicate.
 -   —The listener MUST require `client-hello` first and `client-finish` before any non-handshake frame. Timeout is 10,000 ms by default.
 
-The byte-exact transcript, proof, HKDF and key-confirmation constructions are normative in [the handshake vector](/spec/mmp/conformance/v2/handshake-v2.json). Any lifecycle role advertised by an extension is a hint only. Authority is resolved from the signed role-grant chain, never self-declared handshake data.
+The byte-exact transcript, proof, HKDF and key-confirmation constructions are normative in [the handshake vector](/spec/mmp/conformance/v2/handshake-v2.json). Any lifecycle role advertised by an extension is a hint only. Authority is resolved from the receiver’s in-force set of signed authority statements (§6.6), never self-declared handshake data.
 
 ### 5.2.1 Core Secure key schedule
 
@@ -1430,7 +1473,7 @@ AUTHENTICATING
 
 DISCONNECTED
 
-Timeout, malformed frame, proof failure, room/version mismatch or duplicate nodeId
+Timeout, malformed frame, proof failure, room/version mismatch, or identity conflict (a bound nodeId proving a different key, §3.4)
 
 CONNECTED
 
@@ -1812,34 +1855,297 @@ Anchor weight influences SVAF evaluation: when computing per-category drift agai
 
 The transition from `remixed` to `validated` is the most consequential lifecycle event — it commits human or authorised-agent judgment to the mesh and permanently increases anchor weight from 1.5 to 2.0. This transition MUST be restricted to nodes with appropriate lifecycle roles (Section 3.5).
 
-When a receiving node processes a validation CMB (one whose `lineage.parents` points to an existing CMB), it MUST resolve the _author’s_ role through the anchor-rooted grant chain (§6.6) — never the `createdBy` string, and never the peer’s advertised handshake role:
+When a receiving node processes a validation CMB (one whose `lineage.parents` points to an existing CMB), it MUST resolve the _author’s_ role against its own in-force set (§6.6) at the moment it processes the CMB — never from the `createdBy` string, never from the peer’s advertised handshake role, and never from a time the CMB claims:
 
--   —If the author _resolves_ to validator or anchor, the parent CMB advances to `validated` (if action completed) or `dismissed` (if not actionable).
+-   —If the author _resolves_ to validator or above (validator, admin or the anchor), the parent CMB advances to `validated` (if action completed) or `dismissed` (if not actionable).
 -   —Otherwise the parent CMB advances to `remixed` only. The CMB is stored normally but confers no validation.
+-   —A scoped grant (§6.6.2) confers this only on a parent CMB that is inside the grant’s scope, judged from that parent’s own signed fields. A receiver MUST NOT judge it from the validation CMB’s own fields or tags. When a validation CMB names several parents, each is judged on its own: a parent inside the scope advances, and one outside it does not. An issuer, which admits nodes, confers no validation anywhere.
 
-This prevents agent-level spoofing of validation authority. An agent cannot self-promote to validator by including “founder” or “validator” in its CMB text categories. The authority is bound to the node’s cryptographic identity and the `role-grant` chain from an existing validator (Section 3.5.1).
+The transition is the receiver’s own record, made once, against its in-force set at the moment it is made; a later revoke does not undo it in that store (§6.6.10). An outcome that several parties must agree on is not decided this way: the environment it belongs to decides it once and records it (§6.6.10).
 
-Role verification & admission weight. Authority is the _resolved_ role, never the advertised one. A node MUST NOT grant any authority-weighted treatment — lifecycle advancement, or the elevated _origin_ admission weight a validator/anchor’s own CMBs receive (§6.4) — on the basis of a handshake `lifecycleRole` or a `createdBy` string. That origin weight MUST derive from the author’s chain-resolved role, and the elevation additionally requires a verified signature binding the CMB to that author. A single node that could self-declare `anchor` would otherwise double the admission weight of everything it emits — the highest-leverage poisoning primitive — which is exactly why the weight is gated on the resolved role. Where no anchor is pinned there is no root of trust: an implementation has no cryptographic authority to resolve and MUST treat all roles as unauthenticated — a closed/development mode only. Production deployments MUST pin an anchor.
+This prevents agent-level spoofing of validation authority. An agent cannot self-promote to validator by including “founder” or “validator” in its CMB text categories. The authority is bound to the node’s cryptographic identity and key, through an in-force grant from the anchor or an admin (Sections 3.5.1 and 6.6).
 
-Dismiss vs. validate: These are distinct lifecycle transitions with different consequences. **Validate** (Done): parent CMB advances to `validated` (anchor weight 2.0). The mesh learns what humans value. **Dismiss** (Not actionable): parent CMB advances to `dismissed` (anchor weight 0.5). The dismissal broadcasts as feedback — the producing agent sees its signal was rejected, and similar future signals score lower in SVAF evaluation. Both require validator or anchor role. Both broadcast to the mesh. The effectiveness of this feedback depends on the content quality of the dismissal CMB — see [Section 11 (Feedback Modulation)](/spec/mmp/feedback) for normative content requirements.
+Role verification & admission weight. Authority is the _resolved_ role, never the advertised one. A node MUST NOT grant any authority-weighted treatment — lifecycle advancement, or the elevated _origin_ admission weight the CMBs of a validator, an admin or the anchor receive (§6.4) — on the basis of a handshake `lifecycleRole` or a `createdBy` string. That origin weight MUST derive from the author’s role as resolved against the receiver’s in-force set (§6.6) when the weight is applied, and the elevation additionally requires a verified signature binding the CMB to that author. A single node that could self-declare `anchor` would otherwise double the admission weight of everything it emits — the highest-leverage poisoning primitive — which is exactly why the weight is gated on the resolved role. Where no anchor is pinned there is no root of trust: an implementation has no cryptographic authority to resolve and MUST treat all roles as unauthenticated — a closed/development mode only. Production deployments MUST pin an anchor.
+
+Dismiss vs. validate: These are distinct lifecycle transitions with different consequences. **Validate** (Done): parent CMB advances to `validated` (anchor weight 2.0). The mesh learns what humans value. **Dismiss** (Not actionable): parent CMB advances to `dismissed` (anchor weight 0.5). The dismissal broadcasts as feedback — the producing agent sees its signal was rejected, and similar future signals score lower in SVAF evaluation. Both require validator role or above. Both broadcast to the mesh. The effectiveness of this feedback depends on the content quality of the dismissal CMB — see [Section 11 (Feedback Modulation)](/spec/mmp/feedback) for normative content requirements.
 
 Boundary attestation. The same validation authority governs cognition that crosses a mesh boundary. A gateway node (Section 5.10) that emits a lossy projection of its interior on the interior’s behalf SHOULD sign that boundary emission and record, in its admission attestation, the interior verdict aggregate it was derived from — so an outer admitter can weigh the boundary claim by earned authority exactly as it weighs any peer. Interior and boundary trust are the same mechanism at two scales; see Section 5.11.
 
 ### 6.6 Authority Lifecycle: Grants, Resolution & Revocation
 
-Authority that cannot be lost is decoration. This section defines how a role is conferred, resolved, and withdrawn — the mechanism §6.5 gates on.
+Authority that cannot be lost is decoration. This section defines how a role is conferred, how a node decides which authority is in force, and how authority is withdrawn — the mechanism §6.5 gates on.
 
-Root of trust. Exactly one `anchor` is pinned out-of-band (its nodeId + public key) — configuration a receiver already trusts, not a claim made on the wire. The anchor is non-earnable; all other authority descends from it.
+Authority is a function of a set. A node’s view of authority is computed from the set of verified authority statements it holds, and from nothing else: not the order they arrived in, not the time on any clock, not the session that delivered them. Statements name one another by the hash of their signed bytes, so the graph they form is fixed when they are signed. Two nodes that hold the same statements under the same pinned anchor MUST resolve the same authority. No timestamp takes part in resolution: a statement MAY carry a time as information (`issuedAt`), and a node MUST NOT let that time, its own clock or the order of arrival affect what is in force.
 
-Grant / revoke frames. A `role-grant` confers a role on a grantee; a `role-revoke` withdraws it. Both are signed (§7 frame table; §18.3.1) by the grantor over the action, grantee, conferred role, grantor, grant time, and — for a grant — the grantee’s vouched public key. The vouch distributes keys along the chain: a node that never handshook the grantee learns its key tamper-evidently from a rooted grant (swapping it breaks the grantor’s signature), and a grant-sourced key MUST NOT override a key already learned from a stronger source (a direct handshake or the anchor).
+Why (informative). The rule this section replaces resolved a node’s role at a time _T_ by replaying grants and revokes in the order of times their signers chose. Any role holder could grant further down, grants were gossiped in any order, and revoking a grantor cascaded. Every node therefore had to rebuild one timeline from signer-chosen times, statements by many writers, and arbitrary arrival order, with nothing to order them. That is consensus without a consensus mechanism. An implementation of it diverged on arrival order, accepted backdated revokes, could be flooded until honest records were evicted, and resolved some revoke patterns in exponential time. Resolving a set removes the ordering problem instead of patching it.
 
-Resolution. A node’s role at time _T_ is resolved, not stored: the anchor is `anchor`; otherwise replay the node’s grants and revokes in chronological order up to _T_. A grant confers its role only if the grantor was authorised _when it granted_ AND is still authorised _at T_ (the grantor is resolved recursively, and must itself root at the anchor); a revoke clears the role if the revoker was authorised when it revoked. An unrooted or cyclic chain confers nothing; a grant a node was not entitled to make is stored but inert.
+#### 6.6.1 The anchor
 
-Revocation is effective, and does not rewrite the past. Because a grantor is re-resolved at the query time, revoking a grantor cascades — every role it granted resolves back to participant. Resolution is time-parameterised, so a revoke cuts _future_ authority without invalidating what was legitimately done before it (an incoming CMB is judged at receipt; a stored attestation at its own emission time). And because a grant requires the grantor to be authorised _both_ at grant time and now, a compromised-but- revoked grantor MUST NOT resurrect authority by signing a fresh grant backdated before its own revoke — the backdated grant’s grantor re-resolves as revoked, so the grant is inert. Demotion is revocation, optionally followed by a lesser re-grant. Grant timestamps are grantor-asserted and unwitnessed, which is precisely why authority is gated on re-resolution, not on a trusted clock.
+-   —A pinned key set with a threshold. The anchor is configured out of band as a set of _n_ distinct Ed25519 public keys, 1 ≤ _n_ ≤ `ANCHOR_MAX_KEYS` (16, §19.1), and a threshold _t_, 1 ≤ _t_ ≤ _n_. Each key MAY be pinned with the nodeId of the node that holds it. The pin is configuration a receiver already trusts, never a claim on the wire: a node MUST NOT learn, change or persist its pin from any frame.
+-   —The single anchor stays valid. A pin of one nodeId and its key, as earlier revisions defined it, is the set of one key with _t_ = 1.
+-   —Anchor-level statements. A statement whose `authorisedBy` is `"anchor"` is valid only if it carries signatures over its payload (§6.6.3) by at least _t_ distinct pinned keys, each verifying under §18.3.2. Entries by keys that are not pinned, repeated keys and signatures that do not verify are not counted. A node stores and relays only the entries it counted. Each copy of a statement is judged on its own entries: a node MUST NOT combine entries from different copies, so that validity never depends on which copies a node happened to receive. The key holders collect their _t_ signatures among themselves, out of band.
+-   —The anchor is not a granted role. No grant confers `anchor`. Under a threshold of 1 each pinned member alone is the anchor, whether the pin holds one key or several: its single signature makes an anchor-level statement valid, and a CMB it authors resolves as the anchor (§3.5) when its nodeId is pinned with its key. Under a higher threshold no single node is the anchor, and each key holder holds whatever roles in-force grants give it.
+-   —Re-pinning. Replacing the pin out of band is the last resort. It re-judges every anchor-level statement against the new pin: a statement that still carries _t_ valid signatures from the new set stays valid, and the rest fall away with everything they authorised. Statements do not name the pin. A re-pin that keeps a threshold of the old keys, for example to drop one compromised key of three, therefore keeps what those keys signed. A re-pin to new keys starts authority again. After a re-pin a node re-verifies the copies it holds: a copy that no longer counts is replaced by any copy that does, which anti-entropy brings from a node that holds one.
+-   —Where no anchor is pinned, nothing is in force (§6.5).
 
-Durability & integrity. Grants and revokes are gossiped to the roster and persisted append-only. The record has no integrity of its own, so an implementation MUST re-verify every record’s signature on load — top-down from the pinned anchor, using each verified grant’s vouched key to reach the next — and MUST NOT trust an on-disk record merely because it is present; a record not reachable from a verified anchor-rooted chain is dropped.
+#### 6.6.2 Roles and delegation
 
-Identity vs. authority. This section withdraws _authority_. A compromised signing _key_ is a different failure: MMP does not define key rotation (§3.4) — a node whose key is compromised generates a fresh identity and re-earns its role, while revoking its grants contains the damage in the meantime. Anchor-key compromise is root compromise, recovered only by re-pinning a fresh anchor out-of-band.
+Role
+
+Granted by
+
+May grant
+
+May revoke / endorse
+
+Lifecycle (§3.5)
+
+anchor
+
+pinned, never granted
+
+admin, validator, issuer, any non-authority role
+
+revoke any grant; endorse any grant or revoke that is not anchor-level
+
+canonical (as an author, only under a threshold of 1)
+
+admin
+
+the anchor or an admin
+
+admin, validator, issuer, any non-authority role
+
+revoke and endorse below it on its own chain
+
+validated, canonical, inside its scope
+
+validator
+
+the anchor or an admin
+
+non-authority roles only
+
+revoke below it on its own chain; no endorse
+
+validated, inside its scope
+
+issuer
+
+the anchor or an admin
+
+non-authority roles only
+
+revoke below it on its own chain; no endorse
+
+none
+
+participant, extension roles
+
+the anchor, an admin, a validator or an issuer
+
+nothing
+
+nothing
+
+observed, remixed
+
+-   —Delegating roles are `admin`, `validator` and `issuer`: their holders may sign statements, and a bucket counts their grants against its delegate quota (§6.6.6). Lifecycle authority (§3.5) belongs to admin (canonical) and validator (validated) only. An issuer has none, so a service that admits seats need not hold validation authority over anything. Non-authority roles are `participant` and extension roles, named as §7.3 names extension types (`<extension>-<name>` or `x-<vendor>-<name>`, lowercase, at most 64 characters). A non-authority role confers no lifecycle authority, no admission weight above participant, and no right to sign any statement. MMP authority roles are therefore the anchor, admin, validator and issuer. An extension MAY give a non-authority role meaning in its own domain, such as a seat in a hosted world; it MUST NOT turn one into an authority role.
+-   —A node with no in-force grant is a participant. A `participant` grant adds only a vouched key and a signed record that someone above admitted the node.
+-   —Scope. A grant MAY carry a signed `scope`: an extension namespace and a path, such as `xmesh-world:w1` or `xmesh-world:w1/region-a`, of at most `AUTHORITY_SCOPE_MAX` (256) characters (the grammar is in the schema). No scope is the whole mesh. A grant’s scope MUST equal or narrow its authorising grant’s: the same string, or that string followed by `/` and more segments. A grant under a scoped grant therefore MUST carry a scope, because leaving it out means the whole mesh, which would widen. An anchor-level grant may have any scope or none. A grant whose scope would widen its parent’s is invalid (§6.6.3, rule 4). Scope paths are opaque: they are compared exactly, byte for byte, and never normalised (no case folding, no percent-decoding, no resolution of `.` or `..`). No segment may consist only of dots, so `xmesh-world:w1/../w2` is not a scope at all, and nothing can look like a step up to a reader that would resolve it. Narrowing adds whole segments: `xmesh-world:w10` does not narrow `xmesh-world:w1`. The lifecycle authority and the elevated admission weight of a scoped grant apply only to CMBs inside its scope. The extension that owns a namespace defines which CMBs are inside each of its scopes, for example by room or by world. A receiver that does not implement a namespace treats no CMB as inside its scopes, so a scoped grant gives it no lifecycle authority. A scope does not change who may revoke or endorse a grant, nor what its holder may sign beyond keeping its own grants inside it.
+-   —Depth. The anchor is at depth 0. An anchor-level statement is at depth 1, and a statement authorised by a grant at depth _d_ is at depth _d_ + 1. A statement deeper than `MAX_DELEGATION_DEPTH` (4, §19.1) is invalid. Admins may grant admins, so the role table alone does not bound depth; the cap does.
+-   —Why four. The deepest chain with a separately accountable party at every hop is anchor → deployment admin → world admin → seat issuer → seat. Those are: the anchor’s key holders; the operator of a hosting deployment; the operator of one world hosted there; the service that admits seats to that world, which holds the issuer role so that it admits seats without validation authority; and a seat. That is four grants. A fifth hop would add no new kind of boundary, because what it would express is expressed by granting wider, not deeper. Each extra hop is one more key whose compromise reaches everything below it, and one more link that every check walks. The cap also bounds every chain to four grants, so a revoke check walks at most three ancestors and a fetched chain is at most four statements. The issuer leaves the arithmetic of §6.6.6 as it is: it is a delegating grant in its world admin’s bucket, and its seats are non-authority grants in its own. The draft bound of 8 belonged to the time-replay rule, under which validators promoted validators.
+-   —What MMP authority governs (informative). Grants decide who may attach to a mesh and act in it: hosts, seats, publishers, validators. Roles inside a simulation or a game, such as a commander or a scout, are simulation data kept in that environment’s own records. They are not MMP grants. A world’s own laws, fines and verdicts are that world’s records too: they are not MMP validation, and MMP authority neither grants nor checks them. A seat grant is per admitted node: it names one nodeId and key, not a sitting, so a node that comes back keeps its seat until the grant is revoked. With the constants of §19.1 a world admin’s 16 issuers admit up to 16 × 256 = 4,096 nodes per grant it holds. Grants do not expire, and no expiry is intended: authority ends by revoke.
+
+#### 6.6.3 Statements
+
+Three statements carry all authority. A `grant` confers a role on a subject, a nodeId together with its Ed25519 key, optionally within a scope (§6.6.2). A `revoke` names, by id, the grants it removes. An `endorse` names, by id, the grants and revokes to keep in force after a revoke has cut them off from the anchor (§6.6.5). Each names in `authorisedBy` the authority it is made under: `"anchor"` for an anchor-level statement, otherwise the id of the signer’s own grant. A signer that holds several grants names the one whose role permits the statement and, for a revoke or endorse, one that stands above its targets (§6.6.4). Every statement carries a `nonce` of 16 random bytes, so a fresh grant of the same role to the same subject is a different statement.
+
+```
+{ "kind": "grant",
+  "authorisedBy": "anchor" | "auth-<64 lowercase hex>",
+  "subject": { "nodeId": "<uuid>", "key": "<Ed25519 public key, base64url>" },
+  "role": "admin" | "validator" | "issuer" | "participant" | "<extension role>",
+  "scope": "xmesh-world:w1",                       (optional; omitted means the whole mesh)
+  "nonce": "<16 random bytes, base64url>",
+  "issuedAt": 1786611600000,                       (optional; information only)
+  "sigs": [ { "key": "<base64url>", "sig": "<Ed25519 signature, base64url>" } ] }
+
+{ "kind": "revoke",  "authorisedBy": "...", "targets": ["auth-...", ...], "nonce": "...", "sigs": [ ... ] }
+{ "kind": "endorse", "authorisedBy": "...", "targets": ["auth-...", ...], "nonce": "...", "sigs": [ ... ] }
+```
+
+Canonical signed bytes and identity. `lp` and `decimal` are as in §8.8.4. Targets are unique on the wire, and their wire order is not signed. A nodeId is signed in its canonical lowercase RFC 4122 text form, 8-4-4-4-12 lowercase hexadecimal digits. Any other spelling is not well formed, so one node has one spelling, and one statement one id.
+
+```
+payload = UTF8("mmp-authority-v1\n") ||
+  lp(kind) ||
+  lp(authorisedBy) ||
+  grant:            lp(subject.nodeId) || lp(subject.key) || lp(role) || lp(scope or "")
+  revoke, endorse:  lp(decimal(targetCount)) || concat(lp(target) for bytewise-sorted targets)
+  || lp(nonce) ||
+  lp(decimal(issuedAt) or "")
+
+id  = "auth-" || lowercase hex(SHA-256(payload))
+sig = Ed25519(signing key, payload)         (pure Ed25519, no prehash; unpadded base64url)
+```
+
+The id excludes the signatures. A statement re-signed by a hedged signer (§17.4), or carrying a different subset of anchor signatures, is the same statement. A node MUST compute the id itself; no frame carries a statement’s own id. A non-anchor statement carries exactly one signature entry, whose `key` is the key that signed it. Every signature verifies under the one rule of §18.3.2.
+
+Validity. A statement is _valid_ when all four hold:
+
+1.  Well formed. It validates against [authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json); every base64url field is canonical (a key and a signature decode to 32 and 64 bytes, a nonce to 16); its subject nodeId is canonical (above); its subject key is the encoding of an Ed25519 point of prime order (§18.3.2), so no grant can name the identity or any other small-order or mixed-order key; `issuedAt`, if present, is at most 253 − 1; its scope, if present, follows the scope grammar; and its targets are unique and number 1 to `AUTHORITY_MAX_TARGETS` (64). The schema and the reference construction accept exactly the same shapes; only the point check cannot be written as JSON Schema.
+2.  Rooted and shallow. Following `authorisedBy` from the statement through statements the node holds reaches `"anchor"` within `MAX_DELEGATION_DEPTH` links. If a link within that walk is not held, the statement is _pending_, not invalid (§6.6.8). If the walk would need more links, the statement is invalid.
+3.  Signed. An anchor-level statement as §6.6.1 says. Any other by the key its signature entry names, which MUST be the subject key of its authorising grant, verifying under §18.3.2.
+4.  Permitted. Its authorising statement is a valid grant (or the anchor), and that role permits it under §6.6.2: the role table for a grant, a delegating role for a revoke, an admin or the anchor for an endorse. A grant’s scope equals or narrows its authorising grant’s.
+
+Validity is static: it depends on the statement and its chain, never on revokes, endorsements or quotas. A receiver MUST check it on ingest and MUST discard an invalid statement, which it MUST NOT store or relay.
+
+#### 6.6.4 Resolution
+
+Over the set of valid statements a node holds:
+
+-   —The chain of a statement is the grants above it: its authorising grant, that grant’s authorising grant, and so on, up to and not including the anchor. A grant _g_ is _above_ _s_ if _g_ is on the chain of _s_. The chain is fixed by the hashes: it never depends on what is in force.
+-   —A bucket is the statements that share an `authorisedBy`; the anchor-level statements form one bucket. Everything in a bucket is signed by one signer under one grant, at one depth. A bucket keeps statements: its own, and those its endorses rescue (§6.6.6).
+-   —A revoke _r_ may remove a grant _g_ when _r_ is anchor-level or is authorised by a grant above _g_. These are the anchor, and the holders of grants on _g_’s chain above it. No signer can remove its own grant, a grant above its own, or a grant on another branch.
+-   —An endorse _e_ may rescue a grant or revoke _s_ when _s_ is not anchor-level, and _e_ is anchor-level or authorised by a grant above _s_’s authorising grant. These are exactly the signers that may remove _s_’s authorising grant. An endorse is never rescued: an endorse that names an endorse does nothing to it.
+-   —A revoke or endorse acts target by target. A target it may not remove or rescue, a target the node does not hold, and, for a revoke, a target that is not a grant, are unaffected, and the statement still applies to its other targets.
+-   —A statement is cut by a revoke when its authorising grant is not in force and, walking up its chain past the grants that are dead, the first grant that is not dead is removed. When that first grant is over quota instead, the statement is cut by a quota.
+-   —A statement is alive when it is anchor-level or its authorising grant is in force. A grant or revoke that is not alive is rescued when it is cut by a revoke, an in-force endorse that may rescue it names it, and that endorse’s bucket keeps it (§6.6.6). A statement cut by a quota is never rescued. A grant is removed when an in-force revoke that may remove it names it.
+-   —A revoke or endorse is in force when it is alive and its bucket keeps it; a revoke also when it is rescued. A grant is in force when it is not removed, and either it is alive and its bucket keeps it, or it is rescued. Every in-force statement is kept by exactly one bucket: its own, or its rescuer’s.
+
+Every statement therefore has exactly one status: _invalid_, _pending_, _dead_ (valid, but neither alive nor rescued), _removed_, _over quota_ (no bucket has room for it), or _in force_. The [authority vector](/spec/mmp/conformance/v2/authority-v2.json) pins these statuses. A node MUST resolve its in-force set as this algorithm does, and MAY compute it incrementally, provided the result is the same:
+
+```
+resolve(H):                       H = the valid statements a node holds, as a set
+  index H: bucket each statement by its authorisedBy; list, for every id, the
+           revokes and endorses that name it as a target, in ascending id order
+  F := {}                                               the in-force set
+  for d := 1 .. MAX_DELEGATION_DEPTH:
+    phase A: revokes and endorses at depth d
+      for each bucket B at depth d whose authorising grant is in F (or the anchor's):
+        keep(B, s) for each revoke and endorse s of B, in ascending id order
+      for each other bucket at depth d: its endorses are dead; its revokes that are
+        cut by a revoke are rescue candidates, the rest are dead
+      rescue(s) for each candidate s, in ascending id order
+    phase B: grants at depth d
+      for each bucket B at depth d whose authorising grant is in F (or the anchor's):
+        each grant g of B with removed(g) is removed; keep(B, g) for each other
+        grant, in ascending id order
+      for each other bucket: a grant not cut by a revoke is dead; one that is removed
+        is removed; the rest are rescue candidates
+      rescue(g) for each candidate g, in ascending id order
+  return F
+
+keep(B, s):   if B has kept Q(B) statements, or s is a delegating grant and B (not the
+              anchor's) has kept AUTHORITY_DELEGATE_QUOTA of them: s is over quota;
+              otherwise B keeps s and s is in F
+rescue(s):    for each endorse e in F that names s and may rescue it, in ascending id
+              order: keep(bucket of e, s), stopping at the first that has room;
+              s is over quota if one tried and none had room, dead if none could
+cut by a revoke(s): past the dead grants on s's chain, the first is removed
+removed(g):   some revoke r in F names g, and r may remove g   (r is settled: phase A)
+```
+
+-   —The order is well founded. An endorse that may rescue a statement sits at a lower depth than it, and the endorse’s own bucket is settled before any rescue it keeps. A revoke that may remove a grant sits at the same depth or lower, and phase A runs before phase B. Whether a statement is cut by a revoke or by a quota depends only on grants above it, at lower depths. A revoke can never remove a grant on its own chain, and an endorse can never rescue one, since either would need a statement above itself. So no statement’s standing depends on itself, and the rescues one bucket keeps are served in ascending id order.
+-   —Cost is linear. Each statement is validated once, walking at most four links. It is placed in one bucket once. Each (revoke or endorse, target) pair is checked once against a chain of at most four, and deciding whether a statement was cut off walks at most three grants. Resolution is therefore O(_S_ + _T_) for _S_ statements naming _T_ targets in all, choosing the lowest ids of a bucket by linear-time selection (sorting a bucket, or the endorses that name one target, costs a logarithmic factor). No rule recurses, so the revoke patterns that made the replay rule exponential have nothing to multiply.
+-   —Roles follow the key. A node’s roles are those of the in-force grants whose subject is its nodeId _and_ its key, each with its scope, plus `anchor` for each pinned member of a threshold-1 anchor (§6.6.1). Its lifecycle authority over a CMB (§3.5) is the highest of the roles whose scope contains that CMB: anchor or admin (canonical), then validator (validated). Issuer and the non-authority roles confer none.
+
+#### 6.6.5 Revocation and endorsement
+
+-   —Revocation is effective. A removed grant confers nothing. Everything it authorised, and in turn everything those authorised, is dead unless rescued. Removing an admin’s grant takes its whole subtree with it, in one statement.
+-   —Dead statements. A removed signer’s dependents are dead. A node MUST NOT relay a dead statement and MAY drop it, unless it is in the node’s live set (§6.6.7) as a grant on the chain of an in-force statement. A dropped statement that arrives again is resolved afresh like any other: it is dead unless an endorse has rescued it in the meantime, and a node that dropped it gets it back only from a node that kept it (§6.6.7).
+-   —Nothing is un-revoked. While its revoke is in force a grant stays removed. To restore authority, a signer above issues a fresh grant: the fresh nonce makes it a different statement. A fresh grant does not revive the old grant’s dependents, because they name the old id. Demotion is a revoke, followed if wanted by a fresh grant of a lesser role.
+-   —Rescue reconnects what a revoke cut off. An endorse keeps the grants and revokes it names, and everything that hangs from them, once a revoke has cut them off from the anchor. One use is when an admin leaves and the anchor keeps the validators it appointed. Another is when a key is retired and the grants its holder made should stand. Rescue never brings back a statement cut off by a quota: a grant over quota stays out, and so does everything below it. The endorser answers for what it names. Its bucket keeps what it rescues, counted like its own statements, and a rescued delegating grant takes one of its delegate slots (§6.6.6), so rescuing a delegate costs exactly what granting one would.
+-   —An endorse never restores its signer. The removed signer’s grant stays removed. Anything it signs afterwards is a new statement that no endorse names, because an endorse can only name statements that already exist: their ids are inside its signed bytes. A removed signer therefore cannot regain authority through an endorsement, and an endorse by a statement’s own signer rescues nothing: it is in force only while that signer’s grant is, and then the statement needs no rescue.
+-   —An endorse is never rescued. When an endorser’s own authority goes, what it rescued is cut off again. A signer above that wants it kept endorses it directly, which it may, since it stands above everything the endorser could reach.
+-   —An endorse does not override a revoke. A rescued grant that an in-force revoke may remove is still removed. When it rescues a subtree, an endorser SHOULD also endorse the removed signer’s revokes within it. Otherwise those revokes die, and what they removed returns.
+-   —An endorse of a statement whose authorising grant is still in force changes nothing until that grant is removed, so a signer may endorse before it retires a grant. To withdraw an endorse, remove its endorser’s grant, or revoke the endorsed grant directly; the endorser and anyone above it may. An endorser between a remover and the grant it removes keeps what it names: a remover that wants a whole subtree gone also revokes what is endorsed, or removes the endorser.
+
+#### 6.6.6 Quota
+
+-   —Per signer, per grant. A bucket keeps at most _Q_ statements: `AUTHORITY_QUOTA` (256) for a bucket authorised by a grant, and `AUTHORITY_ANCHOR_QUOTA` (4096) for the anchor’s. A bucket authorised by a grant also keeps at most `AUTHORITY_DELEGATE_QUOTA` (16) delegating grants (admin, validator, issuer). A bucket keeps, first, its own statements, when its authorising grant is in force: revokes and endorses in ascending id order (bytewise), then the alive grants that are not removed, in ascending id order, skipping a delegating grant beyond the delegate quota. Then, at greater depths, it keeps the statements its endorses rescue, in ascending id order, while it has room for them under both limits. A statement no bucket keeps is _over quota_: it is not in force, a node MUST NOT relay it, and a node MAY drop it unless it is in its live set (§6.6.7). A receiver SHOULD report a signer whose bucket is full to its operator.
+-   —Deterministic. Which statements a bucket keeps depends only on the statements, never on which arrived first. Dead statements and removed grants do not count against any quota. Which delegates survive near the cap is decided by statement id, not by the order a signer issued them in. A signer that needs particular delegates to stand keeps below the cap, or asks for a further grant.
+-   —One signer never displaces another. A bucket holds only statements signed under one grant, so a flood by one signer can only push out that signer’s own statements. Pending statements are held per session (§6.6.8) and never count against any bucket. A bucket keeps its own statements before any it rescues, so a rescue never displaces its endorser’s own statements either. The statements an endorser rescues compete only for that endorser’s room.
+-   —Removals first, so the quota fails closed. A flood of grants cannot push out a revoke. A signer that floods revokes displaces only its own grants.
+-   —Why per grant rather than per key. First, it keeps selection well defined depth by depth. A key can hold grants at several depths, and counting per key would let its statements at one depth decide which of its statements survive at another. Second, it gives a way to compact. A signer near its quota, or one that needs more than 16 delegates, is given a further grant, which is a further bucket. To compact, its grantor then removes the old grant and endorses what should stand, and everything else under the old grant is dead and can be dropped. The anchor has no grantor, which is why its quota is larger; re-pinning is its compaction.
+-   —The bound, and why it holds. Below a holder _X_ are the statements whose chain contains _X_’s grant. A signer above _X_ may choose to rescue some of them; its own bucket keeps those, and they and what hangs from them are that signer’s choice, not _X_’s, so the figures below leave them out. Every other statement in force below _X_ is kept by a bucket whose authorising grant is _X_’s grant or an in-force delegating grant below it. That is its own bucket when its authorising grant is in force, or its rescuer’s bucket, whose grant is in force because an endorse is never itself rescued. Each such bucket keeps at most _Q_ = 256 statements and at most _D_ = 16 delegating grants. Each in-force delegating grant below _X_ is kept by exactly one such bucket and lies deeper than that bucket’s grant. So these buckets form a tree under _X_’s bucket in which every bucket has at most _D_ children and depth strictly increases. Only grants at depth 3 or less have buckets, since a depth-4 grant’s statements would be at depth 5. A depth-1 holder therefore has at most 1 + _D_ + _D_2 = 273 buckets below it, and so at most 273 × 256 = 69,888 statements and 273 × 16 = 4,368 delegating grants in force below it. A depth-2 holder has at most 17 buckets, 4,352 statements and 272 delegating grants; a depth-3 holder one bucket, 256 statements and 16 delegating grants. All of it dies with one revoke of _X_’s grant. The authority vector carries the attacks that broke the first version of this rule, each within these figures, and a tree that reaches the figure exactly.
+
+#### 6.6.7 Properties and the authority root
+
+-   —Order independence. The same set gives the same answer. Every rule above refers only to which statements are held, their ids, their signatures and their fixed chains. The evaluation order is fixed by depth and id, not by arrival. Statements that are invalid, pending, dead, removed or over quota have no effect on which statements are in force. The node keeps those of them that are grants on the chains of in-force statements, because it verifies those statements with them. Together with the in-force set they make the node’s live set, which a node MUST keep. Whether it keeps or drops the rest changes nothing for the set it holds now. A dropped statement can matter later, though: an over-quota grant comes into force when a lower one leaves its bucket, and a dead one when an endorse for it arrives. A node that dropped it gets it back only from a node that kept it, so a node SHOULD keep over-quota and dead statements while it has room. A signer whose statement was dropped everywhere sends it again.
+-   —No cycles. A statement names others only by ids inside its own signed bytes, and an id is a hash of those bytes. A statement can therefore only name statements that already existed when it was signed. A cycle would need a statement whose bytes contain, directly or through others, its own hash, which SHA-256 makes infeasible. The references form a DAG. The depth cap bounds every walk even against a statement crafted to loop.
+-   —Anti-entropy is set union. Statements are immutable and resolution is a function of the set, so exchanging statements and taking the union is all that synchronisation does. No merge rule or tie-break between nodes is needed. Nodes compare _authority roots_ to learn whether they agree (§6.6.8). Because held sets only grow and resolution is a function of them, repeated exchange between connected nodes converges, and it has converged when their roots match.
+
+The authority root names one in-force set under one anchor:
+
+```
+pinDigest = lowercase hex(SHA-256(UTF8("mmp-anchor-pin-v1\n") ||
+  lp(decimal(threshold)) ||
+  lp(decimal(memberCount)) || concat(lp(member) for bytewise-sorted members)))
+    member = key || ":" || nodeId when the threshold is 1 and the pin names the node holding
+             the key; otherwise key
+
+root = lowercase hex(SHA-256(UTF8("mmp-authority-root-v1\n") ||
+  lp(pinDigest) ||
+  lp(decimal(inForceCount)) || concat(lp(id) for bytewise-sorted in-force ids)))
+```
+
+-   —It is taken over the in-force set, not the held set. Held sets legitimately differ between nodes that agree: dead and over-quota statements may be dropped, and pending ones are held only in memory. In-force sets of nodes that agree are identical. The live set (the in-force set with the grants on its members’ chains) is also enough to recompute the in-force set, so a root can be checked from statements alone.
+-   —It names the pin. Authority is relative to the anchor. Two different pins never share a root, and a re-pin changes it. Under a threshold of 1 a member’s nodeId is part of the pin, because it decides who is the anchor. Under a higher threshold nodeIds decide nothing and are left out of the digest, so two nodes that pin the same keys and threshold share a root whether or not they annotate them.
+-   —Checking a claimed root. To check a root against a set of statements, a node verifies every statement against the pin, resolves the set, and recomputes the root of the resulting in-force set. The claim holds if and only if the two roots are equal. Supplying the live set is enough. A statement added to it, or left out, that changes what is in force changes the root.
+-   —Binding a run or a decision to a root. An _environment_ here is an application at Layer 7 (§14) that runs work and records its outcomes: a Core Secure participant (§17.1) in that role, such as XMesh. MMP defines no separate conformance class for it, so the two requirements that follow bind such an application and are checked by its own tests, not by the MMP vectors. An environment that binds a run, an episode or a recorded decision to an authority root MUST keep that root’s live set itself. Peers serve only their current set (§6.6.8), so an old root’s statements cannot be fetched later. Inside a deterministic run the environment MUST apply mesh weights (§6.6.10) against the root it admitted for the current tick, never against its node’s live in-force set.
+-   —Runs and ticks (informative). A run binds to a root, not to “the current set”. A replay against a later, larger set, one that includes a revoke that arrived afterwards, would otherwise resolve differently. When authority changes during a run, the environment admits the new root into its own input stream at a tick it chooses, so that a replay is deterministic. When a seat’s grant dies during a run, the hosted world decides the consequence inside the run at the tick it admits the new root, for example taking the seat’s agent out of play. MMP requires only that the change enter at one tick. That ordering, and that consequence, are the environment’s job, not MMP’s.
+
+#### 6.6.8 Frames, gossip and anti-entropy
+
+Four peer-scope frames (§7.1, [authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json)) carry the set, on confirmed sessions only (§5.2). A statement is verified on its own signatures and chain, whichever session delivered it. A session confers no authority on what it carries, and a session that delivers a statement which fails verification SHOULD be rate-limited.
+
+```
+{ "type": "authority-statement", "statement": { ...one statement... } }
+{ "type": "authority-digest", "root": "<64 lowercase hex>", "count": 7 }
+{ "type": "authority-fetch", "reqId": "af-<16 hex>", "ids": ["auth-...", ...] }
+{ "type": "authority-fetch", "reqId": "af-<16 hex>", "after": "" }
+{ "type": "authority-set", "reqId": "<the request's reqId>",
+  "statements": [ ... ], "missing": ["auth-...", ...], "next": "<opaque cursor>" }
+```
+
+-   —Gossip. When a statement first enters a node’s in-force set, the node relays it once, as an `authority-statement`, to its other sessions. The same holds for a statement that enters because another arrived, such as a pending statement whose chain completed. A node MUST NOT relay a statement that is not in force, except as a chain member inside an `authority-set`. A revoke is relayed as soon as it enters, since the revoke window (§6.6.12) runs until it arrives.
+-   —Pending statements. A valid-looking statement whose chain is not complete (§6.6.3, rule 2) is pending. The receiver first checks its single signature, under §18.3.2, with the key its entry names, and discards it if that fails. Checking a key the node has not seen costs one scalar multiplication; the per-session limits below bound how many a session can ask for. It then MAY hold the statement in memory while it fetches the missing link from the session that delivered it. Held statements are keyed by id and signing key, so a forged copy cannot displace a genuine one. At most `AUTHORITY_PENDING_MAX` (64) are held per session. They are never persisted, relayed or counted against a quota, and they are released after `AUTHORITY_PENDING_TIMEOUT` (10,000 ms) or when the session closes. A node keeps at most one fetch in flight per (session, missing id). An anchor-level statement is never pending: the pin is always at hand.
+-   —Fetching by id. `authority-fetch` with `ids` (1 to 64) asks for those statements. The responder answers with one `authority-set` carrying, in authority order, each named statement in its live set together with its chain, and every in-force revoke and endorse that names a statement in the answer, each with its own chain. Ids it does not serve are listed in `missing`, including those of statements it holds that are not in its live set (dead, over quota or pending): a dead statement is served only as a chain member of a live one. An answer carries at most `AUTHORITY_PAGE` (64) statements. A removed grant is served only with the revoke that removes it, so a fetch never hands out a removed grant as if it were in force.
+-   —Authority order is ascending depth; within a depth, revokes and endorses before grants; within each, ascending id. In that order every statement arrives after everything that can change its standing: its chain, the revokes that may remove it, and the endorses that may rescue it. A receiver can ingest a page as it arrives.
+-   —Anti-entropy. A node sends `authority-digest`, its root and in-force count, when a session is confirmed. It sends it again after its in-force set changes, at most once a second per session. A node whose root differs from the peer’s pulls the peer’s live set. It sends `authority-fetch` with `after: ""`, then pages with the `next` cursor of each answer until an answer carries none. Each page holds at most 64 statements, in authority order. Every statement received is ingested as gossip is. The peer, seeing the same mismatch, pulls in the other direction. A node keeps at most one such pull in flight per session. A responder SHOULD pace its answers per session (for example 4 a second, burst 16), and MAY refuse a fresh full pull on a session within 60 s of the last. The cursor is opaque, at most 128 characters. Statements that change while a pull is running are reconciled by the next digest.
+-   —Persistence. A node SHOULD persist its live set and MAY persist more. Persisted statements have no integrity of their own. On load, a node MUST re-verify every statement against the pinned anchor, chain by chain from the top, and resolve the set afresh. It MUST NOT trust a status or a root read from disk. No receipt time is kept, because none is used.
+
+#### 6.6.9 Authority follows the key
+
+-   —A grant confers its role on its subject’s nodeId and key together. A CMB or attestation carries its author’s role only when the key that verifies its signature (§18.3.1) is that grant’s subject key. A grant that names the same nodeId with another key confers nothing on the holder of the first.
+-   —A statement’s signing key comes from its authorising grant, or from the pin, and never from a node’s key registry. That is what makes resolution the same at every node, whatever keys each has bound.
+-   —Grants as a binding source. An in-force grant is a source a key registry MAY bind its subject from (§3.4), as a view over what is in force now: the binding lasts only while the grant is in force, and goes with it unless another source binds the same key. It binds only an unbound nodeId. If the nodeId is bound to a different key, that is an identity conflict (§3.4): it is recorded and reported, and the binding is unchanged. The grant stays in force, since resolution does not read the registry, but at that receiver it confers nothing usable, because no record that verifies under the bound key is signed by the grant’s key.
+-   —The receiver’s own nodeId. A receiver MUST NOT take a binding for its own nodeId from any grant, because it knows its own key (§3.1.3). A grant that names the receiver’s nodeId with a foreign key confers nothing on the receiver, and the receiver SHOULD report it: someone has vouched a foreign key for its identity.
+
+#### 6.6.10 Using authority: agreed outcomes and mesh weights
+
+-   —Outcomes that must be agreed are decided once, by the environment. Some outcomes several parties must agree on: that a piece of work was validated, that a payment is due. Such an outcome is decided once, by the environment the decision belongs to (the application or runtime that runs the work), against that environment’s in-force set at that moment. It is recorded there, bound to the authority root it was decided under (§6.6.7). The record is the outcome. A node MUST NOT re-derive or re-judge such an outcome from mesh gossip, and MUST NOT treat a later change in its own in-force set as reversing it. (Informative: XMesh keeps such a record for the work it runs.)
+-   —Mesh weights are judged by the receiver, when they are used. Everything else authority does in the mesh is a weight a receiver applies: the origin admission weight (§6.4), lifecycle advancement in its own store (§6.5), and the weight of an admission, tether or grounding attestation (§6.7, §15.8, §17.2). A receiver judges each against its own in-force set at the moment it applies it. A transition it has already made in its own store is its own record, and a later revoke does not undo it. A weight it applies afresh, each time it weighs an attestation, uses the in-force set of that moment. A scoped grant’s weight applies only to CMBs inside its scope (§6.6.2). Inside a deterministic run the environment uses the root it admitted for the tick, not the moment (§6.6.7). A statement carries no signed time that could place it inside a period of trust: once a signer’s grant is not in force, nothing that signer signs, whatever time it claims, carries authority.
+
+#### 6.6.11 Migration from the time-replay rule
+
+-   —The old frames confer nothing. The earlier `role-grant` and `role-revoke` frames and records, as signed by sym 0.14.0 and earlier, are retired (§7.1, legacy). A node MUST NOT resolve authority from them and MUST NOT emit them. The old revoke `cutoff`, the grant time `grantedAt`, resolution at a time _T_, and the receipt-time rule are removed. No statement carries a cutoff, and no receipt time is stored.
+-   —Anchor grants map one for one. For each old grant signed by the anchor that the anchor’s holder still regards as in effect, the anchor issues one grant: the same subject nodeId and key (`granteeKey`), `authorisedBy: "anchor"`, and the role mapped (`validator` stays `validator`; the granted `anchor` role becomes `admin`). A single-key anchor is the 1-of-1 set, so the node holding that key can issue these without co-signers. An old grant with no `granteeKey` has no subject key. It cannot be carried over until the key is known from a confirmed handshake or an out-of-band pin. Migrated grants carry no scope, since no old grant had one.
+-   —Deeper chains carry over within the cap. Once a grantor holds its own new grant, it re-issues each old grant it signed that it still regards as in effect. Each re-issued grant names the grantor’s new grant in `authorisedBy`, provided the role table of §6.6.2 permits it and the depth stays within `MAX_DELEGATION_DEPTH`. An old link that does not fit, such as a validator that promoted a validator, does not carry over by itself. Its grantee needs a grant from the anchor or an admin. Each signer re-issues only its own grants, so migration needs no agreement between nodes. An old grant that an old revoke had cleared is simply not re-issued.
+-   —Pre-0.14 grant entries are legacy claims, unchanged. A key that a pre-0.14 implementation (sym 0.13) recorded for a nodeId from a grant, or from an unproven hello, is a _legacy claim_ (§3.4). It is the key the receiver expects for that nodeId: a session proving it binds it, and one proving a different key is an identity conflict. It verifies nothing, binds nothing by itself and confers no authority.
+-   —A flag day. This is a flag day, not a gradual migration. A node running this rule ignores the old frames, so until grants are re-issued under the new rule it resolves every node, itself included, as a participant, whatever the old rule granted. A node running the old rule ignores the four new frames as unknown types (§7) and keeps the old authority. Each sees only its own kind. The anchor’s holder SHOULD migrate first and re-issue at once, and each grantor SHOULD re-issue as soon as it holds its own new grant, so the gap lasts no longer than the mesh’s upgrade.
+
+#### 6.6.12 Residuals
+
+-   —The revoke window. Until a node holds a revoke, it treats the removed grant as in force. Gossip relays a revoke as it enters; anti-entropy bounds the rest. A node learns a revoke at the latest at its next digest exchange with any peer whose in-force set includes it, and those exchanges happen when a session is confirmed and whenever a set changes. A partitioned node stays exposed until it reconnects. An environment deciding an agreed outcome (§6.6.10) SHOULD bring its in-force set up to date with a node it trusts to be current before it decides.
+-   —The threshold holders are the root. Any _t_ anchor keys together can grant, revoke and endorse anything. Compromise of _t_ keys is root compromise, recovered only by re-pinning out of band. Fewer than _t_ keys can do nothing alone; under a threshold of 1, therefore, every pinned key alone is the root.
+-   —A compromised holder acts until it is removed. Within its quota and delegate quota, and within the figures of §6.6.6, a compromised authority holder can grant, revoke and endorse below itself until a signer above removes its grant. Endorsement then keeps what should stand.
+-   —Verification costs one scalar multiplication per new key. Checking that a key is of prime order (§18.3.2) costs one multiplication by _L_ for each key a node has not seen before; under a cofactorless verifier _R_ costs only a byte comparison. A flood of statements under fresh keys is bounded by the per-session pending limits and rate limits (§6.6.8), and by the quotas once chains are held.
+-   —Grants are visible. Every node that holds the set can read who holds which role. Authority statements are not confidential.
+
+Identity vs. authority. This section withdraws _authority_. A compromised signing _key_ is a different failure: MMP does not define key rotation (§3.4). A node whose key is compromised generates a fresh identity and is granted again under its new key. Revoking the old key’s grants contains the damage in the meantime, and endorsing what the old key granted keeps what should stand.
 
 §6.7 — New in 1.1.0 — work layer
 
@@ -1895,7 +2201,19 @@ If any agent could advance a CMB to validated by producing a CMB with lineage, a
 
 Can an agent earn validator role automatically?
 
-The protocol defines the role-grant mechanism (Section 3.5.1) but does not prescribe automated promotion criteria. An implementation MAY define heuristics (e.g. promote after N remixes cited by peers), but the grant itself MUST come from an existing validator via a signed role-grant frame. This keeps the trust chain auditable.
+The protocol defines the grant mechanism (Sections 3.5.1 and 6.6) but does not prescribe automated promotion criteria. An implementation MAY define heuristics (e.g. promote after N remixes cited by peers), but the grant itself MUST be a signed grant statement from the anchor or an admin, naming the authority that permits it. This keeps the trust chain auditable.
+
+Why does authority carry no time?
+
+Every node would have to agree on one history of who held what when, built from times the signers chose themselves and statements that arrive in any order, and nothing in a mesh orders them. Resolving a set instead gives every node holding the same statements the same answer, with no history to agree on. Where a moment matters, the environment that decides records the authority root it decided against (Section 6.6.7).
+
+What does an endorse add that a fresh grant does not?
+
+Continuity. A fresh grant is a new statement with a new id, so everything signed under the old grant still names the old id and dies with it. Once a revoke has cut the named statements off, an endorse keeps them, and everything that hangs from them, without giving their signer its authority back. It costs the endorser what granting them would: its bucket keeps them, and a rescued delegate takes one of its delegate slots.
+
+Why can an endorse not bring back a grant that was over quota?
+
+Because the quota is what bounds a compromised holder. If an endorse could reconnect what a quota dropped, a holder could issue any number of delegates, let the quota drop the extras, and endorse what hangs under them, each with a full bucket of its own. Rescue exists for the case a quota never creates: a subtree cut off because a signer above it was removed.
 
 
 
@@ -2007,7 +2325,7 @@ core
 
 Self-verifying result for an exact content-address request.
 
-role-grant
+authority-statement
 
 3
 
@@ -2017,9 +2335,33 @@ core
 
 [authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json)
 
-Signed, anchor-rooted lifecycle role grant.
+One signed grant, revoke or endorse statement, identified by the hash of its canonical bytes; it counts only as §6.6 resolution places it.
 
-role-revoke
+authority-digest
+
+3
+
+No
+
+core
+
+[authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json)
+
+The sender's authority root and in-force count, for anti-entropy (§6.6.8).
+
+authority-fetch
+
+3
+
+No
+
+core
+
+[authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json)
+
+Asks for statements by id, with their chains, or for a page of the responder's live set in authority order (§6.6.8).
+
+authority-set
 
 3
 
@@ -2029,7 +2371,7 @@ core
 
 [authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json)
 
-Signed revocation of a lifecycle role grant.
+Answers an authority-fetch with statements in authority order; each is verified as gossip is, never on the session's word.
 
 peer-info
 
@@ -2187,6 +2529,30 @@ transport
 
 Relay-level error.
 
+role-grant
+
+legacy
+
+No
+
+legacy
+
+—
+
+Retired time-replayed role grant (sym 0.14.0 and earlier drafts). Confers nothing; MUST NOT emit; ignore on receipt. See §6.6.11 migration.
+
+role-revoke
+
+legacy
+
+No
+
+legacy
+
+—
+
+Retired time-replayed role revoke with a cutoff (sym 0.14.0 and earlier drafts). MUST NOT emit; ignore on receipt. See §6.6.11 migration.
+
 state-sync
 
 deprecated
@@ -2293,7 +2659,7 @@ DUPLICATE\_NODE
 
 Close
 
-nodeId already connected
+nodeId already connected (Legacy Import only: Core Secure never refuses a session that proves the bound key, §3.4)
 
 2001
 
@@ -2326,6 +2692,14 @@ REPLAY\_DETECTED
 Close
 
 Encrypted-frame counter repeated or moved backwards
+
+1009
+
+IDENTITY\_CONFLICT
+
+Close
+
+A nodeId bound to one identity key proved a different key (§3.4); recorded and reported. The refused side does not retry automatically
 
 Codes 1xxx are connection-level (close connection). Codes 2xxx are evaluation-level (informational). Error frames MUST NOT contain sensitive information.
 
@@ -3226,7 +3600,7 @@ The feedback signal enters the agent’s CfC cell (Layer 6) through the Syntheti
 
 This is how the mesh becomes self-correcting. The human does not retrain the agent, reconfigure its weights, or edit its prompt. The human produces a CMB. The mesh cognition loop does the rest.
 
-Feedback recognition. When a node receives a feedback CMB (a CMB with `lineage.parents` from a validator/anchor node), the receiving node SHOULD check whether any of the parent keys match CMBs it produced. If a match is found, the feedback is about the receiving agent’s own prior output. Implementations SHOULD surface this in the LLM reasoning context so the LLM can adjust its analytical approach. This check is O(1) against the node’s local memory index.
+Feedback recognition. When a node receives a feedback CMB (a CMB with `lineage.parents` from a node with validator role or above), the receiving node SHOULD check whether any of the parent keys match CMBs it produced. If a match is found, the feedback is about the receiving agent’s own prior output. Implementations SHOULD surface this in the LLM reasoning context so the LLM can adjust its analytical approach. This check is O(1) against the node’s local memory index.
 
 Neuroscience grounding
 
@@ -3326,7 +3700,7 @@ Feedback is a remix. The operator processes the agent’s signal through their o
 
 Sections 11.1–11.2 describe feedback tied to a specific CMB via lineage. Directive feedback is a standalone teaching CMB — a signal that injects domain knowledge into the mesh without requiring a parent ticket.
 
-A directive feedback CMB is produced by a validator or anchor node with:
+A node with validator role or above produces a directive feedback CMB with:
 
 -   No `lineage.parents` (it is not a response to a specific signal)
 -   Rich CAT7 categories encoding the knowledge to be injected
@@ -3542,7 +3916,7 @@ MMP 2.0 · JSON · Directive
 }
 ```
 
-`metadata.createdBy` identifies the author, and `metadata.createdByNodeId` is bound to the author’s key by the CMB signature (§18.3.1). Validator authority MUST be resolved through the signed role-grant chain rooted at the pinned anchor (§6.5–§6.6) before anchor weight 2.0 is applied. A `lifecycleRole` self-declared in the handshake ([Section 5.2](/spec/mmp/connection)) is advisory only and MUST NOT confer validation weight. Revocation (`role-revoke`, §6.6) immediately withdraws the elevated weight.
+`metadata.createdBy` identifies the author, and `metadata.createdByNodeId` is bound to the author’s key by the CMB signature (§18.3.1). Validator authority MUST be resolved against the receiver’s in-force set of grants under the pinned anchor (§6.5–§6.6) before anchor weight 2.0 is applied. A `lifecycleRole` self-declared in the handshake ([Section 5.2](/spec/mmp/connection)) is advisory only and MUST NOT confer validation weight. A revoke of the author’s grant (§6.6.5) withdraws the elevated weight at each receiver as soon as that receiver holds the revoke.
 
 ### Q&A
 
@@ -5100,7 +5474,7 @@ The invariant. A remix asserts lineage only where the descent claim would surviv
 
 Why the anchor, not the parent. Per-hop checks compound — k hops at drift ε bound the chain only by kε, and the measured median substantive hop is far too large to squeeze without killing legitimate re-projection. A check against the root does not compound: every surviving chain certifies that _every_ depth stays above the floor with respect to its root, so the bound is depth-independent by construction. No vector crosses the wire: the root is content-addressed (§8.2.1 — embeddings are deliberately excluded from the address), so any holder of the root re-encodes its text and recomputes the tether; receivers SHOULD re-verify opportunistically when they hold the root, the same verify-if-resolvable posture as signatures (§18.3.1). A receiver that cannot resolve the root locally MAY fetch it by its content address (`cmb-fetch`, §7): the fetched root self-verifies against its key, so re-verification requires no trust in the serving peer — the recomputed verdict is made in the fetcher’s own kernel (comparability per `kernelId` below). Failing both, the receiver treats the tether as unverified — a trust state, not a rejection — or as attested-by-integrator where a verified attestation rides the remix (below).
 
-Tether attestation and kernel identity. Every φ-space judgement is kernel-relative, so a tether record MUST name the kernel it was evaluated in: a short stable `kernelId` token identifying encoder and comparison dimensionality. Two tether verdicts are comparable _iff_ their `kernelId` values are equal; drifts MUST NOT be compared across kernels. The integrating node SHOULD record its evaluation as a signed tether attestation carried on the remix: a record binding the remix key, anchor key, `kernelId`, measured drift (fixed to six fractional digits so the signed bytes are implementation-independent), verdict (`tethered` | `severed`), integrator nodeId, and integrator time — serialized with the §8.2.1 length-prefix discipline under the domain tag `mmp-tether-v1` and signed with the integrator’s identity key (§18.3.1; verification resolves the key through §6.6). A receiver that cannot resolve the anchor MAY treat a verified attestation as the certificate’s standing — attested-by-integrator, weighed by the integrator’s resolved authority (§6.5–§6.6) — instead of unchecked; an attestation whose signature fails against the integrator’s resolved key MUST be discarded (a forged certificate is worse than an absent one). An attestation proves _who_ evaluated, in _which kernel_, with _what result_ — never that the evaluation was honest; honesty is weighed exactly as it is for admission attestations.
+Tether attestation and kernel identity. Every φ-space judgement is kernel-relative, so a tether record MUST name the kernel it was evaluated in: a short stable `kernelId` token identifying encoder and comparison dimensionality. Two tether verdicts are comparable _iff_ their `kernelId` values are equal; drifts MUST NOT be compared across kernels. The integrating node SHOULD record its evaluation as a signed tether attestation carried on the remix: a record binding the remix key, anchor key, `kernelId`, measured drift (fixed to six fractional digits so the signed bytes are implementation-independent), verdict (`tethered` | `severed`), integrator nodeId, and integrator time — serialized with the §8.2.1 length-prefix discipline under the domain tag `mmp-tether-v1` and signed with the integrator’s identity key (§18.3.1; verification resolves the key by the integrator’s nodeId, §3.4, and its authority from the receiver’s in-force set, §6.6). A receiver that cannot resolve the anchor MAY treat a verified attestation as the certificate’s standing — attested-by-integrator, weighed by the integrator’s resolved authority (§6.5–§6.6) — instead of unchecked; an attestation whose signature fails against the integrator’s resolved key MUST be discarded (a forged certificate is worse than an absent one). An attestation proves _who_ evaluated, in _which kernel_, with _what result_ — never that the evaluation was honest; honesty is weighed exactly as it is for admission attestations.
 
 Distinct from §15.7.1’s mint prohibition. Forwarding MUST NOT mint a fresh root because forwarded content is _unchanged_ — re-rooting it would forge novelty. Tether severance mints a fresh root because the content has _changed past the point of honest descent_ — keeping the lineage would forge fidelity. Same mechanism, opposite honesty conditions; both grow the DAG with claims that are true. Severance also interacts correctly with source-novel forwarding: a severed row is a genuinely new source, and its departed predecessor’s roots are no longer claimed by it.
 
@@ -5263,6 +5637,14 @@ transcript, proofs, X25519 confirmation and HKDF outputs
 [e2e-v2](/spec/mmp/conformance/v2/e2e-v2.json)
 
 directional keys, counter nonces, AAD, ciphertext and authentication failures
+
+[authority-v2](/spec/mmp/conformance/v2/authority-v2.json)
+
+authority statement bytes, ids, pin digests and roots; the status of every statement in every case, and the bucket that keeps it, the same in any ingest order (§6.6)
+
+[ed25519-strict-v2](/spec/mmp/conformance/v2/ed25519-strict-v2.json)
+
+the one Ed25519 verification rule for authority statements, on the twelve “Taming the many EdDSAs” cases and the small-order, mixed-order and non-canonical cases (§18.3.2)
 
 [v2 wire examples](/spec/mmp/examples/v2/transport-cmb.json)
 
@@ -5429,6 +5811,7 @@ Node identity is a UUID bound to an Ed25519 key through the authenticated transc
 -   —Discovery records are untrusted hints. A peer MUST NOT pin their identity or E2E key from DNS-SD, relay discovery or an unproven hello.
 -   —Both nonces, nodeIds, keys, room, protocol version, implementation identifiers and extension negotiation MUST enter the signed transcript.
 -   —Core Secure MUST require both the Ed25519 transcript proof and X25519/HKDF key confirmation. Network isolation is not identity authentication.
+-   —A nodeId stays bound to the first key a receiver binds it to (§3.4). A different key, however well proven, is an identity conflict that the receiver refuses and reports; it is never a re-binding. First contact with no anchor, grant or out-of-band pin is therefore trust on first proven use, and an operator who needs more pins the key out of band.
 
 #### 18.3.1 CMB Signature Verification
 
@@ -5438,6 +5821,27 @@ Transport identity (above) authenticates the _connection_; CMB signatures authen
 -   —The receiver MUST resolve the author key by `createdByNodeId`, never `createdBy`.
 -   —Before admission or application exposure, the receiver follows all checks in §8.8.5, including record address, assertion identity, signature and audience.
 -   —An unsigned, legacy-suite or unverifiable record MUST NOT enter Core Secure. It may be quarantined under an explicitly selected Legacy Import profile; no automatic downgrade is permitted.
+
+#### 18.3.2 Authority Statement Signatures
+
+Grants, revokes and endorsements (§6.6) are not CMBs and do not use `mmp-sig-v2.0`. Each is signed with pure Ed25519 over its own `mmp-authority-v1` payload (§6.6.3), and is identified by the SHA-256 of that payload, never by its signature.
+
+One verification rule. RFC 8032 lets verifiers differ: in the equation they check, and in whether they accept non-canonical encodings and points of small order. Two nodes that verify differently hold different valid sets from the same statements, so they resolve different authority and never converge. Every node MUST therefore verify an authority statement’s signatures by this rule alone. A signature, 64 bytes _R_ ‖ _S_, by a public key _A_ of 32 bytes over a message _M_ is valid if and only if all five hold:
+
+1.  _A_ is a canonical encoding of a curve point: its _y_ is less than _p_ = 2255 − 19, it decodes to a point, and when _x_ = 0 the sign bit is clear (RFC 8032 §5.1.3).
+2.  _A_ has prime order: \[_L_\]_A_ is the identity and _A_ is not, where _L_ = 2252 + 27742317777372353535851937790883648493. This excludes the identity, the other points of small order and every point of mixed order.
+3.  _R_ is likewise a canonical encoding of a point of prime order.
+4.  _S_, read little-endian, is less than _L_.
+5.  \[_S_\]_B_ = _R_ + \[_k_\]_A_ as points, where _k_ = SHA-512(_R_ ‖ _A_ ‖ _M_) mod _L_, hashed over the bytes as given. This is the cofactorless equation of RFC 8032 §5.1.7.
+
+With _A_ and _R_ of prime order, \[8\](\[_S_\]_B_ − _R_ − \[_k_\]_A_) is the identity exactly when \[_S_\]_B_ − _R_ − \[_k_\]_A_ is. The cofactored equation therefore gives the same answer, and a library that uses either equation agrees once rules 1 to 4 are checked. Those four rules are where libraries differ. The [Ed25519 edge-case vector](/spec/mmp/conformance/v2/ed25519-strict-v2.json) holds the twelve cases of _Taming the many EdDSAs_ (Chalkias, Garillot and Nikolaenko, 2020). It adds the identity key, a mixed-order key, and, under a prime-order key, an identity _R_, a pure small-order _R_ (of order 8 and of order 2), a mixed-order _R_ and a non-canonical _R_, as well as an unreduced _S_ and an honest case. It also shows, for each case, what the two equations give when the pre-checks are skipped. Only the honest case is valid.
+
+On a cofactorless library (informative). A cofactorless verifier that compares _R_ by its bytes, as OpenSSL does behind Node’s `crypto.verify`, needs rules 1, 2 and 4 checked first. It also needs one more check: that _R_ is not the identity’s encoding, `01` followed by 31 zero bytes. If such a library then accepts, _R_’s bytes are the canonical encoding of \[_S_\]_B_ − \[_k_\]_A_. That point lies in the prime-order subgroup, because _B_ and _A_ do, and it is not the identity, so _R_ meets rule 3. Rules 1 and 2 cost one scalar multiplication per key, and a node can cache the result per key. The reference construction (`scripts/mmp/lib.mjs`) works this way, and the verifier checks it against the rule computed directly on every edge case.
+
+-   —The verifying key of a non-anchor statement is the subject key of the grant it names in `authorisedBy`. A receiver MUST NOT take it from its key registry, from the delivering session or from the statement’s own signature entry alone.
+-   —An anchor-level statement needs valid signatures by the pinned threshold of distinct anchor keys (§6.6.1). The keys are pinned out of band and never learned from the wire.
+-   —A grant whose subject key fails rule 1 or 2 is not well formed (§6.6.3). No grant can therefore name a key, such as the identity, under which anyone could sign anything.
+-   —Because the id excludes the signature, a hedged signer’s different valid signature over the same payload is the same statement (§17.4). The [authority vector](/spec/mmp/conformance/v2/authority-v2.json) pins payloads, ids and roots; its signatures are for verification only.
 
 ### 18.4 Cognitive Threats
 
@@ -5457,9 +5861,15 @@ MITIGATION CMB keys are cmb- content addresses (§8.8.2). The corrected signatur
 
 Fake outcome attestation (grounding abuse)
 
-A node emits intent="ground" CMBs (§6.7) with fabricated "verified:" outcomes against its own cognition to steer receivers’ evidence-based validation — or griefs with "failed:" attestations to un-ground cognition a validator or anchor verified (latest-observation-wins, §6.7).
+A node emits intent="ground" CMBs (§6.7) with fabricated "verified:" outcomes against its own cognition to steer receivers’ evidence-based validation — or griefs with "failed:" attestations to un-ground cognition a node with validator role or above verified (latest-observation-wins, §6.7).
 
 MITIGATION An outcome is an attestation, never a fact (§6.7): it advances no lifecycle by itself, and elevation is an explicit act under validator-or-above authority that SHOULD weigh the grounding author’s resolved authority (§6.5–§6.6). Groundedness is receiver-relative — only attestations the receiver’s own SVAF admitted count — and ordering uses receiver-local stored time, so a backdated createdTimestamp cannot game latest-wins. A below-validator "failed:" MUST NOT un-ground a validator-or-above "verified:" (§6.7 hard-gate reading) — a tier gate, not a soft weighted vote, since sheer low-authority volume defeats a weighted vote but not the gate; within a tier, latest-wins still surfaces a genuine same-authority regression.
+
+Authority backdating, flooding and blow-up
+
+A compromised or removed authority holder signs revokes or attestations dated inside the time it was trusted, floods statements to push honest ones out of a store, or crafts revoke patterns that are expensive to resolve.
+
+MITIGATION Authority carries no time (§6.6): a statement counts only while its signer’s grant is in force, whatever time it claims, and a removed signer’s dependents are dead. Quotas are per signer and per grant, keep removals first, and never let one signer displace another (§6.6.6). Resolution is linear in the statements held and never recurses (§6.6.4). A rescue never reconnects what a quota dropped, and the rescuer keeps what it rescues against its own quotas, so a compromised holder cannot escape the bound of §6.6.6. Every node verifies by one Ed25519 rule (§18.3.2), so no signer can craft a statement that some nodes count and others reject. Agreed outcomes are decided once by their environment and bound to an authority root (§6.6.10).
 
 Drift manipulation
 
@@ -5471,7 +5881,7 @@ Sybil attack
 
 An attacker creates multiple fake nodes to amplify influence in peer-influence weighting.
 
-MITIGATION Keypairs are free to generate, so identity alone does not limit Sybil creation. Receiver-local drift/recency weighting reduces but does not prove Sybil resistance. Authority-bearing actions require an anchor-rooted signed grant chain (§6.5–§6.6), and operators SHOULD rate-limit new identities and seed trusted anchors. Quantitative Sybil bounds are an open research claim unless demonstrated by a named profile.
+MITIGATION Keypairs are free to generate, so identity alone does not limit Sybil creation. Receiver-local drift/recency weighting reduces but does not prove Sybil resistance. Authority-bearing actions require an in-force grant under the pinned anchor (§6.5–§6.6), and a grant holder can only add authority holders within its quota and the depth cap (§6.6.6); operators SHOULD rate-limit new identities and seed trusted anchors. Quantitative Sybil bounds are an open research claim unless demonstrated by a named profile.
 
 Cold-start capture
 
@@ -5619,6 +6029,66 @@ archiveAfterSeconds
 profile-dependent
 
 Inactivity window after which a validated CMB MAY decay to archived (§6.3–§6.4; implementation status §17.6)
+
+MAX\_DELEGATION\_DEPTH
+
+4
+
+Longest grant chain below the anchor (depth 0); a deeper statement is invalid (§6.6.2)
+
+ANCHOR\_MAX\_KEYS
+
+16
+
+Most keys in a pinned anchor set; its threshold t is configured with the pin, 1 ≤ t ≤ n (§6.6.1)
+
+AUTHORITY\_QUOTA
+
+256 statements
+
+Kept per bucket authorised by a grant, its own and those its endorses rescue: revokes and endorses first, then grants, each by ascending id (§6.6.6)
+
+AUTHORITY\_ANCHOR\_QUOTA
+
+4,096 statements
+
+Kept in the anchor’s bucket, by the same rule (§6.6.6)
+
+AUTHORITY\_DELEGATE\_QUOTA
+
+16 grants
+
+Delegating grants (admin, validator, issuer) kept per bucket authorised by a grant, own and rescued (§6.6.6)
+
+AUTHORITY\_SCOPE\_MAX
+
+256 characters
+
+Longest grant scope (§6.6.2)
+
+AUTHORITY\_MAX\_TARGETS
+
+64
+
+Targets one revoke or endorse may name (§6.6.3)
+
+AUTHORITY\_PAGE
+
+64
+
+Ids per authority-fetch, and statements per authority-set (§6.6.8)
+
+AUTHORITY\_PENDING\_MAX
+
+64 per session
+
+Pending statements held in memory per session while their chain is fetched (§6.6.8)
+
+AUTHORITY\_PENDING\_TIMEOUT
+
+10,000 ms
+
+A pending statement is released after this, or when its session closes (§6.6.8)
 
 SELF\_SELECT\_THRESHOLD
 
@@ -6044,7 +6514,7 @@ Lineage-tether attestation
 
 [authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json)
 
-Signed role-grant and role-revoke authority frames
+Grant, revoke and endorse statements and the authority-statement, authority-digest, authority-fetch and authority-set frames (§6.6)
 
 [control-frame.schema.json](/spec/mmp/schema/control-frame.schema.json)
 
