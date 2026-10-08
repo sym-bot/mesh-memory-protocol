@@ -40,6 +40,7 @@
 - [Extension: room-directory-v0.2.0 (Draft)](#mmp-extension-room-directory-draft)
 - [Extension: error-handling-v0.2.0 (Draft — Candidate Extension)](#mmp-extension-error-handling)
 - [Extension: trust-horizon-v0.1.0 (Draft — Candidate Extension)](#mmp-extension-cmb-trust-horizon)
+- [Extension: sym-attest-v1 (Draft — Candidate Extension)](#mmp-extension-admission-attestations)
 
 ---
 
@@ -186,6 +187,27 @@ Version
 Date
 
 Changes
+
+2.0
+
+2026-10-08
+
+**MMP 2.0 update 1: the wire elements the first Core Secure runtime uses, and the §6.6 errata (2026-10-08; no version bump).** One publication of the drafts that sym 0.14.0 implements, each reviewed against that implementation and against the §6.6 rewrite, together with the §6.6 errata from its release review. The wire version is unchanged: every new frame is additive, and a node that does not know one ignores it (§7). What each part adds:
+
+-   **§6.6 errata.** The first implementation built to §6.6 resolved exactly as the reference does, and its review found gaps in what the section asked of a node around resolution. The signature entries of one statement now have unique keys, a shape rule checked before any signature work, so a copy cannot buy repeated checks under a pinned key. §6.6.8 states one budget rule: every statement a session delivers spends that session’s budget, asked for or not; the asker paces its pulls, pages and fetches to absorb a full page, so nothing it asked for is dropped; pending room is checked before a pending statement is verified; a pull resumes from its cursor and anti-entropy repeats with backoff while roots differ; and a by-id answer is a closure, the namers of namers to a fixpoint. §6.6.12 no longer claims that the pending limits bound fresh-key work. A node at its storage limit drops what is outside its live set first, then live statements in reverse authority order, and never drops an in-force revoke or an in-force anchor-level statement; it protects what is in force, not a kind of statement, so removals first stays true and the protected set stays bounded by the quotas. A node keeps what it holds across a re-pin and judges it again, and a node with no pin takes no part in authority exchange. The `mood` frame is registered: `{ type, mood, context, timestamp }`, mood at most 1,024 characters and context at most 4,096, with no sender fields and no valence or arousal; it is sealed on a Core Secure session, attributed to the session’s proven nodeId and name, and never stored, relayed or remixed.
+-   **§9.2.2/§4.4.4 a CMB’s binding comes from its signed `metadata.to` (was draft #24).** The relay envelope’s `to` is routing only; the binding is the record’s signed audience, bound into the sealed frame’s associated data: null is room-bound, the receiver is directed, anyone else fails the audience check. A nodeId has one lowercase spelling, compared exactly, in records, statements and the handshake hello alike; a directed record older than the receiver’s de-duplication window _may_ be refused as a replay; the unsigned-field rule is stated for Core Secure, and Legacy Import keeps its own.
+-   **§4.4.4 relay fan-out envelope, and relay-auth `room` and `engine` (was draft #25).** A relay that lists `fanout` in the new `relay-peers` `features` accepts `{ fanout: [{ to, payload }, …] }`: one client message, counted once toward the rate limit, each entry delivered as a unicast, with nothing in the delivered bytes revealing the others. Relay limits are floors a relay must allow (§19.1: 25 messages a second, a burst of 300, 64 entries, and a 4,096-byte delivered allowance), not advertised values, and a sender keeps headroom below them. A relay never delivers a message over the allowance, even after re-serialising it, and drops a malformed unicast; in every form the payload is a JSON object. A `to` that is not a lowercase nodeId makes an envelope malformed; a sealed frame is never broadcast. `relay-error` carries `kind`, `code` and `reason`, and acting on `code` is optional. 4008 and the WebSocket closes 1001, 1009, 1011 and 1013 join §4.4.9. `relay-auth` gains `room` (addressing, never permission) and `engine` (a log label, never forwarded), and its nodeId is lowercase.
+-   **§15.5 collapsed integration and §5.1 one discovery service type (was draft #17).** When integration produces the incoming text unchanged, the receiver mints nothing, _may_ keep the author’s record exactly as signed, and never attributes it to itself; the §15.8 tether and the §15.7 emission gate do not apply, and §17.2 is aligned. One DNS-SD service type, `_sym._tcp`, carries every room, with the TXT `room` now required (a per-room service type cannot carry the room identifiers §5.8 allows); the round-trip ownership exclusion is removed. During migration a node browses the per-room type only where it is a valid RFC 6335 service name, to reach 2.0 nodes that still advertise one, and must refuse a room mismatch both ways before advertising `_sym._tcp` for a named room.
+-   **§5.1 the TXT `mmp` profile marker (was draft #22).** Legacy and Core Secure nodes share one service type, so a Core Secure listener lists its versions in TXT `mmp`, a comma-separated list that is `mmp=2.0` today. A record without it is a legacy advertisement and is never dialled under another profile except through a configured Legacy Import route; a 2.0 listener closes a legacy one-frame handshake at once, bounding the work and logging it spends per remote address. TXT keys compare case-insensitively and the first occurrence wins (RFC 6763 §6.4). The marker is an unauthenticated hint: stripping it denies discovery, never downgrades a profile.
+-   **§7.1/§18.2.1 sealed control frames, `control-encrypted` (was draft #26).** On a CONNECTED Core Secure session every peer frame that is not a record travels sealed: records in `cmb-encrypted`, everything else (peer-info, wake-channel, mood, cmb-fetch, cmb-fetch-result, the four authority frames, error, extensions) as the inner frame of `control-encrypted`, under the same traffic keys and the same per-direction sequence, with its own AAD domain, `mmp-aead-control-v2`. ping and pong may go either way, and a sealed ping is answered with a pong. A clear error may be read but changes nothing; a sealed error with a Close action ends the session. A frame that opens advances the sequence, and refusing its inner frame changes nothing else. Authority statements are verified by §6.6.9 and §18.3.2, never by a registry or session key; records and an extension’s signed frames by the receiver’s binding for the nodeId they name (§3.4). A sender never seals a record from another room or for another recipient. A fetched record is matched by its recomputed cognition key and attributed, delivered or admitted only after full §8.8.5. `cmb-fetch` names no sender and `cmb-fetch-result` has no timestamp. The envelope has its own schema, `control-encrypted.schema.json`, and a new vector, `control-encrypted-v2`.
+-   **§9.4 `cmb-anchors` and replayed context (was draft #30).** The first sealed frame a node sends on a Core Secure session after admitting it is `cmb-anchors`, naming the records it is about to replay as context, or `keys: []`. It replays only its own `mmp-sig-v2.0` records that it may seal into that session, at most 50 named and 5 recommended, and a non-empty list at most once a minute per peer. A receiver may mark a listed record as replayed context only when its signed author is the session’s proven peer; the frame never changes verification, admission or weight. A relay client takes it as the sign that its server holds the new session (§5.2.2). This replaces the earlier runtime’s unsigned `_anchor` flag.
+-   **§5.2.2 the handshake over a relay (was draft #23).** Over a relay, where both peers dial and neither listens, the smaller nodeId is the client. A relay session is the §5.2 exchange carried in addressed envelopes, never broadcast, accepted only from the session peer’s `from`; a re-announced peer is probed with `ping`, not re-handshaked. An unconfirmed hello changes nothing. Supersession needs proof both ways: the server supersedes when it admits the new session and sends the mandatory sealed `cmb-anchors`, and the client supersedes only once a sealed frame other than an error opens on the new session, abandoning the new session and keeping the old after the handshake timeout. A replay is discarded on every transport; a gap must close the session, after a sealed 1010 `SESSION_CLOSED` where it can; a sealed error with a Close action ends the session, a clear one changes nothing, a failed handshake _may_ send 1006 or 1007 in clear, and 1009 is sent sealed and never retried automatically. New error 1011 `UNKNOWN_SESSION` answers a frame for a session the receiver does not hold, limited per sender and overall, and prompts a re-handshake only when it names the client’s session or answers its probe, and the client is not already waiting on a newer session. 1008 is retained but no longer sent.
+-   **§5.8.1 the `room-join` frame (was draft #31).** A grant for a gated room is presented inside the confirmed session, as a sealed `room-join` sent first on every new session by a node that holds one, so the key it binds is compared with the key the session proved. The owner’s nodeId and key are pinned out of band and selected by room, never by the grant; the owner is recognised by both together. The receiver checks the schema first (integer times), verifies under §18.3.2, and requires its room, `grantedBy` the owner, the proven nodeId and key, the 24-hour cap, and validity within 5 minutes of skew either way. It decides admission before the session’s next frame, closes a session that presents no grant within the handshake timeout, and closes an admitted session when its grant expires. The implementation note now names the frame `room-join`.
+-   **§8.8.6 record size limits (was draft #37).** A category’s text is at most 262,144 UTF-8 bytes after NFC, the seven together at most 524,288, and the encoded record at most 737,280 bytes, measured as the length of its RFC 8785 serialization (which is the `JSON.stringify` length in any member order, and not what an encoder that escapes non-ASCII writes), so that a record always fits one sealed frame. Emitters never mint an oversized record; receivers refuse one before any other work, and refuse a sealed value over 983,062 characters before opening it. A fetch responder bounds the record bytes it queues per session. New vector `record-size-v2`; the stale implementation note is corrected.
+-   **§8.8.4/§8.8.5 carried but unsigned record members, and the canonical signed projection (was draft #34).** `meta.key` is recomputed from the signed text and a mismatch refused; `valence`, `arousal` and `lineage.method` are unsigned, optional and dropped by a Core Secure verifier, which keeps only the signed projection. Objects are closed and types never coerced, except that an unrecognised category is allowed and dropped; an embedding vector is refused, amending §9.2.1. Every nodeId is lowercase. Signed strings (category text, `createdBy`, `room`, `application.schema`) must already be NFC, and a non-NFC value is refused. `room` is a §5.8 identifier; `createdBy` is at most 256 code points, and parents at most 256 entries of 256. The projection is canonical: parents sorted bytewise, an empty lineage and an absent application are null. §8.2.1 now states `categoryKeyV1` and `blockKeyV2` byte-exactly. New vector `record-projection-v2`.
+-   **§15.7/§14.3 a record that cites its parent is not thereby a remix (was draft #35).** A remix is defined by how it was produced: output that integrates an admitted peer record, whichever API emits it. The §15.7 gate applies to that path and never to a record because it carries parents or a label; the agent’s own observations, replies, trail decisions and outcomes are authored, and `remember()` is named only as an example. Receivers cannot see the path, so a receiver must not skip or refuse a record because its lineage cites the receiver’s own records, and may keep it out of its own remix cycle. A paraphrasing reply is bounded only by the receiver’s redundancy band and budgets. §15.7.2 (a grounding is authored, not a gated remix), the §14.12 completion sentence and the §15 summary are aligned.
+-   **§16.4 the `sym-attest-v1` extension, Draft Candidate (was draft #27).** The wire form of the §17.2 admission attestations, negotiated and sealed in `control-encrypted`: a signed attestation per gated record, chained per attester; checkpoints, each chained to the previous root so none commits over a suffix; witness co-signatures that carry the witnessed range; and unsigned node statistics. Two checkpoints with overlapping ranges or one `prev` prove a fork, whatever boundaries the attester cuts; a checkpoint that does not start right after its `prev` is malformed; after a conflict a node witnesses that attester no more. A witness is not signed by the attester, so overlapping witnesses are a lead, never equivocation evidence; a witness that contradicts a held checkpoint is evidence against the witness. An attester that loses its segment ends its chain visibly. Duplicates are judged by content; an equivocating checkpoint is relayed once as evidence, and an earlier witness stands. A draft vector, `sym-attest-v1`, pins it all. Only the session budget is spent before verification, the global ceiling after. A closed schema (`sym-attest-frame.schema.json`) fixes the token grammars, lowercase nodeIds and exactly seven verdicts. Nothing is attested about Legacy Import records, and no attestation about a directed record is sent or relayed. Weights follow §6.6.9 and §6.6.10, matched by `assertionId`, and tallies are not Sybil-resistant. §17.2 exposes attestations to peers only through this extension, without making it mandatory.
+-   **§14.12 a member is a node; a work session is a trail (was draft #28).** A work session has no mesh identity of its own: the persistent node that works it authors its trail under its own nodeId, and must not mint an identity per session, so coupling and the authority that follows its key (§6.6.9) carry across sessions. Each trail starts at a charter, and a walk stops at the first charter of the node it reaches. An entry’s trail predecessor is its one parent that is the node’s own entry on that trail. Entries are content-addressed, so the node names the trail in every entry, the charter included, by a label unique across nodes. A node may hold several open trails; concurrent independent agents are separate nodes.
 
 2.0
 
@@ -742,7 +764,7 @@ The `nodeId` MUST be a UUID v7 as defined in RFC 9562. UUID v7 encodes a Unix ti
 
 The `nodeId` MUST NOT change during the lifetime of a node installation. If a node is uninstalled and reinstalled, a new nodeId is generated — the node is a new identity on the mesh. Peers that tracked the old nodeId will not recognise it.
 
-On the wire, the nodeId MUST be encoded as a lowercase hexadecimal string with hyphens (e.g., `0192e4a2-7b5c-7def-8a3b-9c4d5e6f7a8b`). Implementations MUST use case-insensitive comparison when matching nodeIds. Existing nodes with UUID v4 identities MAY continue to use them — peers MUST accept both v4 and v7 formats.
+On the wire, the nodeId MUST be encoded as a lowercase hexadecimal string with hyphens (e.g., `0192e4a2-7b5c-7def-8a3b-9c4d5e6f7a8b`). A nodeId has that one spelling: a receiver compares nodeIds exactly, and a nodeId in any other spelling in a signed field (a record’s `createdByNodeId` or `to`, a handshake hello’s `nodeId` (§5.2), an authority statement’s subject) makes that record, statement or handshake malformed (§8.8.5, §5.2, §6.6.3), because the bytes signed are exactly those characters. A nodeId read from an unsigned local source, such as configuration or a Legacy Import store (§17.3), MAY be lowercased before it is compared. Existing nodes with UUID v4 identities MAY continue to use them — peers MUST accept both v4 and v7 formats.
 
 ### 3.1.2 name
 
@@ -1146,6 +1168,8 @@ Clients connect via WebSocket (RFC 6455) and MUST send a `relay-auth` frame with
   "nodeId": "<uuid-v7>",
   "name": "<display-name>",
   "token": "<channel-token>",
+  "room": "<room identifier>",
+  "engine": "<implementation label>",
   "wakeChannel": {
     "platform": "apns",
     "token": "<push-token>",
@@ -1154,9 +1178,11 @@ Clients connect via WebSocket (RFC 6455) and MUST send a `relay-auth` frame with
 }
 ```
 
--   —`nodeId`, `name`: MUST be present. missing categories result in close code 4002.
+-   —`nodeId`, `name`: MUST be present; a missing one results in close code 4002. `nodeId` is the lowercase form of §3.1.1; a relay MUST refuse any other spelling with 4002.
 -   —`token`: SHOULD be present if the relay requires authentication. Invalid token results in close code 4003.
 -   —`wakeChannel`: MAY be present. Registers push notification credentials for waking this peer when offline (§5.7).
+-   —`room`: MAY be present: a room identifier (§5.8; absent means `default`). A relay that scopes routing, roster, presence and fan-out by room uses it to address the connection. It is addressing, never permission: the channel token stays the boundary, and the §5.8 checks at each endpoint still apply.
+-   —`engine`: MAY be present: an implementation label of at most 32 characters, for the relay operator’s logs. A relay MUST NOT forward it.
 
 On success, the relay registers the connection, sends a `relay-peers` response, and broadcasts `relay-peer-joined` to all other clients on the same channel.
 
@@ -1169,11 +1195,14 @@ Immediately after authentication, the relay sends the current peer list:
   "type": "relay-peers",
   "peers": [
     { "nodeId": "<uuid>", "name": "<name>", "wakeChannel": {...}, "offline": false }
-  ]
+  ],
+  "features": ["fanout"]
 }
 ```
 
 The array includes all connected peers on the same channel (excluding the requester) plus offline peers with registered wake channels (`offline: true`). Clients SHOULD treat each non-offline entry as a peer-joined event.
+
+`features` MAY be present. It lists the optional relay behaviours this relay implements; the one defined here is `fanout` (§4.4.4). A client MUST ignore a feature it does not recognise, and MUST NOT use a feature the relay did not list on that connection. An absent `features` lists none.
 
 #### 4.4.3 Peer Presence
 
@@ -1192,9 +1221,26 @@ On the relay, a frame is wrapped in a relay-layer _routing envelope_ — this en
 { "to": "<target-nodeId>", "payload": { "type": "cmb", ... } }
 ```
 
-If `to` is present, the relay forwards to that peer only. If absent, the relay broadcasts to all peers on the same channel. The relay adds `from` and `fromName` to forwarded frames. The relay MUST NOT route frames across channels.
+If `to` is present, the relay forwards to that peer only. If absent, the relay broadcasts to all peers on the same channel. A sealed frame (§18.2.1) is sealed for one session, so a sender MUST send it with `to` or in a fan-out, never as a broadcast: a broadcast sealed frame reaches peers that cannot open it. `to` is a nodeId in the lowercase form of §3.1.1; an envelope whose `to` is anything else is malformed. A relay drops a malformed unicast envelope without delivering it, and MAY answer it with a `relay-error`. The relay adds `from` and `fromName` to forwarded frames. The relay MUST NOT route frames across channels.
 
-The presence of `to` also fixes the CMB’s binding at the receiver: a frame with `to` = the receiving node is peer-bound (directed) and is delivered to the application layer unconditionally; a frame with no `to` is room-bound (autonomous) and is SVAF-gated for delivery. See §9.2.2 for the directed-vs-autonomous delivery contract.
+Fan-out. A sender that holds a separate session with each recipient (§18.2.1) seals one frame per recipient, so a room broadcast to _N_ peers is _N_ frames. A relay that lists `fanout` in `features` (§4.4.2) also accepts a fan-out envelope, which carries them in one client message:
+
+```
+{ "fanout": [
+    { "to": "<nodeId-1>", "payload": { "type": "cmb-encrypted", ... } },
+    { "to": "<nodeId-2>", "payload": { "type": "cmb-encrypted", ... } }
+] }
+```
+
+-   —Shape. An envelope carries exactly one of: `to` with `payload`; `payload` alone; or `fanout` alone. `fanout` is a non-empty array of entries, each with exactly a `to` nodeId, in the lowercase form of §3.1.1, and a `payload` frame; a `to` that is not one makes the whole envelope malformed. In every form, `payload` is a JSON object (a frame). A sender MUST NOT name the same recipient twice in one envelope, or itself. A relay MUST refuse a malformed fan-out envelope as a whole and deliver none of it, answering with a `relay-error` whose `kind` is `fanout` and whose `reason` is one of `malformed`, `too-many-entries`, `duplicate-recipient` or `self` (§4.4.9).
+-   —Delivery. The relay delivers each entry exactly as it would deliver a `{ to, payload }` envelope from the same sender: within the sender’s channel (and room, where the relay scopes by room, §5.8) only, as `{ from, fromName, payload }`, with the payload delivered as the same JSON value it was sent as (a relay may serialise it again, but never changes it, and never past the delivered-size bound below). An entry whose recipient is not connected is dropped as a unicast would be; the other entries are still delivered. For each recipient the relay preserves the order of that sender’s frames, fan-out entries included.
+-   —Confidentiality of the recipient set. A recipient receives only its own entry, in the same form as a unicast; it MUST NOT be able to learn from the delivered bytes that a fan-out occurred or who else was addressed. Recipients that collude can still compare the timing of what they received. The relay learns the recipient set, as it would from _N_ unicasts.
+-   —Limits. The whole envelope is one WebSocket message. A relay MUST accept a client message of at least `MAX_FRAME_SIZE` (§19.1), and each payload is also subject to `MAX_FRAME_SIZE` on its own. A relay that lists `fanout` MUST accept envelopes of at least `RELAY_MIN_FANOUT` (64) entries within that size. A relay adds `from` and `fromName` to what it delivers, so a delivered message can be larger than the one sent: a client MUST accept a delivered message of up to `MAX_FRAME_SIZE` plus `RELAY_ENVELOPE_ALLOWANCE` (4,096 bytes). A relay MUST NOT deliver a larger one. Re-serialising a payload can lengthen it (a JSON serialiser may write `1e21` as `1e+21`), so a relay that re-serialises measures what it is about to deliver and drops a message over the bound, as it drops a unicast to an absent recipient; a relay that forwards the payload’s bytes as received meets the bound by construction. A sender splits a larger fan-out into several envelopes. Nesting depth is bounded for the whole envelope, not per payload: a relay MAY refuse a message whose arrays and objects nest more than 64 levels deep, counted from the envelope itself, and MUST NOT refuse one within 64 for depth alone. A unicast payload therefore has 63 levels of its own, and a fan-out payload 61 (the envelope, the `fanout` array and the entry take three). MMP frames need far fewer: a CMB’s categories sit four levels deep.
+-   —Rate. A relay MAY limit each client’s inbound message rate, and closes a client that exceeds its limit with 4008. A relay that limits the rate MUST allow at least `RELAY_MIN_RATE` (25) messages a second, sustained, with a burst of at least `RELAY_MIN_BURST` (300) (§19.1), and MUST count a fan-out envelope as one message toward that limit. It MAY separately limit the bytes or entries a client sends per second. These are floors, not advertised values; nothing on the wire states a relay’s own limits. A sender SHOULD keep headroom below them, counting every message it sends, `relay-auth` and `relay-pong` included, because messages paced at the sender can arrive bunched after a network stall. Without `fanout`, a sender SHOULD pace its per-recipient envelopes within the floors rather than burst them.
+
+The fan-out envelope changes routing, never meaning: each payload is the frame its recipient would have received by unicast, sealed for that recipient’s session, and a record’s binding comes from its signed audience (§9.2.2), not from how many envelopes carried it.
+
+The envelope’s `to` is routing only. It MUST NOT be used to decide a CMB’s binding at the receiver — whether the record is peer-bound (directed) or room-bound (autonomous). The binding is the record’s authenticated `metadata.to` (§9.2.2), which the author signs (§8.8.4) and a sealed frame binds into its associated data (§18.2.1). The envelope is not authenticated, the relay does not forward its `to` to the recipient, and a sender whose frames are sealed per peer session addresses every frame to one peer, room broadcasts included. See §9.2.2 for the directed-vs-autonomous delivery contract.
 
 #### 4.4.5 Keepalive
 
@@ -1218,6 +1264,22 @@ Clients receiving code 4004 SHOULD log the collision and MUST NOT automatically 
 A relay MAY support multiple isolated channels. Each authentication token maps to exactly one channel. Cross-channel routing MUST NOT occur: frames, peer lists, and presence notifications are scoped to the channel. A relay with no token configured operates in open mode (single default channel, no authentication).
 
 #### 4.4.9 Close Codes
+
+Before it closes a client, or when it refuses a message without closing, a relay SHOULD send a `relay-error`:
+
+```
+{ "type": "relay-error", "kind": "fanout", "reason": "duplicate-recipient",
+  "message": "fan-out entry 3 names a recipient an earlier entry names" }
+
+{ "type": "relay-error", "kind": "auth", "code": 4003, "message": "<why the token was refused>" }
+```
+
+-   —`message` (MUST): text for the operator. It MUST NOT quote what the client sent.
+-   —`kind` (SHOULD): a token naming what was refused, such as `auth`, `duplicate-identity` or `fanout`.
+-   —`code` (MUST when a close follows): the close code below that the relay is about to use, so a client can act on the refusal even when the close reason is cut short.
+-   —`reason` (MAY): a token naming the specific cause within `kind`, such as a fan-out refusal (§4.4.4).
+
+A client MUST ignore a `kind` or `reason` it does not recognise. It acts on the close code that follows, which is never cut short, and MAY act on `code` for a close that does not arrive. A `relay-error` is a transport-scope frame from the relay, never a peer frame.
 
 Code
 
@@ -1260,6 +1322,18 @@ Reconnect with backoff
 Duplicate rejected
 
 Do NOT reconnect
+
+4008
+
+Rate limit exceeded
+
+Reconnect with backoff; send less (use fan-out where listed, §4.4.4)
+
+1001, 1009, 1011, 1013
+
+WebSocket closes (RFC 6455): going away, message too big, internal error, try again later (a receiver too far behind)
+
+Reconnect with backoff
 
 ### 4.5 IPC Transport (Local)
 
@@ -1351,6 +1425,12 @@ MUST
 
 Ed25519 public key (base64url, RFC 4648 Section 5)
 
+mmp
+
+MUST (Core Secure)
+
+A comma-separated list of the protocol versions the listener’s handshake speaks, today exactly `2.0`: the listener runs the Core Secure handshake (§5.2). Absent on a legacy (pre-2.0) advertisement. See the profile marker below.
+
 hostname
 
 SHOULD
@@ -1359,9 +1439,19 @@ Machine hostname
 
 room
 
-MAY
+MUST
 
-Mesh room identifier (Section 5.8). Default `"default"` if absent.
+Mesh room identifier (Section 5.8), as sent at the handshake (§5.2, NFC-normalized). A receiver reads an absent `room` as `"default"` when choosing whom to dial; membership is decided by the handshake regardless.
+
+One service type for every room. Rooms are not mapped to DNS-SD service types: every node advertises `_sym._tcp` and carries its room only in the TXT `room` key, so every §5.8-valid identifier — dots, underscores and all 64 characters — is advertisable (a DNS-SD service name is at most 15 characters and admits neither, RFC 6335 §5.1; the advertised label prefixes it with `_`, RFC 6763 §4.1.2), and two identifiers can never collapse onto one advertised name. A TXT string is at most 255 bytes per `key=value` (RFC 6763 §6.1), which a 64-character room fits. A node SHOULD connect only to advertisements whose TXT `room` equals its own. The TXT room is a _hint_, never an admission: membership is decided by the authenticated handshake (§5.2, §5.8). It is also broadcast in cleartext to the whole segment: a room name is not a credential (§5.8.1) and MUST NOT be relied on as one, and an operator who treats a room name as sensitive SHOULD use an opaque identifier.
+
+Profile marker. Legacy and Core Secure nodes advertise the same service type, so the TXT record is the only discovery-time signal that tells them apart. The value of `mmp` is a comma-separated list of the protocol versions the listener’s handshake speaks, with no spaces; this specification defines one, `2.0`, so today the value is `mmp=2.0`. A node whose listener runs the Core Secure handshake (§5.2) MUST list `2.0`, and a node MUST NOT list it on an advertisement whose listener does not. A record with no `mmp` key is a legacy advertisement. A node ignores versions in the list that it does not know, and MUST NOT dial a record as 2.0 unless the list contains `2.0`. TXT keys are read as RFC 6763 §6.4 says: compared case-insensitively, and when a key occurs more than once, the first occurrence wins.
+
+A Core Secure node SHOULD dial, as Core Secure, only records whose `mmp` lists `2.0`. It MUST NOT dial a record without the marker under any other profile unless its operator has configured a Legacy Import route for that nodeId (§17.3): the absence of the marker never selects a profile. On the listening side, a Core Secure listener MUST close, without retained state, a connection whose first frame is the legacy one-frame `handshake` (§5.2.1), and SHOULD bound the work and the logging it spends on such closes per remote address, because pre-2.0 implementations that dial every `_sym._tcp` advertiser (migration note below) reach Core Secure listeners in `default`.
+
+The marker is a hint like every TXT key, never authenticated (§18.3). Adding it to a legacy endpoint yields a Core Secure handshake that fails. Stripping it from a Core Secure advertisement hides that node from Core Secure peers on the segment, which an attacker on the segment can do anyway by suppressing the advertisement; it is a denial of discovery and never a downgrade, because no profile is chosen from a discovery record. The protocol version actually spoken is the `protocolVersion` bound into the handshake transcript.
+
+Migration (non-normative, except as marked). An implementation that advertises a per-room service type MAY also advertise `_sym._tcp` with TXT `room` during a transition, and SHOULD drop the per-room type at its next major version. A 2.0 node SHOULD also browse the per-room service type that implementations derive from its room (for the SYM reference runtime, `_<room>._tcp`), where that is a valid RFC 6335 service name, for as long as it supports migration. The reason is 2.0 nodes that still advertise only a per-room type: they are otherwise undiscoverable, and the partition is silent. (A pre-2.0 peer is not dialled from discovery at all once §5.1’s `mmp` marker applies, so browsing does not reach it.) Some pre-2.0 implementations (the SYM reference runtime among them) dial every `_sym._tcp` advertiser in `default` without a TXT filter, and are refused at the handshake by every named-room advertiser. §5.8’s unconditional mismatch refusal, inbound and outbound, is what makes that safe: an implementation that has not verified it in both directions MUST NOT advertise `_sym._tcp` for a named room. While per-room service types are still advertised anywhere, the room `sym` maps to `_sym._tcp` and is indistinguishable there from `default`: it MUST NOT be owned and SHOULD NOT be used as a room name. Pre-2.0 advertisements, under either service type, carry no `mmp` marker, so a 2.0 node that finds one this way dials it only through a configured Legacy Import route (profile marker, above).
 
 To prevent duplicate connections, the node with the lexicographically smaller nodeId MUST initiate the outbound TCP connection. The other node MUST NOT initiate.
 
@@ -1369,7 +1459,7 @@ Relay-based discovery. On platforms where mDNS is unavailable (cloud VMs, Window
 
 ### 5.2 Handshake
 
-The TCP or WebSocket dialler is the **client**; the listener is the **server**. They MUST complete this authenticated exchange in order:
+On a direct connection the TCP or WebSocket dialler is the **client** and the listener is the **server**. Over a relay, where both peers dial the relay and neither listens, the roles are assigned by nodeId (§5.2.2). They MUST complete this authenticated exchange in order:
 
 ```
 client → server  client-hello  { protocolVersion: "2.0", room, nodeId, name,
@@ -1423,9 +1513,36 @@ keyConfirmation(role) = HMAC-SHA256(finishedKey(role), confirmPayload(role))
 -   —The X25519 shared secret and every finished or traffic key are raw 32-byte values. An invalid peer key or all-zero shared secret MUST abort authentication.
 -   —The server sends the server proof and server key confirmation in `server-hello`; the client sends the client proof and client key confirmation in `client-finish`.
 -   —Proofs are unpadded base64url Ed25519 signatures. Confirmations are unpadded base64url HMAC-SHA256 values and MUST be compared in constant time.
--   —The two traffic keys feed only their named direction of the `cmb-encrypted` envelope. Reversing or reusing a direction key is non-conformant.
+-   —The two traffic keys feed only their named direction of the sealed envelopes, `cmb-encrypted` and `control-encrypted` (§18.2.1), which share that direction’s sequence. Reversing or reusing a direction key is non-conformant.
 
 Deprecated. The one-frame `handshake` that pins its own unproven keys is a Legacy Import/migration protocol and MUST NOT be accepted by Core Secure. `state-sync` is also retired: hidden state never crosses the wire.
+
+### 5.2.2 Handshake over a relay
+
+Over a relay (§4.4) both peers are WebSocket diallers of the relay, so the dialler and listener roles of §5.2 do not exist, and a peer’s arrival, departure and restart are relay events rather than connection events. A relay session is the §5.2 exchange and the §5.2.1 key schedule, unchanged, carried in routing envelopes addressed to the peer (§4.4.4), with the following rules.
+
+-   —Roles. The node with the smaller nodeId is the client, comparing the lowercase wire forms (§3.1.1) bytewise — the order §5.1 uses on the LAN. The node with the larger nodeId MUST NOT send `client-hello` to that peer over the relay, and a node MUST ignore a relay `client-hello` from a peer whose nodeId is larger than its own. Both sides apply one order, so there is no simultaneous open to resolve.
+-   —Trigger. When `relay-peers` lists a peer that is not offline (§4.4.2), or `relay-peer-joined` announces one (§4.4.3), the client-role node SHOULD send `client-hello` to it if it holds no relay session with that nodeId. An announcement for a peer it _does_ hold a session with is ambiguous: the peer may have restarted and replaced its own relay connection (§4.4.7), losing the session’s keys, or the relay may simply have announced it again. A node MUST NOT re-handshake on that announcement alone, which would supersede working sessions. It SHOULD instead probe: send a `ping` to that peer, at most once a second per peer. A live peer answers `pong`; a restarted one holds no session and answers `UNKNOWN_SESSION` (below), which tells the client to re-handshake.
+-   —Addressing. Every handshake frame and every sealed frame of a relay session MUST be sent in an envelope whose `to` is the peer’s nodeId; none is ever broadcast. A node MUST refuse a `client-hello` or `server-hello` whose nodeId differs from the envelope’s `from`, and MUST accept a session’s frames only from envelopes whose `from` is that session’s peer, arriving on the relay connection the session was established on.
+-   —Timeout. The server-role node MUST require `client-hello` first and `client-finish` before any non-handshake frame from that peer, exactly as a listener does. Either role MUST abandon, retaining no state, a handshake that has not confirmed within 10,000 ms of its first frame. The client SHOULD retry with exponential backoff (for example from 1 s, doubling, capped at 60 s) and MUST NOT have more than one handshake in flight per peer on one relay connection.
+-   —Supersession. A handshake that confirms for the same (nodeId, identity key) as an existing session on that relay connection supersedes it, once each side knows the other holds it. The server supersedes when it admits the new session (§5.8.1; in an ungated room, when `client-finish` verifies). The client cannot, since its `client-finish` may have been lost, so: the server MUST send a sealed frame on a relay session as soon as it admits it, and that frame is the mandatory `cmb-anchors` (§9.4). The client MUST NOT supersede its existing session until a sealed frame other than an `error` opens on the new session; if none opens within the handshake timeout, it MUST abandon the new session, retaining no state, and keep the old one. When a side supersedes, it discards the old session’s keys and counters and refuses frames sealed under the old `sessionId` from then on. Supersession itself sends nothing. This is how a peer restart recovers. A handshake that proves a different identity key for the nodeId never supersedes: a nodeId keeps one key (§3.4), the new handshake is refused, and the existing session is unaffected.
+-   —An unconfirmed hello changes nothing. A handshake in progress MUST NOT tear down, pause or alter a confirmed session. Only confirmation supersedes; a timeout, a failure or an abandoned handshake leaves the confirmed session exactly as it was, so a forged or replayed `client-hello` costs the peers nothing.
+-   —Teardown. A node MUST tear down every relay session with a nodeId when `relay-peer-left` names it, and every relay session on a relay connection when that connection closes; tearing down discards the session’s keys and counters. A node that closes a confirmed relay session for any other reason except supersession SHOULD first send, sealed in that session and addressed to the peer, an `error` with a Close action (§7.2): 1010 `SESSION_CLOSED` with the reason in `message`, unless another code names the reason. A sealed error with a Close action ends the session at its receiver too, and the client-role side then begins a new handshake, with backoff, except after 1009, which it does not retry automatically (§7.2). A node whose handshake fails or is refused MAY send 1006 or 1007 in clear; like every clear error it changes nothing at the receiver (§7.1). 1009 is found only after both proofs validate, so it is sent sealed on the session (§5.2).
+-   —Sequence. Sealed frames follow §18.2.1. A relay may drop frames and never retransmits them, so a gap is final: the receiver MUST close the session, and SHOULD first send a sealed 1010 `SESSION_CLOSED`, and the client re-handshakes; nobody waits for a missing sequence. A frame that fails authentication does not advance the receive sequence and does not close the session, and neither does a replayed one, since the relay can inject and replay frames. A sealed frame naming a `sessionId` the receiver does not hold is discarded and answered with `UNKNOWN_SESSION` (below).
+
+Unknown session. A node that receives, from a relay `from`, a sealed frame (`cmb-encrypted`, or any other sealed envelope) naming a session it does not hold, or a `ping` from a `from` it holds no relay session with, SHOULD answer with error 1011 `UNKNOWN_SESSION`:
+
+```
+{ "type": "error", "code": 1011, "message": "unknown session",
+  "detail": "session:<32 lowercase hex>" }
+```
+
+-   —`detail` names the session as `session:` followed by its 32 lowercase hex characters when the triggering frame named one, and is absent when it did not (a `ping`). The error travels in clear, as a routing-envelope payload addressed to the sender: the node holds no session to seal it with.
+-   —A node MUST NOT send it more than once a second per relay `from`, and SHOULD also cap its replies across all senders (for example 2 a second, with a burst of 8), which bounds the replies a stream of stale or forged frames can draw.
+-   —The client-role receiver, if the peer is present on the relay, SHOULD begin a new handshake, but only when the error’s `detail` names the session it holds with that peer or it has a probe `ping` outstanding to that peer, and it is not already waiting for a newer session with that peer to supersede the one named, and no faster than its handshake retry backoff. It MUST keep its existing session until the new one supersedes it, so a peer’s restart produces no peer-left at the application. The server-role receiver ignores it: the client will re-handshake.
+-   —Like every error frame it is informational (§7.2). It MUST NOT tear down a session by itself. Anyone on the relay path can forge it, and the worst it can do is prompt a handshake that only a peer holding the right key can confirm.
+
+Why the session, not the relay, decides. The relay’s view of a nodeId is weaker than a handshake (§4.4.1), so nothing a relay says can end a session both peers confirmed, except `relay-peer-left` and the loss of the relay connection, and those cost only a re-handshake. Everything that would let a third party end or replace a session — a hello, an error, a forged or replayed frame — either needs the peer’s keys to confirm or changes nothing.
 
 ### 5.3 Connection State Machine
 
@@ -1483,6 +1600,8 @@ Heartbeat timeout, TCP close, or error
 
 Implementations MUST NOT process any non-handshake frame in the AUTHENTICATING state.
 
+A relay session (§5.2.2) passes through the same states. It enters AUTHENTICATING when the client sends, or the server accepts, `client-hello`; it becomes CONNECTED on confirmation; and it returns to DISCONNECTED on timeout, failure, supersession by a newer confirmed session for the same (nodeId, key), `relay-peer-left`, the closing of the relay connection, a sequence gap, or a sealed error with a Close action (§7.2). An existing CONNECTED session stays CONNECTED while a newer handshake with the same peer is AUTHENTICATING.
+
 ### 5.4 Heartbeat
 
 Nodes MUST send a `ping` frame to each peer if no frame has been received from that peer within the heartbeat interval (SYM reference default: 10,000 ms). Upon receiving `ping`, a node MUST respond with `pong`. If no frame is received from a peer within the heartbeat timeout (SYM reference default: 120,000 ms), the connection MUST be closed. These defaults are local policy, not interoperability constants.
@@ -1524,15 +1643,38 @@ The naming convention above is the complete normative surface; deeper design rat
 
 Consent to hear is not consent to believe. Admission decides whether a node’s frames are exchanged at all. It says nothing about whether their content is true, and a receiver that treats membership as credibility has confused the two. Every admitted record is still evaluated by SVAF (§9.2), and admission gives it no standing there.
 
-A room name is not a credential. §5.8 makes a room a named cohort, and every discovery path — LAN advertisement, same-host registry, relay routing — turns knowledge of that name into membership without asking anyone. A deployment that needs membership to be a _right_ rather than a _string_ MAY gate a room. A gated room has exactly one owner, identified by node identifier and Ed25519 public key. The room identifier `default` MUST NOT be owned: it is the public mesh. An identifier that does not survive the room↔service-type round trip MUST NOT be owned either, because two such names can denote one room and an “owned” one would silently be the public square.
+A room name is not a credential. §5.8 makes a room a named cohort, and every discovery path — LAN advertisement, same-host registry, relay routing — turns knowledge of that name into membership without asking anyone. A deployment that needs membership to be a _right_ rather than a _string_ MAY gate a room. A gated room has exactly one owner, identified by node identifier and Ed25519 public key together. A node that enforces a gated room MUST have the owner’s nodeId and key pinned out of band, for that room: it selects the owner by the room, never by anything a grant or a peer carries. The room identifier `default` MUST NOT be owned: it is the public mesh. Because rooms are carried verbatim and never mapped to a service type (§5.1), every §5.8-valid identifier denotes exactly one room and any of them other than `default` MAY be owned (but see the migration note in §5.1 on the room `sym`).
 
 The room-join grant. A node joins a gated room by presenting a grant signed by that room’s owner. The grant MUST bind, under one signature, the room identifier, the grantee’s node identifier, the grantee’s public key, and an expiry. A grant that names a grantee but binds no key is a bearer token: anyone holding the bytes can present it, and the verifier MUST refuse it.
 
 The key must be proven, not asserted. A handshake field stating a public key proves nothing — the key an impostor would have to state is printed inside the grant it is holding. A verifier MUST compare the grant’s bound key against a key the peer _proved_ possession of during the handshake, and MUST refuse when no such proof is available. Failing closed here costs a deployment nothing it had; failing open hands the room to whoever copied a file.
 
+Presenting the grant: the `room-join` frame. The handshake transcript has no field for a grant, and a grant carried in a hello would be presented before anything was proven. A grant is therefore presented inside the confirmed session, where the key it binds can be compared with the key the session proved. It travels as a sealed control frame (§7.1, §18.2.1):
+
+```
+{ "type": "room-join",
+  "grant": { "type": "room-join", "room": "<room>",
+             "grantee": "<grantee nodeId>", "granteeKey": "<43-char base64url>",
+             "grantedBy": "<owner nodeId>", "grantedAt": 1786611600000,
+             "expiresAt": 1786698000000, "sigAlg": "ed25519",
+             "sig": "<unpadded base64url>" } }
+
+signed payload = UTF8("mmp-room-join-v1
+") || lp(room) || lp(grantee) ||
+                 lp(granteeKey) || lp(grantedBy) ||
+                 lp(decimal(grantedAt)) || lp(decimal(expiresAt))
+```
+
+-   —The grant’s signature. `grant.sig` is the owner’s Ed25519 identity-key signature over the payload above, using the §8.8.4 `lp` encoding, and is verified by the one rule of §18.3.2. `granteeKey` is the grantee’s identity key as unpadded base64url, and `grantedAt` and `expiresAt` are integer milliseconds. The frame adds no signature of its own; the session protects it.
+-   —Sending. A node that holds a grant for its room MUST send `room-join` on every newly confirmed session, as its first control frame, after both proofs validate and its own key-registry check of the peer (§3.4) has passed. Both ends of a session between two grantees send one.
+-   —Pending admission. In a gated room, a receiver MUST hold each newly confirmed session as _pending_, and MUST NOT process any content-bearing frame on it until it is admitted (the per-frame door, below). It admits the owner at once, recognised by the session’s proven nodeId and identity key together matching the pinned owner. Any other session it admits only on a `room-join` that arrives within the handshake timeout (10,000 ms by default, §5.2), and it MUST close a session that presents none in time. It MUST decide admission on a `room-join` before it handles the session’s next frame, so no frame is judged against a decision still being made.
+-   —Verification. The receiver MUST first check the frame against [room-join.schema.json](/spec/mmp/schema/room-join.schema.json), so the times are integers before any signature work, and then verify the grant against the pinned owner key for this room under §18.3.2. It MUST require all of the following: `room` is its own room; `grantedBy` is the pinned owner’s nodeId; `grantee` is the session’s proven nodeId; `granteeKey` is the session’s proven identity key; `expiresAt` is no more than 24 hours after `grantedAt` (the cap below); and, allowing 5 minutes of clock skew, the grant is already valid (`grantedAt` is no more than 5 minutes ahead of the receiver’s clock) and not expired (the clock is no more than 5 minutes past `expiresAt`). If every check passes it admits the session; if any fails it closes the session. A grant copied onto another key’s session therefore fails, whoever presents it.
+-   —Expiry closes the session. A session admitted on a grant stays admitted only while the grant lasts: the receiver MUST close it when its clock reaches the grant’s `expiresAt`. A grant admitted inside the 5-minute skew allowance after its `expiresAt` is therefore closed at once. The grantee presents a fresh grant on a new session.
+-   —Otherwise ignored. A `room-join` on a session already admitted, or in an ungated room, MUST be ignored.
+
 Expiry is the revocation window. A grant MUST NOT be accepted with a lifetime exceeding 24 hours, and the cap MUST be enforced by the _verifier_, not only by the issuer: a cap only the issuer honoured is a suggestion, and a receiver that accepts a ten-year grant has no window at all. Revocation is live gossip with no catch-up replay, so a peer that is offline when a revocation publishes never learns of it. The grant’s own lifetime is therefore the true exposure, and this number _is_ that exposure rather than a bound on it.
 
-The door is consulted per frame, not once per greeting. Admission is decided from the handshake, but a receiver MUST record that decision and consult it on every frame that carries meaning. A receiver MUST NOT process a record, a message, or any other content-bearing frame from a peer it refused, nor from a peer for which no admission decision was ever made while the room is gated. This is not a restatement of §5.8: an implementation can satisfy the handshake rule and still dispatch content from a node that never greeted it, because frame handling is commonly attached to a transport before, or independently of, the handshake that would have judged it. Handshake frames MUST NOT be gated this way — a grant-holder could then never join. Liveness frames MAY be answered, since a keep-alive tells a refused peer nothing that a closed connection does not.
+The door is consulted per frame, not once per greeting. Admission is decided from the handshake and the grant presented after it, but a receiver MUST record that decision and consult it on every frame that carries meaning. A receiver MUST NOT process a record, a message, or any other content-bearing frame from a peer it refused, nor from a peer for which no admission decision was ever made while the room is gated. This is not a restatement of §5.8: an implementation can satisfy the handshake rule and still dispatch content from a node that never greeted it, because frame handling is commonly attached to a transport before, or independently of, the handshake that would have judged it. Handshake frames MUST NOT be gated this way — a grant-holder could then never join. Liveness frames MAY be answered, since a keep-alive tells a refused peer nothing that a closed connection does not.
 
 A door governs a room, not a node’s voice. Admission decides what is exchanged _within_ a room; it does not make a node inaudible outside one. A receiver that also hears a band the room does not scope — a discovery advertisement, a broadcast channel, any transport it shares with non-members — MUST NOT ingest what arrives there as room content, because nothing on that band passed the door. This is not hypothetical: an independent implementation built against this specification was measured on 2026-09-16 emitting an adversarial node’s records to every peer on the local segment _without ever joining the room_, and its door counted nothing, correctly — the node never knocked. A door that is never approached refuses nothing, and a receiver MUST NOT read that silence as evidence of admission.
 
@@ -1540,7 +1682,7 @@ What the door cannot do. In an _ungated_ room there is no admission to enforce: 
 
 Implementation status
 
-The reference runtime implements owner-signed grants with the key binding, the verifier-enforced 24-hour cap, and the per-frame door described above. Two parts of this section are specified but not exercised: no shipped deployment gates a room, so the refusal paths are covered by tests rather than by traffic; and the proving handshake that would supply a _proven_ key is not reachable from the admission path. The consequence is worth stating plainly rather than leaving to be discovered: because the verifier refuses for want of proof _before_ it compares keys, a gated room in that runtime is currently shut to everyone — a legitimate grant-holder is refused for the same reason as a thief presenting a stolen grant. That is fail-closed, and it is the right direction to fail, but it means the key binding described above is specified and implemented without being reachable, and no measurement of a refusal in that runtime can yet distinguish the binding working from the door being closed. Revocation exists only as expiry. Treat the grant mechanism as specified and implemented, the binding as not yet exercisable, and the gated-room deployment as untried.
+The reference runtime implements owner-signed grants with the key binding, the verifier-enforced 24-hour cap, and the per-frame door described above. Two parts of this section are specified but not exercised: no shipped deployment gates a room, so the refusal paths are covered by tests rather than by traffic; and, through sym 0.13, the proving handshake that would supply a _proven_ key was not reachable from the admission path. Because the verifier refuses for want of proof _before_ it compares keys, a gated room in those versions is shut to everyone — a legitimate grant-holder is refused for the same reason as a thief presenting a stolen grant. That is fail-closed, and it is the right direction to fail. sym 0.14.0 completes the §5.2 handshake on every transport and presents the grant after it in the `room-join` frame defined above, so the key binding is reachable there. Revocation exists only as expiry. Treat the grant mechanism as specified and implemented, the binding as reachable from sym 0.14.0, and the gated-room deployment as untried.
 
 §5.9–5.11 — Informative
 
@@ -1883,10 +2025,10 @@ Why (informative). The rule this section replaces resolved a node’s role at a 
 
 -   —A pinned key set with a threshold. The anchor is configured out of band as a set of _n_ distinct Ed25519 public keys, 1 ≤ _n_ ≤ `ANCHOR_MAX_KEYS` (16, §19.1), and a threshold _t_, 1 ≤ _t_ ≤ _n_. Each key MAY be pinned with the nodeId of the node that holds it. The pin is configuration a receiver already trusts, never a claim on the wire: a node MUST NOT learn, change or persist its pin from any frame.
 -   —The single anchor stays valid. A pin of one nodeId and its key, as earlier revisions defined it, is the set of one key with _t_ = 1.
--   —Anchor-level statements. A statement whose `authorisedBy` is `"anchor"` is valid only if it carries signatures over its payload (§6.6.3) by at least _t_ distinct pinned keys, each verifying under §18.3.2. Entries by keys that are not pinned, repeated keys and signatures that do not verify are not counted. A node stores and relays only the entries it counted. Each copy of a statement is judged on its own entries: a node MUST NOT combine entries from different copies, so that validity never depends on which copies a node happened to receive. The key holders collect their _t_ signatures among themselves, out of band.
+-   —Anchor-level statements. A statement whose `authorisedBy` is `"anchor"` is valid only if it carries signatures over its payload (§6.6.3) by at least _t_ distinct pinned keys, each verifying under §18.3.2. Each entry’s key is unique within the statement (§6.6.3, rule 1), so a copy that repeats a key is not well formed and none of its signatures is checked. Entries by keys that are not pinned, and signatures that do not verify, are not counted. A node stores and relays only the entries it counted. Each copy of a statement is judged on its own entries: a node MUST NOT combine entries from different copies, so that validity never depends on which copies a node happened to receive. The key holders collect their _t_ signatures among themselves, out of band.
 -   —The anchor is not a granted role. No grant confers `anchor`. Under a threshold of 1 each pinned member alone is the anchor, whether the pin holds one key or several: its single signature makes an anchor-level statement valid, and a CMB it authors resolves as the anchor (§3.5) when its nodeId is pinned with its key. Under a higher threshold no single node is the anchor, and each key holder holds whatever roles in-force grants give it.
--   —Re-pinning. Replacing the pin out of band is the last resort. It re-judges every anchor-level statement against the new pin: a statement that still carries _t_ valid signatures from the new set stays valid, and the rest fall away with everything they authorised. Statements do not name the pin. A re-pin that keeps a threshold of the old keys, for example to drop one compromised key of three, therefore keeps what those keys signed. A re-pin to new keys starts authority again. After a re-pin a node re-verifies the copies it holds: a copy that no longer counts is replaced by any copy that does, which anti-entropy brings from a node that holds one.
--   —Where no anchor is pinned, nothing is in force (§6.5).
+-   —Re-pinning. Replacing the pin out of band is the last resort. It re-judges every anchor-level statement against the new pin: a statement that still carries _t_ valid signatures from the new set stays valid, and the rest fall away with everything they authorised. Statements do not name the pin. A re-pin that keeps a threshold of the old keys, for example to drop one compromised key of three, therefore keeps what those keys signed. A re-pin to new keys starts authority again. After a re-pin a node re-verifies the copies it holds: a copy that no longer counts is replaced by any copy that does, which anti-entropy brings from a node that holds one. A node keeps the statements it holds independently of its pin, and judges them again under the current pin whenever the pin changes or it loads them. It MUST NOT delete a statement because it fails under the current pin, so a re-pin, or a mistyped pin, destroys nothing: what fails under one pin counts again under a pin it meets.
+-   —No pin. Where no anchor is pinned, nothing is in force (§6.5), and there is no authority root, since a root names a pin (§6.6.7). A node with no anchor pinned therefore sends no `authority-digest`, pulls nothing, answers no `authority-fetch`, and stores and relays no authority statement it receives; statements it already holds stay as they are, to be judged when a pin is configured. It MUST NOT rate-limit or penalise a session for authority statements it cannot judge.
 
 #### 6.6.2 Roles and delegation
 
@@ -1994,7 +2136,7 @@ The id excludes the signatures. A statement re-signed by a hedged signer (§17.4
 
 Validity. A statement is _valid_ when all four hold:
 
-1.  Well formed. It validates against [authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json); every base64url field is canonical (a key and a signature decode to 32 and 64 bytes, a nonce to 16); its subject nodeId is canonical (above); its subject key is the encoding of an Ed25519 point of prime order (§18.3.2), so no grant can name the identity or any other small-order or mixed-order key; `issuedAt`, if present, is at most 253 − 1; its scope, if present, follows the scope grammar; and its targets are unique and number 1 to `AUTHORITY_MAX_TARGETS` (64). The schema and the reference construction accept exactly the same shapes; only the point check cannot be written as JSON Schema.
+1.  Well formed. It validates against [authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json); every base64url field is canonical (a key and a signature decode to 32 and 64 bytes, a nonce to 16); its subject nodeId is canonical (above); its subject key is the encoding of an Ed25519 point of prime order (§18.3.2), so no grant can name the identity or any other small-order or mixed-order key; `issuedAt`, if present, is at most 253 − 1; its scope, if present, follows the scope grammar; its targets are unique and number 1 to `AUTHORITY_MAX_TARGETS` (64); and the keys of its signature entries are unique, so a statement that repeats a key is not well formed. A node checks this rule before any signature work. The schema and the reference construction accept exactly the same shapes, with two exceptions JSON Schema cannot express: the point check, and unique keys across entries (the schema refuses only identical entries).
 2.  Rooted and shallow. Following `authorisedBy` from the statement through statements the node holds reaches `"anchor"` within `MAX_DELEGATION_DEPTH` links. If a link within that walk is not held, the statement is _pending_, not invalid (§6.6.8). If the walk would need more links, the statement is invalid.
 3.  Signed. An anchor-level statement as §6.6.1 says. Any other by the key its signature entry names, which MUST be the subject key of its authorising grant, verifying under §18.3.2.
 4.  Permitted. Its authorising statement is a valid grant (or the anchor), and that role permits it under §6.6.2: the role table for a grant, a delegating role for a revoke, an admin or the anchor for an endorse. A grant’s scope equals or narrows its authorising grant’s.
@@ -2068,6 +2210,7 @@ removed(g):   some revoke r in F names g, and r may remove g   (r is settled: ph
 -   —Deterministic. Which statements a bucket keeps depends only on the statements, never on which arrived first. Dead statements and removed grants do not count against any quota. Which delegates survive near the cap is decided by statement id, not by the order a signer issued them in. A signer that needs particular delegates to stand keeps below the cap, or asks for a further grant.
 -   —One signer never displaces another. A bucket holds only statements signed under one grant, so a flood by one signer can only push out that signer’s own statements. Pending statements are held per session (§6.6.8) and never count against any bucket. A bucket keeps its own statements before any it rescues, so a rescue never displaces its endorser’s own statements either. The statements an endorser rescues compete only for that endorser’s room.
 -   —Removals first, so the quota fails closed. A flood of grants cannot push out a revoke. A signer that floods revokes displaces only its own grants.
+-   —Node capacity. A node MAY limit how many statements it stores. What it protects at the limit is what is in force, not a kind of statement. Validity is static: a removed signer can still sign any number of valid revokes, all of them dead, and an in-force holder can sign revokes beyond its quota. Protecting revokes by kind would let either crowd out honest in-force statements and grow storage without bound. When a node reaches its limit it first drops statements outside its live set, which it may drop anyway; dead and over-quota statements are ordinary candidates there, revokes and anchor-level statements included. Then it drops live statements in reverse authority order (§6.6.8): deepest first, grants before revokes and endorses at the same depth, and the highest id first. It never drops an in-force revoke or an in-force anchor-level statement. A revoke or an anchor-level statement that arrives at a full node is protected only if it would be in force once held. Then it displaces the last statement in that order that is not protected. Otherwise it is an ordinary candidate, like any other statement outside the live set. The protected set is bounded by the quotas of this section: in-force anchor-level statements by `AUTHORITY_ANCHOR_QUOTA` (4,096), and in-force revokes by the 256 statements each bucket keeps, in buckets whose grants are themselves in force. So protection cannot grow storage without bound. A capacity refusal is not a relay failure, and a node MUST NOT rate-limit or penalise the session that delivered the statement. So “removals first” and “fails closed” stay true under a storage limit: what a full node loses is the deepest delegated authority, never a removal in force. A node that has dropped live statements no longer resolves the same set as its peers, and it SHOULD report this to its operator. A storage limit is the node’s own, outside resolution: the quota rules above decide what every node resolves alike, and this rule decides only what a full node gives up first.
 -   —Why per grant rather than per key. First, it keeps selection well defined depth by depth. A key can hold grants at several depths, and counting per key would let its statements at one depth decide which of its statements survive at another. Second, it gives a way to compact. A signer near its quota, or one that needs more than 16 delegates, is given a further grant, which is a further bucket. To compact, its grantor then removes the old grant and endorses what should stand, and everything else under the old grant is dead and can be dropped. The anchor has no grantor, which is why its quota is larger; re-pinning is its compaction.
 -   —The bound, and why it holds. Below a holder _X_ are the statements whose chain contains _X_’s grant. A signer above _X_ may choose to rescue some of them; its own bucket keeps those, and they and what hangs from them are that signer’s choice, not _X_’s, so the figures below leave them out. Every other statement in force below _X_ is kept by a bucket whose authorising grant is _X_’s grant or an in-force delegating grant below it. That is its own bucket when its authorising grant is in force, or its rescuer’s bucket, whose grant is in force because an endorse is never itself rescued. Each such bucket keeps at most _Q_ = 256 statements and at most _D_ = 16 delegating grants. Each in-force delegating grant below _X_ is kept by exactly one such bucket and lies deeper than that bucket’s grant. So these buckets form a tree under _X_’s bucket in which every bucket has at most _D_ children and depth strictly increases. Only grants at depth 3 or less have buckets, since a depth-4 grant’s statements would be at depth 5. A depth-1 holder therefore has at most 1 + _D_ + _D_2 = 273 buckets below it, and so at most 273 × 256 = 69,888 statements and 273 × 16 = 4,368 delegating grants in force below it. A depth-2 holder has at most 17 buckets, 4,352 statements and 272 delegating grants; a depth-3 holder one bucket, 256 statements and 16 delegating grants. All of it dies with one revoke of _X_’s grant. The authority vector carries the attacks that broke the first version of this rule, each within these figures, and a tree that reaches the figure exactly.
 
@@ -2111,11 +2254,12 @@ Four peer-scope frames (§7.1, [authority-frame.schema.json](/spec/mmp/schema/au
 ```
 
 -   —Gossip. When a statement first enters a node’s in-force set, the node relays it once, as an `authority-statement`, to its other sessions. The same holds for a statement that enters because another arrived, such as a pending statement whose chain completed. A node MUST NOT relay a statement that is not in force, except as a chain member inside an `authority-set`. A revoke is relayed as soon as it enters, since the revoke window (§6.6.12) runs until it arrives.
--   —Pending statements. A valid-looking statement whose chain is not complete (§6.6.3, rule 2) is pending. The receiver first checks its single signature, under §18.3.2, with the key its entry names, and discards it if that fails. Checking a key the node has not seen costs one scalar multiplication; the per-session limits below bound how many a session can ask for. It then MAY hold the statement in memory while it fetches the missing link from the session that delivered it. Held statements are keyed by id and signing key, so a forged copy cannot displace a genuine one. At most `AUTHORITY_PENDING_MAX` (64) are held per session. They are never persisted, relayed or counted against a quota, and they are released after `AUTHORITY_PENDING_TIMEOUT` (10,000 ms) or when the session closes. A node keeps at most one fetch in flight per (session, missing id). An anchor-level statement is never pending: the pin is always at hand.
--   —Fetching by id. `authority-fetch` with `ids` (1 to 64) asks for those statements. The responder answers with one `authority-set` carrying, in authority order, each named statement in its live set together with its chain, and every in-force revoke and endorse that names a statement in the answer, each with its own chain. Ids it does not serve are listed in `missing`, including those of statements it holds that are not in its live set (dead, over quota or pending): a dead statement is served only as a chain member of a live one. An answer carries at most `AUTHORITY_PAGE` (64) statements. A removed grant is served only with the revoke that removes it, so a fetch never hands out a removed grant as if it were in force.
+-   —Budget. A receiver keeps a budget per session for authority statements: the verification work it will do for that session over time. Every statement a session delivers spends that session’s budget, whether it was asked for (an answer to a fetch, a page of a pull) or not, and its cost is never forgiven below zero. The asker paces its own requests so that its budget for the session can absorb the worst-case answer. It starts a pull, asks for the next page, or sends a by-id fetch only when the session’s budget can pay for a full page: `AUTHORITY_PAGE` statements, each at the worst-case cost of verifying a statement under keys it has not seen. An answer within what was asked is therefore never dropped for budget. A statement nobody asked for, beyond the budget, is dropped unverified.
+-   —Pending statements. A valid-looking statement whose chain is not complete (§6.6.3, rule 2) is pending. Before it verifies anything in such a statement, the receiver checks that it has room to hold one more pending statement on that session; a statement it could not hold is dropped unverified. It then checks the statement’s single signature, under §18.3.2, with the key its entry names, and discards it if that fails. Checking a key the node has not seen costs one scalar multiplication, paid from the session’s budget. It then MAY hold the statement in memory while it fetches the missing link from the session that delivered it. Held statements are keyed by id and signing key, so a forged copy cannot displace a genuine one. At most `AUTHORITY_PENDING_MAX` (64) are held per session. They are never persisted, relayed or counted against a quota, and they are released after `AUTHORITY_PENDING_TIMEOUT` (10,000 ms) or when the session closes. A node keeps at most one fetch in flight per (session, missing id), and sends a fetch only when the session’s budget allows (Budget, above). An anchor-level statement is never pending: the pin is always at hand.
+-   —Fetching by id. `authority-fetch` with `ids` (1 to 64) asks for those statements. The responder answers with one `authority-set` carrying, in authority order, the closure of what was asked: each named statement in its live set with its chain; then every in-force revoke and endorse that names a statement already in the answer, each with its chain; and so on, the namers of namers, until a pass adds nothing or the answer reaches the page bound. Ids it does not serve are listed in `missing`, including those of statements it holds that are not in its live set (dead, over quota or pending): a dead statement is served only as a chain member of a live one. An answer carries at most `AUTHORITY_PAGE` (64) statements. A removed grant is served only with the revoke that removes it, so a fetch never hands out a removed grant as if it were in force.
 -   —Authority order is ascending depth; within a depth, revokes and endorses before grants; within each, ascending id. In that order every statement arrives after everything that can change its standing: its chain, the revokes that may remove it, and the endorses that may rescue it. A receiver can ingest a page as it arrives.
--   —Anti-entropy. A node sends `authority-digest`, its root and in-force count, when a session is confirmed. It sends it again after its in-force set changes, at most once a second per session. A node whose root differs from the peer’s pulls the peer’s live set. It sends `authority-fetch` with `after: ""`, then pages with the `next` cursor of each answer until an answer carries none. Each page holds at most 64 statements, in authority order. Every statement received is ingested as gossip is. The peer, seeing the same mismatch, pulls in the other direction. A node keeps at most one such pull in flight per session. A responder SHOULD pace its answers per session (for example 4 a second, burst 16), and MAY refuse a fresh full pull on a session within 60 s of the last. The cursor is opaque, at most 128 characters. Statements that change while a pull is running are reconciled by the next digest.
--   —Persistence. A node SHOULD persist its live set and MAY persist more. Persisted statements have no integrity of their own. On load, a node MUST re-verify every statement against the pinned anchor, chain by chain from the top, and resolve the set afresh. It MUST NOT trust a status or a root read from disk. No receipt time is kept, because none is used.
+-   —Anti-entropy. A node sends `authority-digest`, its root and in-force count, when a session is confirmed. It sends it again after its in-force set changes, at most once a second per session. A node whose root differs from the peer’s pulls the peer’s live set. It sends `authority-fetch` with `after: ""`, then pages with the `next` cursor of each answer until an answer carries none. It starts the pull, and asks for each page, only when the session’s budget can pay for a full page (Budget, above). Each page holds at most 64 statements, in authority order. Every statement received is ingested as gossip is. The peer, seeing the same mismatch, pulls in the other direction. A node keeps at most one such pull in flight per session. A responder SHOULD pace its answers per session (for example 4 a second, burst 16), and MAY refuse a fresh full pull on a session within 60 s of the last. The cursor is opaque, at most 128 characters. Statements that change while a pull is running are reconciled by the next digest. A pull that stops early, because the session closed or a page did not come, resumes from its last cursor. While the two roots still differ after a pull, a node repeats anti-entropy with backoff (for example doubling from one second up to a few minutes) rather than giving up after a fixed number of tries; a matching root, or a change to either set, resets the backoff.
+-   —Persistence. A node SHOULD persist its live set and MAY persist more. Persisted statements have no integrity of their own. On load, a node MUST re-verify every statement against the pinned anchor, chain by chain from the top, and resolve the set afresh. It MUST NOT trust a status or a root read from disk. It keeps the statements that fail under the current pin, and judges them again under the next (§6.6.1). No receipt time is kept, because none is used.
 
 #### 6.6.9 Authority follows the key
 
@@ -2142,7 +2286,7 @@ Four peer-scope frames (§7.1, [authority-frame.schema.json](/spec/mmp/schema/au
 -   —The revoke window. Until a node holds a revoke, it treats the removed grant as in force. Gossip relays a revoke as it enters; anti-entropy bounds the rest. A node learns a revoke at the latest at its next digest exchange with any peer whose in-force set includes it, and those exchanges happen when a session is confirmed and whenever a set changes. A partitioned node stays exposed until it reconnects. An environment deciding an agreed outcome (§6.6.10) SHOULD bring its in-force set up to date with a node it trusts to be current before it decides.
 -   —The threshold holders are the root. Any _t_ anchor keys together can grant, revoke and endorse anything. Compromise of _t_ keys is root compromise, recovered only by re-pinning out of band. Fewer than _t_ keys can do nothing alone; under a threshold of 1, therefore, every pinned key alone is the root.
 -   —A compromised holder acts until it is removed. Within its quota and delegate quota, and within the figures of §6.6.6, a compromised authority holder can grant, revoke and endorse below itself until a signer above removes its grant. Endorsement then keeps what should stand.
--   —Verification costs one scalar multiplication per new key. Checking that a key is of prime order (§18.3.2) costs one multiplication by _L_ for each key a node has not seen before; under a cofactorless verifier _R_ costs only a byte comparison. A flood of statements under fresh keys is bounded by the per-session pending limits and rate limits (§6.6.8), and by the quotas once chains are held.
+-   —Verification costs one scalar multiplication per new key. Checking that a key is of prime order (§18.3.2) costs one multiplication by _L_ for each key a node has not seen before; under a cofactorless verifier _R_ costs only a byte comparison. A flood of statements under fresh keys is bounded by the session’s budget, which every statement a session delivers spends, asked for or not, and which the asker paces its own requests to (§6.6.8), and by the quotas once chains are held. The pending limits bound how many statements a session can have held, not how many checks it can cause.
 -   —Grants are visible. Every node that holds the set can read who holds which role. Authority statements are not confidential.
 
 Identity vs. authority. This section withdraws _authority_. A compromised signing _key_ is a different failure: MMP does not define key rotation (§3.4). A node whose key is compromised generates a fresh identity and is granted again under its new key. Revoking the old key’s grants contains the damage in the meantime, and endorsing what the old key granted keeps what should stand.
@@ -2301,6 +2445,30 @@ core
 
 Directional ChaCha20-Poly1305 envelope with session, sequence, routing metadata and sealed record bytes.
 
+control-encrypted
+
+2
+
+After decrypt
+
+core
+
+[control-encrypted.schema.json](/spec/mmp/schema/control-encrypted.schema.json)
+
+Directional ChaCha20-Poly1305 envelope sealing one control frame; shares the session's per-direction sequence with cmb-encrypted.
+
+cmb-anchors
+
+4
+
+Sealed only
+
+core
+
+[control-frame.schema.json](/spec/mmp/schema/control-frame.schema.json)
+
+The first sealed frame a node sends on every Core Secure session it admits: the cognition keys of the sender's own records about to be replayed as context, or none (§9.4); changes no verification or admission.
+
 cmb-fetch
 
 3
@@ -2323,7 +2491,7 @@ core
 
 [cmb-fetch-result.schema.json](/spec/mmp/schema/cmb-fetch-result.schema.json)
 
-Self-verifying result for an exact content-address request.
+Correlation id with the keys returned and the keys not found; each returned record travels before it as its own cmb-encrypted frame.
 
 authority-statement
 
@@ -2372,6 +2540,30 @@ core
 [authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json)
 
 Answers an authority-fetch with statements in authority order; each is verified as gossip is, never on the session's word.
+
+mood
+
+4
+
+Sealed only
+
+core
+
+[control-frame.schema.json](/spec/mmp/schema/control-frame.schema.json)
+
+Session-scoped mood text and context, sealed in control-encrypted on a confirmed Core Secure session; attributed to the session's proven peer; never stored, relayed or remixed (§9.3).
+
+room-join
+
+2
+
+Sealed only
+
+core
+
+[room-join.schema.json](/spec/mmp/schema/room-join.schema.json)
+
+Owner-signed room-join grant presented after the handshake; admits the session to a gated room when it binds the proven key (§5.8.1).
 
 peer-info
 
@@ -2527,7 +2719,7 @@ transport
 
 [relay-frame.schema.json](/spec/mmp/schema/relay-frame.schema.json)
 
-Relay-level error.
+Relay-level error: message, with kind, code (the close that follows) and reason (§4.4.9).
 
 role-grant
 
@@ -2577,18 +2769,6 @@ legacy
 
 Legacy unsigned application message.
 
-mood
-
-legacy
-
-No
-
-legacy
-
-—
-
-Legacy mood fast path; Core Secure carries mood inside CAT7.
-
 xmesh-insight
 
 legacy
@@ -2607,11 +2787,17 @@ The registry distinguishes Core Secure wire types from retained legacy and runti
 
 The `relay-*` types are transport-scope (Section 4.4): they are exchanged between a node and a relay, never between peers, and never reach the application layer. The relay forwards peer frames as opaque payloads (Section 4.4.4) and does not originate any of the peer-scope types above.
 
+Sealed control frames. Only the frames a session protects are bound to it. A frame in clear can be read and injected by whatever sits on the path — over a relay, the relay itself and, before relay authentication proves keys, any client that can claim a nodeId there (§4.4.1, §4.4.4). In a Core Secure session that is CONNECTED (§5.3), a sender MUST therefore send every peer-scope frame other than `ping` and `pong` sealed: a record in `cmb-encrypted`, and every other frame — `peer-info`, `wake-channel`, `mood`, `cmb-fetch`, `cmb-fetch-result`, `cmb-anchors` (§9.4), `room-join` (§5.8.1), the four authority frames (`authority-statement`, `authority-digest`, `authority-fetch`, `authority-set`, §6.6.8), `error` and every negotiated extension frame — as the inner frame of a `control-encrypted` envelope (§18.2.1). A receiver MUST discard any of those frames that arrives in clear on a CONNECTED session, with one exception: it MAY read an `error` in clear, as the informational frame it always is (§7.2), but a clear error changes nothing. It closes no session, moves no sequence and changes no state, because whatever sits on the path can forge it, and a receiver cannot tell whether its sender still holds a session. The one clear error a node acts on is 1011 `UNKNOWN_SESSION`, which MAY prompt a new handshake and nothing else (§5.2.2). A sealed error is the peer’s own: one whose action is Close (§7.2) ends the session. `ping` and `pong` MAY travel in clear or sealed, and a receiver handles a sealed one as liveness, exactly as a clear one, and answers a sealed `ping` with a `pong`, in clear or sealed (§5.4). The inner frame of a `control-encrypted` envelope MUST NOT be a handshake frame (including the legacy `handshake`), `cmb`, `cmb-encrypted`, `control-encrypted`, `state-sync` or a `relay-*` frame. A sealed frame that opens advances its direction’s sequence (§18.2.1) whether or not its inner frame is then accepted; refusing the inner frame changes nothing else.
+
+Session-bound frames speak only for the session’s peer. `wake-channel`, `mood`, `cmb-fetch`, `cmb-fetch-result`, `cmb-anchors`, `room-join`, `authority-digest` and `authority-fetch` take their sender from the session: the proven nodeId of the peer whose keys opened them. A receiver MUST attribute them to that nodeId and the name the handshake bound to it (§5.2). None of them carries a sender field, and a receiver MUST NOT take a sender from inside a frame. `peer-info` describes other nodes; its entries are hints. A receiver MAY use a gossiped wake channel to try a wake, but MUST NOT let it replace a wake channel the named node registered over its own session, and MUST NOT bind an identity or a key from it (§18.3). Sealing proves who sent a frame, not that what it says about third parties is true.
+
+Author-signed frames carry their own authority. A frame that carries a signed statement takes its authority from that signature, never from the session that delivered it: a signed statement may be relayed over any session, and the session only transports it. Sealing it still keeps it from the relay, and from injection. The key it is verified against depends on what it is. An authority statement, carried in `authority-statement` or `authority-set` (§6.6.3), is verified by §6.6.9 and §18.3.2: against the subject key of the grant its `authorisedBy` names, or the pinned anchor keys, under the one verification rule, and never against a key a registry or a session binds to a nodeId. A record (§18.3.1), and an extension’s author-signed frame such as a `sym-attest-v1` attestation (§16.4), is verified against the key the receiver binds to the nodeId it names (§3.4), never against the key of the session that delivered it.
+
 Deprecated — `state-sync`. The `state-sync` frame carried a node’s hidden-state vectors (h₁, h₂). Per the hidden-state locality invariant ([Section 2.7](/spec/mmp/architecture#hidden-state-locality)), hidden state MUST NOT cross the wire. Implementations MUST NOT emit `state-sync` and SHOULD ignore it on receipt. It is retained in this registry only to reserve the type and document the deprecation; all peer influence flows through `cmb` frames evaluated by SVAF.
 
 ### 7.2 Error Frame
 
-When a node encounters a protocol-level error, it SHOULD send an `error` frame before closing the connection (if applicable). Error frames are informational — the receiving node MUST NOT treat them as commands.
+When a node encounters a protocol-level error, it SHOULD send an `error` frame before closing the connection (if applicable). Error frames are informational — the receiving node MUST NOT treat them as commands. A clear error changes nothing (§7.1). A sealed error is the session peer’s own notice: one whose Action is Close ends that session at the receiver too; any other sealed error is information.
 
 Code
 
@@ -2691,7 +2877,7 @@ REPLAY\_DETECTED
 
 Close
 
-Encrypted-frame counter repeated or moved backwards
+Encrypted-frame counter repeated or moved backwards. Retained for compatibility: a receiver now discards a replayed frame and keeps the session (§18.2.1), so a conformant node does not send it
 
 1009
 
@@ -2701,7 +2887,23 @@ Close
 
 A nodeId bound to one identity key proved a different key (§3.4); recorded and reported. The refused side does not retry automatically
 
-Codes 1xxx are connection-level (close connection). Codes 2xxx are evaluation-level (informational). Error frames MUST NOT contain sensitive information.
+1010
+
+SESSION\_CLOSED
+
+Close
+
+The sender closed the session for a reason no other code names; the reason is in message (§5.2.2)
+
+1011
+
+UNKNOWN\_SESSION
+
+None
+
+The sender holds no session for the frame it received; prompts the client to re-handshake, never closes a session (§5.2.2)
+
+Codes 1xxx are connection-level: they concern a connection or a session, and most close it; the Action column says which. Codes 2xxx are evaluation-level (informational). Error-frame codes are a registry of their own, separate from the relay’s WebSocket close codes (§4.4.9): an implementation MUST NOT send an error frame with a code in the 4000–4999 range, which those close codes occupy. Error frames MUST NOT contain sensitive information.
 
 ### 7.3 Type Naming and Extensions
 
@@ -2809,9 +3011,9 @@ Affect
 
 Emotion (valence) + energy (arousal)
 
-Each category carries signed symbolic text and content-address metadata. A receiver derives any machine-comparable embedding locally from that signed text; embedding vectors never cross the wire. The `mood` category additionally carries optional numeric `valence` (-1 to 1) and `arousal` (-1 to 1) values.
+Each category carries signed symbolic text and content-address metadata. A receiver derives any machine-comparable embedding locally from that signed text; embedding vectors never cross the wire. The `mood` category additionally carries optional numeric `valence` (-1 to 1) and `arousal` (-1 to 1) values. Neither the address nor the `mmp-sig-v2.0` signature covers them, so a Core Secure verifier drops them before admission (§8.8.4); the signed mood _text_ is what carries affect between nodes.
 
-A CMB MUST NOT be modified after creation. When an agent remixes a CMB, it MUST create a new CMB whose `metadata.lineage` contains `parents` (direct parent CMB keys) and `method` (the fusion method used). Transitive provenance is obtained by recursively resolving those signed parent records. A sender MUST NOT supply or rely on an unauthenticated transitive-closure field.
+A CMB MUST NOT be modified after creation. When an agent remixes a CMB, it MUST create a new CMB whose `metadata.lineage` contains `parents` (direct parent CMB keys) and optionally `method` (the fusion method used; carried but not signed, and dropped by a Core Secure verifier, §8.8.4). Transitive provenance is obtained by recursively resolving those signed parent records. A sender MUST NOT supply or rely on an unauthenticated transitive-closure field.
 
 ### 8.2.1 Content Address & Canonical Serialization
 
@@ -2830,13 +3032,27 @@ key = "cmb-" + first 32 hex chars of SHA-256( UTF-8( focus.text + "|" + issue.te
 
 This scheme has three known weaknesses, which the successor resolves: the `|` join is not injection-proof (a delimiter inside a category can shift a boundary), text is not Unicode-normalised (NFC vs NFD diverge), and the 128-bit truncation gives only 64-bit collision resistance.
 
-Normative record — see [§8.8 Record Model](#record). The address is `"cmb-"` + 64 lowercase hex, and the digest is a **promote-odd Merkle root over the seven per-category keys**, not a hash of a concatenated preimage. This section gives the cognition-key construction byte-exactly; §8.8 makes the construction implementable and reproducible from that text alone.
+Normative record — see [§8.8 Record Model](#record). The address is `"cmb-"` + 64 lowercase hex, and the digest is a **promote-odd Merkle root over the seven per-category keys**, not a hash of a concatenated preimage. This section gives the cognition-key construction byte-exactly; §8.8 makes the construction implementable and reproducible from that text alone. With `lp` as in §8.8.4 (the ASCII decimal UTF-8 byte length, a colon, then the bytes):
+
+```
+categoryKeyV1(name, text) = lowercaseHex( SHA-256( UTF8("mmp-cmb-v1\n") || lp(name) || lp(text) ) )
+                            // text is NFC; the result is the category's meta.key
+
+leaf(name)  = SHA-256( 0x00 || K )     // K: the 32 bytes the 64 hex characters of categoryKeyV1 encode
+pair(l, r)  = SHA-256( 0x01 || l || r )
+
+level 0     = leaf(focus), leaf(issue), leaf(intent), leaf(motivation),
+              leaf(commitment), leaf(perspective), leaf(mood)          // CAT7 order
+level n + 1 = pair the nodes of level n left to right; a last node with no partner
+              is promoted to level n + 1 unchanged
+blockKeyV2  = "cmb-" || lowercaseHex(the single node left)              // 7 → 4 → 2 → 1
+```
 
 Why this section changed in 2.0. Through 1.1.0 this page specified a flat `SHA-256` over a length-prefixed concatenation of the seven category texts plus a role tag. The implementation mints the Merkle form. **Both wear the same `cmb-` prefix**, so an implementation built to the older text computes a _different address for the same content_ and nothing signals the mismatch — it fails silently, at every record. That is the divergence 2.0 exists to close.
 
 Schemes a node may encounter. The reference implementation classifies three: `block-v2` — the Merkle form, and the _only_ form it mints — together with `root-v1` and `remix-v1`, the earlier flat derivations, retained so older records can still be classified. A conforming node MUST mint `block-v2`.
 
--   Category text MUST be Unicode NFC-normalised (UAX #15). Category order is the fixed CAT7 order. Mood contributes its **text only**; valence, arousal and all vector embeddings are excluded from the address.
+-   Category text MUST be Unicode NFC (UAX #15): an emitter normalises category text, `createdBy`, `room` and `application.schema` to NFC before minting, and a verifier refuses a record in which any of them is not NFC (§8.8.5). Category order is the fixed CAT7 order. Mood contributes its **text only**; valence, arousal and all vector embeddings are excluded from the address.
 -   Netstring length-prefixing makes each per-category preimage injection-proof with no escaping and no JSON-canonicalization dependency, so implementations in different languages agree byte-for-byte.
 -   A record binds **content only** — identical content by any author at any time yields one address. Descent is committed alongside the address in the signature (§8.8.4), never folded into it, so that collapse property is preserved.
 -   The full 256-bit width is normative: a truncated hash’s birthday bound would admit a grind-then-substitute attack against the signed key.
@@ -3218,20 +3434,72 @@ lp(applicationCommitmentV1)
 -   —`createdByNodeId` is the cryptographic author identity and MUST resolve to the verifying Ed25519 key.
 -   —`createdBy` is a signed display label and MUST NOT be used for identity resolution or routing.
 -   —`room` is explicit. The default room is the literal string `default`, not absence.
+-   —`to` is the record’s audience: `null` for a room-bound record, which enters the payload as `lp("")`, or the recipient’s nodeId for a directed one. It is the only source of the record’s binding (§9.2.2); no transport field overrides it.
 -   —New v2.0 records MUST declare `mmp-cmb-merkle-v2`; a verifier MUST NOT guess among address derivations sharing one prefix.
+
+Carried but unsigned members. Four members travel with a record and are not bound by this payload: each category’s `meta.key`, the mood category’s `valence` and `arousal`, and `metadata.lineage.method`. A relayer can change any of them in a record whose signature still verifies. The payload also leaves four forms unbound: the order of parents, the Unicode form of a signed string, an empty lineage against `null`, and an absent application against `null`. §8.8.5 step 1 makes each canonical. The four members are handled as follows:
+
+-   —`meta.key` is derived: a verifier MUST recompute it from the category name and the signed text (§8.2.1) and MUST refuse a record whose carried value differs (§8.8.5, step 4). Recomputing it makes it as trustworthy as the text it is derived from, without signing it.
+-   —`valence`, `arousal` and `lineage.method` are unsigned and carry no authenticated meaning. A Core Secure verifier MUST drop them before admission, so the record it admits, stores, delivers or serves again is the signed projection without them, and a receiver MUST NOT act on a value it was sent for them. An emitter MAY still include them; a reader under an explicitly selected Legacy Import profile may show them, labelled as unverified.
+
+Adding them to this payload would change the `mmp-sig-v2.0` bytes, and so every published v2.0 signature, assertion identity and vector. If authenticated affect values are needed, they belong in a new signature suite with its own identifier, which a verifier selects by `signatureSuite` (§8.8), so records signed under `mmp-sig-v2.0` stay verifiable. (Informative: the SYM runtime from 0.14.0 recomputes and checks `meta.key`, and drops the other three at ingress, on fetch and at egress.)
 
 ### 8.8.5 Verification order
 
-1.  Validate the negotiated frame and record schemas.
+Before step 1, and for a sealed frame again immediately after step 2, a verifier MUST check the size limits of §8.8.6 and refuse a record over any of them without doing any other work on it.
+
+1.  Validate the negotiated frame schema, and the record schema strictly, and keep only the signed projection. For a sealed frame the record schema and the projection apply to the decrypted record, immediately after step 2, as the size check does.
+    -   Every object is closed (`additionalProperties: false`): a member the schema does not define is refused. The one exception is an unrecognised category, which is dropped (§8, forward compatibility).
+    -   Every member already has its schema’s JSON type. A verifier MUST NOT coerce one: a number is not its decimal string, and an array or object is not a string.
+    -   `metadata.createdByNodeId` is a lowercase UUID, and `metadata.to` is a lowercase UUID or `null`, and nothing else (§3.1.1).
+    -   Every signed string is already NFC (UAX #15): each category’s `text`, `createdBy`, `room` and, when present, `application.schema`. A verifier refuses a value that is not, and never normalises it, as it never coerces a type. `room` is a §5.8 room identifier (`[a-z0-9._-]`, 1 to 64 characters), as the handshake room is. `createdBy` is at most 256 characters, and `lineage.parents` and each `meta.parents` hold at most 256 entries of at most 256 characters, counted in Unicode code points, as JSON Schema’s `maxLength` counts them.
+    -   The projection is canonical, so one assertion is held as the same bytes at every node: `lineage.parents` and each `meta.parents` are sorted bytewise, as they are signed (§8.8.4), a `lineage` whose `parents` is empty becomes `null`, and an absent `application` becomes `null`, each of which signs the same as the form it replaces. The [record-projection vector](/spec/mmp/conformance/v2/record-projection-v2.json) pins the projection of relayer-style variants of signed records, and each refusal.
+    -   A record that carries an embedding vector, or any member the schema does not define other than an unrecognised category name directly under `categories`, is refused (§8.8.5 step 1, §9.2.1).
+    -   The verifier then drops the carried but unsigned members (§8.8.4). Every later step, and admission, storage and delivery, sees only the projection: the members `mmp-sig-v2.0` binds, with each `meta.key` checked in step 4.
 2.  When encrypted, authenticate and decrypt the transport envelope.
 3.  Verify application encoding, length and digest.
-4.  Recompute every category key and the cognition key.
+4.  Recompute every category key and the cognition key, and reject a record whose carried `meta.key` or `metadata.key` differs.
 5.  Recompute the assertion identity and reject a carried mismatch.
 6.  Resolve the author key by `createdByNodeId` and verify the Ed25519 signature.
 7.  Verify signed room and recipient audience.
 8.  Only then expose the record for delivery and receiver-autonomous admission.
 
 Failure at any cryptographic step is a refusal, not an “unverified success.” Legacy reading belongs to a named migration profile and MUST NOT downgrade Core Secure automatically.
+
+### 8.8.6 Record size limits
+
+A record is bounded so that it always fits in one sealed frame, and so that a receiver can refuse an oversized one before doing any work on it. The limits are in bytes:
+
+Limit
+
+Bytes
+
+Measures
+
+MAX\_CATEGORY\_TEXT
+
+262,144 (256 KiB)
+
+The UTF-8 length of one category’s text, after NFC normalisation (§8.2.1)
+
+MAX\_RECORD\_TEXT
+
+524,288 (512 KiB)
+
+The sum of those lengths over the seven categories
+
+MAX\_RECORD\_BYTES
+
+737,280 (720 KiB)
+
+The length in bytes of the record’s RFC 8785 serialization (the JSON Canonicalization Scheme, which is UTF-8): the two-section logical record (§8.8.1), with `metadata.application.data` included
+
+-   —One measure. Every receiver has to reach the same verdict on the same record, so the encoded size is measured on one serialization, not on whatever bytes arrived or whatever a local encoder writes. RFC 8785 writes strings with only the escapes JSON requires, and other characters as their UTF-8 bytes; it writes numbers as ECMAScript does and sorts members. Its length is therefore the length of ECMAScript `JSON.stringify` of the record, whatever the member order. An encoder that escapes every non-ASCII character (`\uXXXX`, the default of some JSON libraries) counts a CJK character as 6 bytes instead of 3, and is not this measure. The [record-size vector](/spec/mmp/conformance/v2/record-size-v2.json) pins the measure and each limit at its boundary.
+-   —An emitter MUST NOT mint a record over any limit, and a receiver MUST refuse one. Records are never split: a node with more to say emits more records, linked by lineage.
+-   —Where the check sits. For a cleartext frame, the receiver checks before §8.8.5 step 1. For a sealed frame, it checks twice. Before decrypting, it refuses a `sealed` value longer than a `MAX_RECORD_BYTES` plaintext could produce: ⌈4 × (737,280 + 16) / 3⌉ = 983,062 base64url characters. Immediately after step 2, it checks all three limits on the decrypted record. Either way, the check comes before schema validation, key recomputation, signature verification and any encoding of text.
+-   —Why these numbers. A frame is at most 1 MiB (§4.1). A sealed frame carries its plaintext as base64url, a third larger, so a record above about 768 KiB cannot travel in one `cmb-encrypted` frame at all. 720 KiB leaves room for the envelope, the clear metadata and the relay’s routing wrapper. 256 KiB per category and 512 KiB in all bound the text a receiver must normalise, hash and encode before it decides anything. They also leave room for metadata and application bytes, whose decoded length is at most 524,288 bytes (§8.8.3). The encoded limit binds all of them together.
+
+Implementation status: the SYM runtime 0.14.0 enforces these three limits when it mints and when it receives, and refuses a sealed value longer than 983,062 characters before opening it.
 
 Machine contract. Download the [record schema](/spec/mmp/schema/cmb.schema.json), [signature vectors](/spec/mmp/conformance/v2/record-signature-v2.json) and [application vectors](/spec/mmp/conformance/v2/application-v2.json).
 
@@ -3334,7 +3602,7 @@ Inputs: the incoming category vector xf and the receiver’s local anchor set A.
 
 A is a receiver-chosen window over prior memory, not necessarily all of it. A node MAY evaluate against every block it holds, or against a bounded selection of them — the window is part of its **admission policy**, alongside the thresholds, and no sender or coordinator sets it. This matters more than it first reads: the window decides how much of what a node already knows is allowed to participate in judging an arrival, and a narrow one selected by _recency_ answers a different question from one selected by _relevance_. An implementation SHOULD make the window explicit rather than fixing it as a constant, and SHOULD state which of the two it selects by. The reference runtime uses the 5 most recent blocks by default — an informative value, carried for continuity, with no measurement claimed for it.
 
-Embedding vectors are receiver-local. xf MUST be computed by the receiver from the category’s own `text`, in the receiver’s own encoder. An emitter MUST NOT include embedding vectors in a record; a receiver MAY accept a record that carries them, but MUST re-encode from text and MUST NOT use a transmitted vector for admission. MAY here means the record is not malformed — the vector is ignored, never honoured. The reason is that a foreign vector is _unusable_, not merely untrusted: drift is measured against the receiver’s anchors in the receiver’s encoder, so a vector produced by a different encoder is not comparable — the comparison is meaningless rather than imprecise, and no signature can make a cross-encoder number mean something. Nothing in this specification requires nodes to share an encoder, and requiring it would reintroduce a center. Only the **text** is normative; the vector is the receiver’s own reading of it.
+Embedding vectors are receiver-local. xf MUST be computed by the receiver from the category’s own `text`, in the receiver’s own encoder. An emitter MUST NOT include embedding vectors in a record, and a Core Secure receiver refuses a record that carries one: the record schema is closed (§8.8.5 step 1), and a vector is a member it does not define. Under any profile a receiver MUST encode from text and MUST NOT use a transmitted vector for admission. The reason is that a foreign vector is _unusable_, not merely untrusted: drift is measured against the receiver’s anchors in the receiver’s encoder, so a vector produced by a different encoder is not comparable — the comparison is meaningless rather than imprecise, and no signature can make a cross-encoder number mean something. Nothing in this specification requires nodes to share an encoder, and requiring it would reintroduce a center. Only the **text** is normative; the vector is the receiver’s own reading of it.
 
 A conformant δf MUST satisfy:
 
@@ -3371,10 +3639,11 @@ SVAF governs two _separate_ receiver decisions that implementations MUST not con
 -   —Memory admission — whether the incoming CMB is stored (remixed with lineage) into the receiver’s local memory. This is always governed by the §9.2 band-pass decision κ.
 -   —Delivery (surfacing) — whether the CMB is surfaced to the receiver’s application/agent layer for it to act on. Whether SVAF gates delivery depends on how the CMB is _bound_.
 
-A CMB’s binding is determined by its transport routing envelope (§4.4.4) — the presence or absence of a `to` recipient:
+A CMB’s binding is determined by its authenticated recipient, `metadata.to`: the author signs it in the §8.8.4 payload, and on a sealed frame it is also bound into the AEAD associated data (§18.2.1). A receiver MUST take the binding from `metadata.to` of the record it verified (§8.8.5), and in Core Secure it MUST NOT take it from a transport routing envelope (§4.4.4) or from any other unsigned field. A Legacy Import profile (§17.3), whose records may carry no signed audience, states its own rule. The envelope is not authenticated, the relay does not forward its `to`, and under per-session encryption every sealed frame is addressed to exactly one peer, whether the record inside it is directed or room-bound — so an envelope-derived binding would make every room broadcast directed, and would let whoever writes envelopes decide what reaches an agent unfiltered.
 
--   — Room-bound (autonomous). A CMB broadcast to its authenticated room with no `to` recipient. The receiver evaluates it autonomously: SVAF gates _both_ memory admission and delivery. A room-bound CMB that SVAF rejects (or deems redundant) MUST NOT be surfaced to the application layer — this is receiver-autonomous attention, the mechanism that keeps broadcast traffic from overwhelming every node. (Mood is the sole exception — §9.3.)
--   — Peer-bound (directed). A CMB addressed to a specific recipient (`to` = this node, §4.4.4). A directed CMB is a request from one agent to another; the receiver MUST surface it to the application/agent layer _unconditionally_, regardless of the SVAF verdict. For a directed CMB, SVAF governs _memory admission only_ — the receiver MAY still decline to store a directed CMB it finds redundant or foreign, but it MUST NOT withhold delivery on those grounds. Suppressing a peer-bound CMB because SVAF scored it low is a conformance defect (the agent was spoken to and did not hear it).
+-   — Room-bound (autonomous). A CMB whose `metadata.to` is null: it is addressed to its authenticated room, however many frames carried it. The receiver evaluates it autonomously: SVAF gates _both_ memory admission and delivery. A room-bound CMB that SVAF rejects (or deems redundant) MUST NOT be surfaced to the application layer — this is receiver-autonomous attention, the mechanism that keeps broadcast traffic from overwhelming every node. (Mood is the sole exception — §9.3.)
+-   — Peer-bound (directed). A CMB addressed to a specific recipient (`metadata.to` = this node). A directed CMB is a request from one agent to another; the receiver MUST surface it to the application/agent layer _unconditionally_, regardless of the SVAF verdict. For a directed CMB, SVAF governs _memory admission only_ — the receiver MAY still decline to store a directed CMB it finds redundant or foreign, but it MUST NOT withhold delivery on those grounds. Suppressing a peer-bound CMB because SVAF scored it low is a conformance defect (the agent was spoken to and did not hear it). A receiver MAY refuse, before delivery, a directed CMB whose signed `createdTimestamp` is older than the window over which it keeps the marks it de-duplicates delivery by. That is replay protection, not withholding: a record older than the window could be one already delivered and forgotten.
+-   — Addressed to another node. A CMB whose `metadata.to` names a node other than the receiver fails the recipient-audience check of §8.8.5 (step 7). It MUST NOT be delivered or admitted. This is the case a misrouted frame or a forwarded copy of someone else’s directed record produces; the mood exception of §9.3 does not apply to it.
 
 Delivery MUST be exactly-once per received CMB: a directed CMB that SVAF _admits_ surfaces through the normal admission path; a directed CMB that SVAF _rejects_ surfaces through the unconditional-delivery rule above. Implementations MUST ensure these two paths do not both fire for the same CMB. Receive-path de-duplication (§4.2) applies equally to both bindings.
 
@@ -3382,9 +3651,11 @@ Because delivery and memory admission are decoupled, a delivered CMB SHOULD carr
 
 ### 9.3 Mood category extraction
 
-Mood is a CAT7 category within the CMB; it is also carried as its own lightweight frame type (`mood`, §7.1) for application-layer mood broadcast, distinct from `cmb` frames — in either carrier, mood delivery is not SVAF-gated memory admission. Affective state crosses all domain boundaries — this is the only category with this property.
+Mood is a CAT7 category within the CMB; it is also carried as its own lightweight frame type (`mood`, §7.1) for sharing mood with a connected peer, distinct from `cmb` frames — in either carrier, mood delivery is not SVAF-gated memory admission. Mood text is cognitive content: in Core Secure the `mood` frame travels only sealed, as the inner frame of `control-encrypted` (§7.1, §18.2.1), and is attributed to the session’s proven peer. Affective state crosses all domain boundaries — this is the only category with this property.
 
-When SVAF rejects a CMB (totalDrift > Tguarded), the receiving node MUST still inspect the `mood` category. If the mood category contains a non-neutral value (text ≠ "neutral"), the implementation MUST deliver the mood category’s `text` to the application layer for autonomous processing; `valence` and `arousal` SHOULD be included when present (they are RECOMMENDED, not required, at emission — §8.2). The full CMB is not stored, but the mood category is not lost.
+The mood frame. `{ type: "mood", mood, context, timestamp }` (§7.1, [control-frame.schema.json](/spec/mmp/schema/control-frame.schema.json)): `mood` is text of 1 to 1,024 characters, `context` is text of at most 4,096 characters or null, and `timestamp` is the sender’s, information only. The frame names no sender and carries no valence or arousal (the CMB mood category carries those). It is session-scoped: in Core Secure it travels only on a confirmed session, as the inner frame of `control-encrypted` (§18.2.1), and a mood frame in clear on a CONNECTED session is discarded (§7.1). A receiver attributes it to the session’s proven nodeId and the name the handshake bound to it (§5.2), and refuses a mood frame that carries any other member, a sender field included. It is not a record. It carries no signature, and a receiver MUST NOT store it, relay it, remix it or treat it as a CMB; it reports it with no record verification (verification null) together with the session’s facts. A receiver MAY weigh the mood against its own state, for example by drift, and surface or ignore it; neither is memory admission.
+
+When SVAF rejects a CMB (totalDrift > Tguarded), the receiving node MUST still inspect the `mood` category. If the mood category contains a non-neutral value (text ≠ "neutral"), the implementation MUST deliver the mood category’s `text` to the application layer for autonomous processing; `valence` and `arousal` SHOULD be included when present (they are RECOMMENDED, not required, at emission — §8.2). Under `mmp-sig-v2.0` they are unsigned and a Core Secure verifier drops them (§8.8.4), so in Core Secure they are not present and the signed mood text is delivered alone. The full CMB is not stored, but the mood category is not lost.
 
 This ensures that a coding agent’s observation “user exhausted after 3 hours debugging” reaches a music agent even though the focus (“debugging auth module”) and issue (“type error in handler”) categories are irrelevant to the music domain. The music agent receives only the mood: `"exhausted" (v:−0.6, a:−0.5)`.
 
@@ -3402,6 +3673,18 @@ The bootstrapping path works through two mechanisms:
 Implementations SHOULD log the distinction between peer-level rejection (aggregate drift) and content-level evaluation (SVAF per-CMB) to aid debugging. A peer may be “rejected” at Layer 4 while its individual CMBs are “aligned” at the content level — this is normal during bootstrap and indicates convergence is in progress.
 
 Cold-start convergence time depends on CMB frequency, category relevance, and mood signal strength. For agents that share domain overlap (e.g., a knowledge agent and a coding agent both in the AI domain), convergence typically occurs within 2–5 CMB exchanges. For agents with no domain overlap (e.g., a fitness agent and a legal agent), convergence may never occur — and that is correct. They couple only through mood.
+
+Replayed context. A newly admitted peer has nothing of a node’s to evaluate against until the node next emits, so a node MAY replay a few of its own recent records to it as context. Whether or not it does, the first sealed frame a node sends on a Core Secure session after it admits that session (§5.8.1) MUST be one `cmb-anchors` frame, naming the records it is about to replay, or none with `keys: []`. It then sends each named record as an ordinary `cmb-encrypted` frame on the same session. The frame also tells the peer that the node holds the session: it guarantees that a relay client hears a sealed frame from its server on every admitted session, which supersession waits for (§5.2.2).
+
+```
+{ "type": "cmb-anchors", "keys": ["cmb-<64 lowercase hex>", "..."] }
+```
+
+-   —Sender. `keys` lists the cognition keys (§8.8.2) of the records to follow, in the order they will be sent, at most 50. A node MUST replay only records it authored itself and signed under `mmp-sig-v2.0`, never another node’s (§15.7: replay is not forwarding), and only records it may seal into that session (§18.2.1: its room, and no other recipient). It SHOULD replay at most 5 records per admission and MUST NOT send a non-empty `cmb-anchors` to one peer more than once a minute; the empty list goes on every admission. The frame is a sealed control frame (§7.1), unsigned and session-bound: it speaks only for the session’s proven peer, about records that peer authored.
+-   —Receiver. It keeps the key set for that session, replacing any earlier set from it. A record that then arrives on that session with a listed key goes through §8.8.5 verification and receiver-autonomous admission (§9.2) exactly like any other record; the receiver MAY mark it as replayed context, for example to its application, so that it is not read as a fresh observation, but only when the record’s signed `createdByNodeId` is the session’s proven nodeId. A listed key on another author’s record marks nothing.
+-   —What it never does. `cmb-anchors` MUST NOT change how a record is verified, admitted, delivered or weighted, and it never causes a record to be accepted. A replayed record is the author’s original signed record: it keeps its key, its assertion identity and its signed time, and a receiver that already holds it deduplicates it (§8.8.2). It asserts nothing new, so it is not an emission under §15.7.
+
+Why a separate frame. The record envelope carries the record and nothing else (§18.2.1), and an unsigned flag beside it would be the kind of unauthenticated top-level field §8.8.3 rules out. The earlier runtime marked replayed records with an `_anchor` flag on the record frame; a session-bound list sent ahead of the records says the same thing inside the session’s protection.
 
 ### Q&A
 
@@ -4739,7 +5022,7 @@ When an agent observes something significant in its domain, it MUST:
 1.  Extract CAT7 categories from the observation (see Section 14.3.1)
 2.  Create a CMB from the structured categories
 3.  Store via `remember(fields, parents)` — persists locally, computes lineage, broadcasts to mesh
-4.  Include lineage if this CMB is a response to mesh signals
+4.  Include lineage if this CMB is a response to mesh signals. A response is the agent’s own observation: its lineage cites what prompted it and does not make it a remix (§15.7)
 
 The protocol MUST NOT extract categories from raw text. The agent IS the intelligence — category extraction is the agent’s responsibility. The protocol transports, evaluates, and stores structured CMBs. It does not interpret them.
 
@@ -4797,7 +5080,7 @@ remember(fields, parents?)
 
 CAT7 categories + optional parent CMBs
 
-Creates CMB, computes lineage from parents automatically, stores locally, broadcasts `cmb` to all peers. Pass parent CMBs when remixing (Section 15).
+Creates CMB, computes lineage from parents automatically, stores locally, broadcasts `cmb` to all peers. Pass parent CMBs whenever the record responds to or builds on the records it cites. A record the agent authors through `remember()` is its own observation, not a §15.7-gated remix, with or without parents; an automated loop that turns admitted peer records into output is a remix path whichever call it uses (§15.7).
 
 recall(query)
 
@@ -5245,7 +5528,7 @@ A human operator — typically through a control plane — MAY inject intent int
 A broadcast directive carries no privileged authority. Every receiving node MUST evaluate it through SVAF (§9.2) exactly like any peer CMB, and MAY reject a directive that does not cohere with its own cognitive state. Steering is receiver-autonomous, not command-and-control: there is no router, and no bypass. The operator adds a signal the collective weighs — it does not dictate what any agent believes. This preserves the mesh’s defining property, the absence of a central authority over cognition, _even for human input_.
 
 -   MUST The operator’s node signs the directive (§8.3) like any emission; receivers verify it. A directive is not exempt from authenticity.
--   MAY A directive be _directed_ to a single node (§4.4.4 `to`). A directed directive surfaces unconditionally per the directed-delivery contract (§9.2.2) — but that governs _delivery_, not memory admission: the receiver still gates whether it integrates.
+-   MAY A directive be _directed_ to a single node (its signed `metadata.to`, §9.2.2). A directed directive surfaces unconditionally per the directed-delivery contract (§9.2.2) — but that governs _delivery_, not memory admission: the receiver still gates whether it integrates.
 -   MUST NOT An implementation grant a broadcast directive elevated admission weight on the basis that it originates from the operator. Elevated influence, where it exists, comes only from earned authority (§6.5), evaluated identically for human and agent emissions.
 -   SHOULD The per-node admit/reject verdict on a directive be recorded in the admission audit trail — it is the honest record of _how the mesh received the steer_, node by node.
 
@@ -5256,16 +5539,21 @@ A command-and-control system would force every agent to obey the operator. A mes
 
 Within the Class 2 SYM reference-runtime documentation, Section 14.12 is a normative application profile added in 1.1.0 (the work layer); it is not a Class 1 conformance requirement. §14.11 is reserved for Commissions. Everything below composes existing machinery — no new frames, categories, or gates.
 
-### 14.12 Work Sessions as Mesh Members (Session Capture)
+### 14.12 Work Sessions as Trails in a Member (Session Capture)
 
-The mesh compounds only if real work writes into it. This profile captures a work session — a coding-agent session, a research task, any bounded piece of work — as a member whose cognition lands as a lineage-chained trail in its own store, grounded by the session’s real outcome.
+The mesh compounds only if real work writes into it. This profile captures a work session — a coding-agent session, a research task, any bounded piece of work — as a trail: a charter-rooted, lineage-chained run of records in the store of the member node that does the work, grounded by the session’s real outcome.
 
--   —Join. A session MAY join the mesh as an ordinary member node. Its `charter` CMB (§8.3.1) declares the session’s intent and is the root of its trail.
--   —Decisions. Choices made during the work are CMBs with intent `decision`, each carrying `lineage.parents` = the previous trail entry, so the trail MUST be walkable end-to-end through lineage alone. A repeated identical decision content-dedups (§8.2.1) — implementations MUST NOT treat the dedup as an error.
--   —Completion. The session emits an `artifact` CMB (parents = the trail head) and a grounding CMB ([§6.7](/spec/mmp/memory#grounding)) recording the session’s real outcome — `verified:` or `failed:`. Each emission is a fresh observation from real work, so §15.7 is satisfied per §15.7.2.
+-   —A member is a node. A member is one agent’s node (§3.2): its persistent identity, its store and its learned admission profile. A work session is not a member and has no mesh identity of its own. The node that works a session MUST author the session’s trail under its own nodeId, and MUST NOT mint a new identity for the session (§3.1.1, §3.3). Over its life a node works many sessions, one trail each.
+-   —Charter. Each session begins with a `charter` CMB (§8.3.1), authored by the working node, which declares the session’s intent and is the root of the session’s trail. Its lineage MAY cite the record that commissioned the work, such as a directive (§14.10) or a question (§12.8); the trail is still walked from its head back to its charter, and the walk stops at the first `charter` of this node it reaches, never following the charter’s own parents.
+-   —Decisions. Choices made during the work are CMBs with intent `decision`, each carrying the previous entry of the same trail in `lineage.parents`, so each trail MUST be walkable end-to-end through lineage alone, however many other trails its node holds. An entry’s trail predecessor is the one parent that is this node’s own entry on this trail; an entry MUST NOT cite two entries of its own trail, and any other parent it cites (a peer record it responds to, for example) is not part of the walk. Parent order is unsigned (§8.8.4), so the walk never relies on it.
+-   —Entries are distinct per trail. Records are content-addressed and a store keeps one record per cognition key (§8.2.1), so two entries with the same content are one record. An identical entry repeated later in a trail would turn the trail into a loop and orphan the entries between, and identical entries in two trails, or another node’s identical record, would join the trails. The working node MUST therefore make each entry’s content distinct within the node: it names the trail in every entry, the charter included, by a label unique to it, such as its own nodeId and a session number (for example in `perspective`), so that no entry can share content with another of its trails or with another node’s record, and it does not repeat an entry within a trail. A store that receives an entry it already holds keeps the one record and MUST NOT treat the de-duplication as an error; the emitting node repeated content, and SHOULD make its next entry distinct.
+-   —Completion. The session emits an `artifact` CMB (parents = the trail head) and a grounding CMB ([§6.7](/spec/mmp/memory#grounding)) recording the session’s real outcome — `verified:` or `failed:`. Each is the session’s own observation of real work, authored rather than remixed, so the §15.7 gate does not apply to it (§15.7.2).
 -   —Ordinary wire behavior. Every trail CMB is signed, broadcast, SVAF-evaluated, and remixable like any other — a session’s grounded trail can be admitted by teammates exactly as any cognition is (§6.7’s team note). Elevation of the trail into the Canon tier follows §6.7: an explicit act under validator-or-above authority, typically the operator completing the session.
+-   —Concurrent sessions. A node MAY hold several open trails, and because each entry cites only its own trail’s previous entry, trails never interleave through lineage. Sessions that run concurrently in independent agents are several agents sharing one identity, which §3.2 forbids: each such agent is its own node, with its own trails.
 
-The profile is deliberately thin: charter, decision, artifact are informative vocabulary (§8.3.1); grounding is §6.7; chaining is ordinary lineage. What the profile adds is the _discipline_ — one member per session, one walkable trail per member, one real outcome per trail.
+Why the session is a trail, not a node. A node minted for each session discards what the mesh has learned about the agent that does the work: its peers’ coupling with it restarts cold (§9.4); the roles it has earned do not follow it, because authority follows its key (§6.6.9); and every discarded identity leaves behind a key binding that nothing will use again (§3.4). Inside a persistent node the trail is exactly as walkable, and the node’s standing accumulates across its sessions instead of starting over.
+
+The profile is deliberately thin: charter, decision, artifact are informative vocabulary (§8.3.1); grounding is §6.7; chaining is ordinary lineage. What the profile adds is the _discipline_ — one node per agent, one walkable trail per session, one real outcome per trail.
 
 ### Q&A
 
@@ -5299,7 +5587,7 @@ Remix is how collective intelligence emerges. Without remix, agents forward data
 
 ### 15.1 What Remix Is
 
-When a node receives a CMB that passes [SVAF evaluation](/spec/mmp/coupling) (Layer 4), the agent MUST NOT store the original CMB. Instead, it MUST create a new CMB — the remix — that captures what the agent understood from the incoming signal, processed through its own domain intelligence.
+When a node receives a CMB that passes [SVAF evaluation](/spec/mmp/coupling) (Layer 4), the agent MUST NOT store the original CMB as its own record. Instead, it MUST create a new CMB — the remix — that captures what the agent understood from the incoming signal, processed through its own domain intelligence, unless integration collapses: when it adds no new cognition there is nothing new to create, so the agent mints nothing, and whatever it keeps of the author’s record it keeps exactly as signed ([§15.5, collapsed integration](#collapsed-integration)).
 
 The remix is not a copy. It is not a summary. It is new knowledge that exists because two domains intersected. A coding agent sends `mood: "exhausted"`. A music agent receives it, curates calm music, and creates a remix: `focus: "music curation response"`, `commitment: "now playing: Brian Eno, Ambient 1"`, `mood: "calm"`. This remix didn’t exist in either agent alone. It was born from the intersection.
 
@@ -5307,7 +5595,7 @@ The remixed CMB is immutable and stored locally; a node that has new domain data
 
 ### 15.2 Lineage
 
-Every remixed CMB carries lineage — the provenance chain that traces how this knowledge was built:
+Every remixed CMB carries lineage — the provenance chain that traces how this knowledge was built. Lineage is not limited to remixes: any record cites its direct sources this way (a response, a trail decision, a grounding), and a record that cites sources is a remix only when the node produced it by integrating them (§15.5, §15.7):
 
 Field
 
@@ -5325,7 +5613,7 @@ method
 
 string
 
-Fusion method used (e.g. `SVAF-v2`)
+Fusion method used (e.g. `SVAF-v2`). Optional, unsigned, and dropped by a Core Secure verifier (§8.8.4): informational only
 
 Transitive provenance is derived from the records, never accepted as an author-supplied shortcut. A verifier fetches each exact parent key, validates its content address and signature, and repeats. Implementations may maintain a receiver-local reverse index for efficient descendant queries, but that index is cache state rather than signed CMB content.
 
@@ -5405,15 +5693,21 @@ New CMB exists that neither A nor B could have produced alone. Graph grows.
 
 ### 15.5 Implementation
 
-Integration and emission are two operations, and the rest of §15 keeps them distinct. When SVAF admits an incoming CMB (κ ∈ \[aligned or guarded\], §9.2), the agent MUST _integrate_ it — store a remix:
+Integration and emission are two operations, and the rest of §15 keeps them distinct. When SVAF admits an incoming CMB (κ ∈ \[aligned or guarded\], §9.2), the agent MUST _integrate_ it — store a remix. Steps 1–4 apply when integration produces new cognition; when it collapses (below), only the store in step 5 applies:
 
 1.  Process the incoming signal through its domain intelligence (LLM reasoning or structured-data logic)
 2.  Create a new CMB with all 7 CAT7 categories reflecting what the agent understood and did
 3.  Set `metadata.lineage.parents` to the exact direct source keys and record the remix method
 4.  Verify every available parent by content address and signature; do not copy a sender-supplied transitive closure
-5.  Store the remix locally. The original incoming CMB MUST NOT be stored — only the remix.
+5.  Store the remix locally. The original incoming CMB MUST NOT be stored as the receiver’s own record — only a remix whose cognition key differs from the incoming key is the receiver’s record (see collapsed integration below).
 
 This local store is unconditional on admission: it is the convergence update (§9.4) by which an admitted observation shifts the receiver’s state, and it happens _whether or not_ the receiver has new domain data of its own. (A near-duplicate — κ = redundant — carries no information gain, is not an informative admission, and stores nothing; §9.2.)
+
+Collapsed integration. If the remix produced by integration has the same cognition key as the incoming record (§8.2.1 and §8.8.2: the key depends on the CAT7 text alone — vectors and mood scalars are excluded from the address — so identical cognition collapses to one key), the receiver MUST NOT mint a record. It MAY keep the incoming record; anything it stores at that cognition key MUST be the incoming record exactly as its author signed it — categories, metadata, signature and lineage unchanged — and it MAY keep its admission evidence (SVAF provenance, admission attestation) alongside it. It MUST NOT attribute that record to itself, and it MUST NOT write a lineage edge from the key to itself. Retention is optional; misattribution is not. A collapsed integration is still integration for the §9.4 convergence update; it creates no new node in the graph, because the receiver added nothing.
+
+Collapse is evaluated only after admission: a record refused as κ = redundant never reaches integration and stores nothing (§9.2). The §15.8 lineage tether does not apply to a collapsed integration — the receiver produced no remix and asserts no descent of its own; the incoming record’s lineage is its author’s. And there is no remix to emit: re-transmitting the author’s record is governed by §15.7.1 forwarding, not §15.7.
+
+Collapse is what keeps content addressing sound. Re-attributing the author’s block to the receiver would make one address carry two authorship claims, and whichever copy a peer fetched would decide who the author appeared to be; writing `parents: [K]` on a record whose own key is `K` would create an edge no lineage walk can leave. An integration that runs without an agent producing new text — a gate that fuses only category vectors and keeps the text verbatim, for example — always collapses.
 
 Whether to _emit_ — re-broadcast the stored remix to the mesh — is a separate decision, gated by §15.7: the agent MUST NOT broadcast unless it has produced new domain observations of its own. Store is unconditional; emission is selective. Conflating the two is what made “remix” read as a MUST-and-MUST-NOT contradiction.
 
@@ -5436,6 +5730,12 @@ No central model aggregates this. No orchestrator directs it. Each agent remixes
 
 This governs _emission_, not the §15.5 integration store (which is unconditional on admission). An agent MUST NOT _broadcast_ a remix CMB to the mesh unless it has new observations from its own domain that intersect with the incoming signal. Receiving a peer signal alone is not sufficient cause to emit. Silence on the wire is correct when the agent has nothing new from its domain to contribute — but the admitted signal is still stored (§15.5), so silence-on-emit is not silence-in-memory.
 
+A remix is defined by how it was produced, not by its lineage or by the call that emitted it. This gate applies to a _remix_: a record the node produced by integrating an admitted peer record (§15.5) — the output of its remix cycle, or of any automated path that turns an admitted peer record into new output, whichever API emits it. It does not apply to a record the agent authored from its own domain (§14.3) — an observation, a reply in a conversation, a decision in a trail (§14.12), an outcome (§15.7.2) — however many parents that record cites. Lineage is how any record cites its direct sources (§14.3, §15.2), and citing a parent does not make a record a remix. An implementation MUST NOT apply this gate to a record because it carries parents, and MUST NOT key the gate on a label the record carries: not an intent value (§15.7.2), and not the lineage method, which is the author’s own description. The emitting node knows which path produced a record, and applies the gate by that path. In the reference runtime, for example, the remix cycle is gated and an agent’s own `remember()` is not; but an automated loop that answers each admitted record by calling `remember()` with that record as its parent is a remix path, and is gated.
+
+Receivers cannot see the path. A receiver MUST NOT skip or refuse a record because its lineage cites the receiver’s own records: a reply to its observation, a grounding of its claim (§6.7) and a charter that cites its directive (§14.12) are ordinary records to it, evaluated like any other (§9.2). It MAY keep such a record out of its own remix cycle, so that it does not remix an echo of itself.
+
+An authored record is new domain data by construction: the agent produced it, as §15.7.2 says of outcomes. A reply that only restates its parent adds noise all the same, and that is the agent’s responsibility under §14.3.4 (“one CMB per significant signal”). An authored reply that paraphrases its parent is therefore bounded only by each receiver’s redundancy band (§9.2.1) and its budgets. The protocol does not police authored content, because the agent is the intelligence (§14.3).
+
 Three conditions MUST all be true before an agent _emits_ a remix:
 
 1.  New domain data exists — the agent has fresh observations from its own domain (new RSS items, new sensor readings, new API results, new user interactions) since its last remix
@@ -5444,7 +5744,7 @@ Three conditions MUST all be true before an agent _emits_ a remix:
 
 Without new domain data, an agent that remixes is merely paraphrasing — restating the peer’s signal in different words without adding domain-specific knowledge. This produces noise, not intelligence. In a mesh of N agents where all agents remix every accepted signal, the result is N variations of the same thought — exponential CMB growth with zero information gain.
 
-Implementations MUST track whether the agent has produced new domain observations since its last remix. The SDK SHOULD provide an API for this (e.g. `canRemix()` / `markRemixed()`). The `remember()` method sets the flag when the agent stores a domain observation. The remix cycle checks the flag before invoking the LLM. After a remix is produced, the flag resets.
+Implementations MUST track whether the agent has produced new domain observations since its last remix. The SDK SHOULD provide an API for this (e.g. `canRemix()` / `markRemixed()`). `remember()` sets the flag when the agent stores its own domain observation, with or without parents, and the agent’s own call is never gated. A remix path that emits through `remember()` checks the flag first, as the remix cycle does, and what it emits resets the flag rather than setting it. The remix cycle checks the flag before invoking the LLM. After a remix is produced, the flag resets.
 
 This ensures the remix graph grows with genuine domain intersections, not with paraphrased echoes. Each node in the DAG represents a moment where two domains actually met — not a moment where an agent had nothing to say but said it anyway.
 
@@ -5464,7 +5764,7 @@ Membrane lineage (boundary root). When a node emits across a mesh boundary on be
 
 ### 15.7.2 Outcomes Are Observations (clarifying note) New in 1.1.0
 
-Observing a real-world outcome — a test result, a shipped artifact, a prediction resolving — is a new domain observation: it carries information from the world into the mesh. An agent that has just observed an outcome therefore satisfies §15.7 and may legitimately emit a grounding remix ([§6.7](/spec/mmp/memory#grounding)) through the ordinary emission path — signed, gate-checked, lineage-expanded. This is a clarification, not a carve-out: no intent value exempts an emission from §15.7, since a content-keyed exemption would hand every emitter a free-text bypass of the anti-echo invariant. What makes the grounding remix legal is the fresh observation behind it, not the label on it.
+Observing a real-world outcome — a test result, a shipped artifact, a prediction resolving — is a new domain observation: it carries information from the world into the mesh. An agent that has just observed an outcome therefore records it as its own observation: a grounding ([§6.7](/spec/mmp/memory#grounding)) is authored, not a remix, so the §15.7 gate does not apply to it, and it is emitted through the ordinary path — signed and lineage-expanded — citing what it grounds. This is a clarification, not a carve-out: no intent value exempts an emission from §15.7, since a content-keyed exemption would hand every emitter a free-text bypass of the anti-echo invariant. What makes a grounding an authored record is the outcome the agent observed, not the label on it.
 
 ### 15.8 Lineage Tether — the Root-Anchored Drift Bound
 
@@ -5482,7 +5782,7 @@ Distinct from §15.7.1’s mint prohibition. Forwarding MUST NOT mint a fresh ro
 
 Does every admitted CMB get re-broadcast?
 
-No — but every admitted CMB is still integrated. On admission (κ ∈ \[aligned or guarded\]) the agent stores a remix (Section 15.5); that local store is the convergence update and is unconditional. Re-broadcasting the remix to the mesh is a separate decision: the agent MUST NOT emit without new domain data (Section 15.7). So without new data the agent stays silent on the wire — yet the admitted signal has already shifted its state in memory. The original incoming CMB is never stored; only the agent’s own remix is.
+No — but every admitted CMB is still integrated. On admission (κ ∈ \[aligned or guarded\]) the agent stores a remix (Section 15.5); that local store is the convergence update and is unconditional. Re-broadcasting the remix to the mesh is a separate decision: the agent MUST NOT emit without new domain data (Section 15.7). So without new data the agent stays silent on the wire — yet the admitted signal has already shifted its state in memory. The original incoming CMB is never stored as the agent’s own record; when integration adds nothing new, the agent mints nothing and may keep the author’s record, but only exactly as signed (Section 15.5, collapsed integration).
 
 What if two agents remix the same CMB?
 
@@ -5552,6 +5852,12 @@ Draft — Candidate Extension
 
 [MMP Extension: CMB Trust Horizon v0.1.0](/spec/mmp/extensions/trust-horizon) — application-layer CMB convention; no wire-format change. Validator-attested, knowledge-scoped trust-weight invariants: a grant governs how earned influence persists (never how it is minted), interpreted per receiver under operator policy, with Canon-retention separation. (Draft — a reference deployment reports an experimental implementation; independent interoperability not yet established; promotes per the extension’s own Promotion Criteria.)
 
+sym-attest-v1
+
+Draft — Candidate Extension
+
+[MMP Extension: Admission Attestations v1.0.0](/spec/mmp/extensions/sym-attest) — the wire form of the admission attestations §17.2 requires: a signed attestation per record a node gated (whole-record verdict and the seven §9.2.1 per-category verdicts), chained per attester; signed checkpoints, each chained to the one before; witness co-signatures that make a forked history detectable; and unsigned, informational node statistics. Frames `sym-attest-attestation`, `-checkpoint`, `-witness`, `-node-stats`; author-signed frames take their authority from the signer’s bound key, never the session. (Draft — the SYM runtime sends an earlier, unnegotiated form under bare type names; promotes per the extension’s own Promotion Criteria.)
+
 ### 16.5 Extension Lifecycle
 
 Extensions progress through a defined lifecycle:
@@ -5587,7 +5893,7 @@ A Core Secure participant MUST:
 -   negotiate protocol version, room and extensions without silent fallback;
 -   construct all seven CAT7 categories and the §8.2.1 cognition key;
 -   authenticate author nodeId, audience, lineage and application bytes with §8.8 `mmp-sig-v2.0`;
--   use the §18.2.1 directional HKDF/ChaChaPoly envelope and exact ordered sequence;
+-   use the §18.2.1 directional HKDF/ChaChaPoly envelopes and exact ordered sequence — `cmb-encrypted` for records and `control-encrypted` for every other post-handshake peer frame except liveness (§7.1);
 -   validate schemas, cryptographic bytes, audience and replay state before application exposure;
 -   reject Core Secure downgrade to an unsigned, one-frame-handshake or legacy-suite path.
 
@@ -5597,8 +5903,8 @@ A cognitive node satisfies every Core Secure obligation and implements receiver-
 
 -   hidden neural or model state MUST NOT cross the wire;
 -   foreign embedding vectors MUST NOT control admission; receivers encode from signed text;
--   admitted peer cognition is stored as the receiver’s remix with walkable lineage;
--   admission attestations expose the observable decision and per-category evidence;
+-   admitted peer cognition is stored as the receiver’s remix with walkable lineage, or — when integration collapses (§15.5) — nothing is minted, and any record kept at that key is the author’s, unchanged and never attributed to the receiver;
+-   admission attestations expose the observable decision and per-category evidence — to the node’s operator, and, where the node exposes them to peers, only through the registered [sym-attest-v1](/spec/mmp/extensions/sym-attest) extension (§16.4), their only wire form;
 -   directed delivery is distinct from memory admission and carries verification/admission state;
 -   private learned policies MAY vary, but MUST NOT weaken public identity, integrity, audit or receiver-autonomy invariants.
 
@@ -5630,6 +5936,14 @@ canonical bytes, length, digest and presence commitment
 
 category keys, Merkle address, assertion identity and Ed25519 signature
 
+[record-projection-v2](/spec/mmp/conformance/v2/record-projection-v2.json)
+
+the §8.8.5 canonical signed projection: unsigned members, unknown categories, parent order, empty lineage and absent application each give one projection of one assertion; a rewritten meta.key, NFD text, an uppercase nodeId, a coerced type, an embedding vector and the 256 caps are refused
+
+[record-size-v2](/spec/mmp/conformance/v2/record-size-v2.json)
+
+the §8.8.6 measures (UTF-8 text after NFC, the RFC 8785 length of the record) and each limit at its boundary and one byte over
+
 [handshake-v2](/spec/mmp/conformance/v2/handshake-v2.json)
 
 transcript, proofs, X25519 confirmation and HKDF outputs
@@ -5638,6 +5952,10 @@ transcript, proofs, X25519 confirmation and HKDF outputs
 
 directional keys, counter nonces, AAD, ciphertext and authentication failures
 
+[control-encrypted-v2](/spec/mmp/conformance/v2/control-encrypted-v2.json)
+
+sealed control frames on the handshake session: control AAD, nonces and ciphertext for mood, cmb-fetch, cmb-fetch-result and ping; domain and direction separation; an authentic envelope with a forbidden inner frame, which opens, advances the sequence and is refused (§18.2.1)
+
 [authority-v2](/spec/mmp/conformance/v2/authority-v2.json)
 
 authority statement bytes, ids, pin digests and roots; the status of every statement in every case, and the bucket that keeps it, the same in any ingest order (§6.6)
@@ -5645,6 +5963,10 @@ authority statement bytes, ids, pin digests and roots; the status of every state
 [ed25519-strict-v2](/spec/mmp/conformance/v2/ed25519-strict-v2.json)
 
 the one Ed25519 verification rule for authority statements, on the twelve “Taming the many EdDSAs” cases and the small-order, mixed-order and non-canonical cases (§18.3.2)
+
+[sym-attest-v1](/spec/mmp/conformance/v2/sym-attest-v1.json)
+
+for the Draft Candidate extension (§16.4) only: attestation, checkpoint and witness bytes and signatures, the chained checkpoint root over 1-, 2- and 3-leaf segments, the equivocation rule on three conflicting pairs, and the link checks
 
 [v2 wire examples](/spec/mmp/examples/v2/transport-cmb.json)
 
@@ -5711,9 +6033,9 @@ N/A — strictly local; MUST NOT cross the wire
 
 Mood (valence, arousal)
 
-Via cmb (CMB mood category)
+Via cmb (CMB mood category), or a mood frame (text only) sealed in control-encrypted on a Core Secure session
 
-Medium — affective state, extracted from CMBs per Section 9.3
+Medium — affective state, extracted from CMBs per Section 9.3; a mood frame is never stored, relayed or remixed
 
 Messages (direct text)
 
@@ -5797,11 +6119,54 @@ The v2.0 Core Secure suite is X25519 key agreement, HKDF-SHA256 derivation and I
 }
 ```
 
-Each direction has a distinct HKDF-derived 32-byte traffic key. The first sequence is zero; the nonce is that sequence encoded as an unsigned 96-bit big-endian integer. An ordered receiver MUST require the exact next sequence and reject replay, rollback and gaps.
+Each direction has a distinct HKDF-derived 32-byte traffic key. The first sequence is zero; the nonce is that sequence encoded as an unsigned 96-bit big-endian integer. An ordered receiver MUST require the exact next sequence and reject replay, rollback and gaps. The receive sequence advances only after the AEAD has authenticated the frame at the expected sequence: a frame that fails authentication MUST be discarded without changing any session state, so that one forged frame carrying the right sequence number cannot desynchronise the session. A sequence below the next expected value is a replay or rollback and is never processed: on every transport the receiver discards the frame and keeps the session, because a replayed frame changes nothing and closing on one would hand the session to whoever can replay frames, a relay above all. A sequence above the next expected value whose frame authenticates under its own sequence is a gap: the receiver MUST close the session, and SHOULD first send a sealed error 1010 `SESSION_CLOSED`, and the peers re-handshake (§5.2.2). A receiver MUST NOT stall waiting for missing frames, which a relay that dropped them never retransmits.
 
-The protected plaintext contains `categories` and decoded application bytes. Associated data binds protocol version, session, direction, sequence, cognition key, assertion identity, author nodeId, room and recipient. After decrypting, the receiver reconstructs the logical two-section record and follows §8.8.5 verification order. Exact outputs are published in the [E2E vector](/spec/mmp/conformance/v2/e2e-v2.json).
+The protected plaintext contains `categories` and decoded application bytes. Associated data binds protocol version, session, direction, sequence, cognition key, assertion identity, author nodeId, room and recipient. After decrypting, the receiver reconstructs the logical two-section record and follows §8.8.5 verification order. Exact outputs are published in the [E2E vector](/spec/mmp/conformance/v2/e2e-v2.json). The recipient in the associated data is `metadata.to`, entering as `lp("")` when it is null, exactly as in the signature payload (§8.8.4). An intermediary therefore cannot turn a room-bound record into a directed one, or redirect a directed one, without the frame failing to open; and the receiver takes the record’s binding from that authenticated field, never from the relay envelope that carried the frame (§9.2.2).
 
 When `metadata.application` is null, the protected plaintext MUST omit `applicationData` entirely. A present application whose decoded data is zero bytes instead carries `applicationData: ""`. The two states are distinct and MUST NOT be collapsed. Both byte shapes are pinned by the E2E vector.
+
+Sealed control frames. Every peer-scope frame of a CONNECTED Core Secure session that is not a record and not liveness travels in a `control-encrypted` envelope (§7.1). It uses the same suite, session and directional traffic keys as `cmb-encrypted`; the plaintext is the inner frame itself, and the envelope carries no clear metadata beyond what the AEAD needs:
+
+```
+{
+  "type": "control-encrypted",
+  "protocolVersion": "2.0",
+  "suite": "X25519-HKDF-SHA256-ChaCha20-Poly1305",
+  "sessionId": "<32 lowercase hex>",
+  "sequence": "7",
+  "direction": "server-to-client",
+  "sealed": "<unpadded base64url ciphertext || 16-byte tag>"
+}
+
+plaintext = UTF8(minified JSON of the inner frame, e.g. { "type": "mood", ... })
+aad       = UTF8("mmp-aead-control-v2
+") || lp("2.0") || lp(sessionId) ||
+            lp(direction) || lp(sequence)
+key, nonce: the session's traffic key for direction; sequence as for cmb-encrypted
+```
+
+-   —One sequence per direction. `cmb-encrypted` and `control-encrypted` frames sent in one direction of one session draw their sequence numbers from one counter, so that no traffic key ever seals two frames under one nonce. The receiver applies the ordering rules above to the merged stream.
+-   —Domain separation. The associated data of the two envelopes begins with different labels (`mmp-aead-aad-v2` for records, `mmp-aead-control-v2` here), so neither can be opened as the other. Exact outputs for four inner frames, and an authentic envelope whose inner frame is refused, are published in the [control-encrypted vector](/spec/mmp/conformance/v2/control-encrypted-v2.json), on the session of the handshake vector.
+-   —After opening. A frame that opens has taken its place in the sequence: the receiver advances its direction’s counter first. It then parses the plaintext as one JSON frame, under the same size limits as a frame in clear, refuses an inner type that §7.1 forbids, validates the inner frame against its schema, and handles it as if it had arrived on the session in clear — attributed to the session’s proven peer. Refusing the inner frame changes nothing else: the session stays up and the next frame is judged at the next position. The same holds for a `cmb-encrypted` frame whose record is then refused.
+-   —Records stay in their own envelope. No control frame carries a record. A record returned for a `cmb-fetch` travels as its own `cmb-encrypted` frame, so its associated data binds that record’s cognition key, assertion identity, author, room and recipient, exactly as for any record. The sealed `cmb-fetch-result` carries only the request’s correlation id and the lists of keys returned and keys not found (below).
+-   —Seal only what the session may carry. A sender MUST NOT seal into a session a record whose signed room differs from the session’s room, or whose `metadata.to` names a node other than the session’s peer, whatever path offered it: a fetch answer, a replay, a queued or forwarded frame, or the sender’s own publishing. The receiver would refuse it (§8.8.5 step 7, §5.8, §9.2.2), but only after its content was disclosed.
+
+Fetch results. A node answering a `cmb-fetch` on a Core Secure session MUST send each record it returns as its own `cmb-encrypted` frame, and then one `cmb-fetch-result` inside `control-encrypted`:
+
+```
+{
+  "type": "cmb-fetch-result",
+  "reqId": "<the request's reqId>",
+  "returned": ["cmb-<64 lowercase hex>"],
+  "missing": []
+}
+```
+
+-   —`reqId` echoes the request. Every key the request asked for appears exactly once, in `returned` or in `missing`.
+-   —The records come first. A responder MUST send every record a result lists as returned before the result itself. Both envelopes draw on the session’s one sequence per direction, so when the result arrives the requester has already received, in order, every record it lists; a listed record that did not arrive was not sent.
+-   —A responder MUST NOT return a record whose signed room differs from the session’s room, or whose `metadata.to` names a node other than the requester. It lists such a key as missing, as it does a key it does not hold or declines to disclose.
+-   —A per-session byte budget. A responder MUST bound the record bytes it holds queued for fetch answers on one session (RECOMMENDED: 4 MiB), and never less than `MAX_RECORD_BYTES` (§8.8.6), so that one maximal record can always be served. A key whose record would exceed the budget is listed in `missing`, never queued; the requester may ask for it again later. A responder SHOULD also bound the total across sessions. Without such a budget, one 900 KB record requested 150 times was measured to hold 99 MiB in the sender’s buffers.
+-   —The requester MUST recompute each returned record’s cognition key (§8.2.1) and match it to its request by that key and the responder. A content address binds the categories only, not the author or the metadata (§8.8.2), so a match proves only the categories: the requester MAY use them to check lineage (§15.8), but it MUST pass every check of §8.8.5 before it attributes the record to an author, delivers it to its application or admits it. A record whose author key it cannot resolve stays unattributed. Whether it admits the record is its own decision (§9.2).
 
 ### 18.3 Node Identity & Authentication
 
@@ -5839,7 +6204,7 @@ With _A_ and _R_ of prime order, \[8\](\[_S_\]_B_ − _R_ − \[_k_\]_A_) is the
 On a cofactorless library (informative). A cofactorless verifier that compares _R_ by its bytes, as OpenSSL does behind Node’s `crypto.verify`, needs rules 1, 2 and 4 checked first. It also needs one more check: that _R_ is not the identity’s encoding, `01` followed by 31 zero bytes. If such a library then accepts, _R_’s bytes are the canonical encoding of \[_S_\]_B_ − \[_k_\]_A_. That point lies in the prime-order subgroup, because _B_ and _A_ do, and it is not the identity, so _R_ meets rule 3. Rules 1 and 2 cost one scalar multiplication per key, and a node can cache the result per key. The reference construction (`scripts/mmp/lib.mjs`) works this way, and the verifier checks it against the rule computed directly on every edge case.
 
 -   —The verifying key of a non-anchor statement is the subject key of the grant it names in `authorisedBy`. A receiver MUST NOT take it from its key registry, from the delivering session or from the statement’s own signature entry alone.
--   —An anchor-level statement needs valid signatures by the pinned threshold of distinct anchor keys (§6.6.1). The keys are pinned out of band and never learned from the wire.
+-   —An anchor-level statement needs valid signatures by the pinned threshold of distinct anchor keys (§6.6.1). The keys are pinned out of band and never learned from the wire. No two entries of one statement share a key: a repeated key makes the statement malformed, refused as shape before any signature is checked (§6.6.3, rule 1), so one copy cannot buy repeated checks under a pinned key.
 -   —A grant whose subject key fails rule 1 or 2 is not well formed (§6.6.3). No grant can therefore name a key, such as the identity, under which anyone could sign anything.
 -   —Because the id excludes the signature, a hedged signer’s different valid signature over the same payload is the same statement (§17.4). The [authority vector](/spec/mmp/conformance/v2/authority-v2.json) pins payloads, ids and roots; its signatures are for verification only.
 
@@ -5994,6 +6359,24 @@ MAX\_FRAME\_SIZE
 
 Frames exceeding this MUST be rejected
 
+MAX\_CATEGORY\_TEXT
+
+262,144 bytes
+
+UTF-8 length of one category text after NFC (§8.8.6)
+
+MAX\_RECORD\_TEXT
+
+524,288 bytes
+
+Sum of the seven category texts (§8.8.6)
+
+MAX\_RECORD\_BYTES
+
+737,280 bytes
+
+RFC 8785 serialization of the two-section record; fits one sealed frame (§8.8.6)
+
 HANDSHAKE\_TIMEOUT
 
 10,000 ms
@@ -6017,6 +6400,30 @@ WAKE\_COOLDOWN
 300,000 ms
 
 Default per-peer wake rate limit
+
+RELAY\_MIN\_RATE
+
+25 messages/s
+
+A relay that limits a client’s message rate MUST allow at least this, sustained (§4.4.4)
+
+RELAY\_MIN\_BURST
+
+300 messages
+
+A relay that limits a client’s message rate MUST allow at least this burst (§4.4.4)
+
+RELAY\_MIN\_FANOUT
+
+64 entries
+
+A relay that lists fanout MUST accept at least this many entries in one envelope (§4.4.4)
+
+RELAY\_ENVELOPE\_ALLOWANCE
+
+4,096 bytes
+
+A client MUST accept a delivered relay message of up to MAX\_FRAME\_SIZE plus this, for the from and fromName the relay adds (§4.4.4)
 
 PEER\_RETENTION
 
@@ -6496,6 +6903,10 @@ client-hello, server-hello and client-finish
 
 Core Secure ChaCha20-Poly1305 transport envelope
 
+[control-encrypted.schema.json](/spec/mmp/schema/control-encrypted.schema.json)
+
+Core Secure sealed envelope of one control frame (§18.2.1)
+
 [cmb-frame.schema.json](/spec/mmp/schema/cmb-frame.schema.json)
 
 Explicit cleartext or migration-profile CMB frame
@@ -6512,21 +6923,29 @@ Content-address fetch response
 
 Lineage-tether attestation
 
+[room-join.schema.json](/spec/mmp/schema/room-join.schema.json)
+
+Owner-signed room-join grant, presented sealed after the handshake (§5.8.1)
+
 [authority-frame.schema.json](/spec/mmp/schema/authority-frame.schema.json)
 
 Grant, revoke and endorse statements and the authority-statement, authority-digest, authority-fetch and authority-set frames (§6.6)
 
 [control-frame.schema.json](/spec/mmp/schema/control-frame.schema.json)
 
-Peer-info, wake-channel, error, ping and pong frames
+Mood, cmb-anchors, peer-info, wake-channel, error, ping and pong frames: inner frames of control-encrypted in Core Secure
 
 [relay-frame.schema.json](/spec/mmp/schema/relay-frame.schema.json)
 
 Relay authentication, directory, presence, keepalive and error frames
 
+[sym-attest-frame.schema.json](/spec/mmp/schema/sym-attest-frame.schema.json)
+
+The sym-attest-v1 extension frames (Draft Candidate Extension, §16.4): attestation, checkpoint, witness and node statistics
+
 ### 20.2 Closed core, negotiated extensions
 
-Core objects use `additionalProperties: false`. This is deliberate: a misspelled security field or an unsigned sibling must not be mistaken for a forward-compatible extension. Extension data is carried only in its specified container and only after the extension identifier was negotiated in the authenticated handshake.
+Core objects use `additionalProperties: false`, with one exception: a record’s `categories` admits an unrecognised category, which a verifier drops (§8, §8.8.5). This is deliberate: a misspelled security field or an unsigned sibling must not be mistaken for a forward-compatible extension. Extension data is carried only in its specified container and only after the extension identifier was negotiated in the authenticated handshake.
 
 -   —A sender MUST NOT emit an unregistered core sibling such as the retired top-level `payload`.
 -   —A receiver MUST NOT silently discard an unknown member inside a signed or authenticated core object and continue as if it had understood the assertion.
@@ -7054,7 +7473,7 @@ Motivation context
 
 ## Abstract
 
-MMP §5.8 mesh rooms give cognitive meshes an isolation primitive: nodes in different rooms do not discover each other at mDNS or relay level. This is sufficient for small dev teams who already know each other’s room names and coordinate the shared secret out of band.
+MMP §5.8 mesh rooms give cognitive meshes an isolation primitive: nodes in different rooms never exchange application traffic, because the authenticated handshake refuses a room mismatch. This is sufficient for small dev teams who already know each other’s room names and coordinate the shared secret out of band.
 
 It is **not** sufficient for the UX model end users expect from chat platforms (Telegram, Discord, Slack): browse a list of rooms, see who is in them, request to join, wait for admin approval, get accepted or denied.
 
@@ -7066,7 +7485,7 @@ This extension specifies the protocol additions needed to bridge that gap: **per
 
 ### What MMP §5.8 already provides
 
--   **LAN rooms**: a node setting `SYM_ROOM=<name>` advertises on `_<name>._tcp` via Bonjour/mDNS. Nodes in different rooms never see each other at mDNS. Membership is per-process, constructor-locked.
+-   **LAN rooms**: a node setting `SYM_ROOM=<name>` advertises on `_sym._tcp` with TXT `room=<name>` (§5.1). Nodes in different rooms are mutually visible at mDNS and are separated by the authenticated handshake, not by discovery. (Per-room service types `_<name>._tcp` are the legacy mapping, kept only during migration.) Membership is per-process, constructor-locked.
 -   **Relay channels**: the `sym-relay` server maps tokens to channels (`SYM_RELAY_CHANNELS=token1:channel1,...`). Each token reaches exactly one channel; channels are isolated routes on the relay. Peers on the same token see each other’s presence (gossiped connected + offline peers with wake channels) and exchange CMBs. Peers on different tokens never see each other.
 
 The primitives above give isolation and per-token peer visibility _within_ a room. They do not give any cross-room visibility, public browsing, admin authority, or persistent state that survives all members going offline.
@@ -7552,6 +7971,279 @@ Promotion to **Published** status in the MMP §16 registry requires all of:
 3.  **Review** — maintainer and community review of this document against the exchange results.
 
 On promotion, the Status section is rewritten to **Published**, an Adopters list is added, and the §16.4 registry row is updated. No other sections change at promotion.
+
+
+
+---
+
+<!-- Extension: sym-attest-v1 (Draft — Candidate Extension) -->
+
+# MMP Extension: Admission Attestations
+
+**Signed admission evidence, chained per attester, checkpointed and witnessed**
+
+Version
+
+1.0.0
+
+Status
+
+Draft — Candidate Extension
+
+Date
+
+8 October 2026 (revised; first draft 2 October 2026)
+
+Author
+
+SYM.BOT
+
+Negotiation token
+
+`sym-attest-v1`
+
+Extends
+
+[MMP v2.0](/spec/mmp) — §9.2.1 (per-category verdicts), §16 (extension negotiation), §17.2 (admission attestations)
+
+Canonical URL
+
+[https://meshcognition.org/spec/mmp/extensions/sym-attest](https://meshcognition.org/spec/mmp/extensions/sym-attest)
+
+Licence
+
+CC BY 4.0 (specification text)
+
+* * *
+
+## 1\. Status
+
+This document is a **Draft Candidate Extension**. It defines four extension frames negotiated through MMP §16. It changes no core frame, record or construction.
+
+The SYM reference runtime already sends frames with this purpose, under the bare type names `attestation`, `checkpoint`, `witness` and `node-stats`. It sends them without negotiation and signs them with a construction that this document corrects. §9 lists the differences. This document defines the registered form, which an implementation sends only under the negotiated token. Promotion to Published follows §10.
+
+## 2\. Conventions and conformance
+
+The key words MUST, MUST NOT, SHOULD, SHOULD NOT, and MAY in this document are to be interpreted as described in RFC 2119 and RFC 8174 when, and only when, they appear in all capitals.
+
+A node claims conformance by offering `sym-attest-v1` in its handshake and following §4–§8 with every peer that selects it. `lp(x)`, `decimal(x)` and NFC are as defined in MMP §8.8.4. Every signature here is an Ed25519 signature by an identity key, verified by the one rule of MMP §18.3.2. The frames’ shapes are published as [sym-attest-frame.schema.json](/spec/mmp/schema/sym-attest-frame.schema.json): every object is closed, and a frame that fails it is discarded whole. The draft vector [sym-attest-v1.json](/spec/mmp/conformance/v2/sym-attest-v1.json) pins the four signed constructions, a chain of three checkpoints with 1-, 2- and 3-leaf segments, a witness, three conflicting pairs, two pairs that are not conflicts, and the link checks.
+
+## 3\. Abstract
+
+MMP §17.2 requires a cognitive node’s admission attestations to “expose the observable decision and per-category evidence”, and §9.2.1 fixes the per-category verdict vocabulary. MMP defines no wire form for them. This extension defines one:
+
+-   an **attestation**: one signed statement per record a node gated through SVAF, chained to the node’s previous attestation;
+-   a **checkpoint**: a signed commitment to a prefix of an attester’s chain;
+-   a **witness**: a peer’s signature over a checkpoint it holds, so an attester that signs two different histories can be caught;
+-   **node statistics**: an unsigned, informational summary.
+
+An attestation proves who evaluated which record, in which room, with what result. It never proves that the evaluation was honest. That is the same limit MMP §15.8 states for tether attestations.
+
+## 4\. Negotiation and carriage
+
+-   The extension is active between two peers only when both offer `sym-attest-v1` and the server selects it (MMP §16.3). A node MUST NOT send the frames below to a peer for which it is not active. A receiver MUST ignore them from such a peer.
+-   The frames travel only on a CONNECTED Core Secure session (MMP §5.3), and only as the inner frame of a `control-encrypted` envelope (MMP §7.1, §18.2.1).
+-   **Attestations, checkpoints and witnesses are author-signed.** Their origin is the signature of the node they name, verified against the key the receiver binds to that nodeId (MMP §3.4). It never comes from the session that delivered them. The weight they carry is that node’s authority, resolved as §6 says. They MAY be relayed to other peers for which the extension is active (§6).
+-   **Node statistics are session-bound.** They describe the session’s proven peer and no one else.
+
+Frame types follow MMP §16.2 (`<extension>-<name>`), using the extension name `sym-attest`.
+
+## 5\. Frames
+
+### 5.1 `sym-attest-attestation`
+
+```
+{
+  "type": "sym-attest-attestation",
+  "attestation": {
+    "of": "cmb-<64 lowercase hex>",
+    "assertionId": "asrt-<64 lowercase hex>",
+    "by": "<attester nodeId>",
+    "at": 1786611600000,
+    "room": "<room>",
+    "method": "<evaluation method token>",
+    "verdict": "aligned",
+    "categories": {
+      "focus": "admit", "issue": "admit", "intent": "guard", "motivation": "admit",
+      "commitment": "silent", "perspective": "admit", "mood": "admit"
+    },
+    "role": "participant",
+    "seq": 42,
+    "prev": "<64 lowercase hex>",
+    "sigAlg": "ed25519",
+    "sig": "<unpadded base64url Ed25519 signature>"
+  }
+}
+```
+
+-   `of` and `assertionId` identify the evaluated record: its cognition key and its assertion identity (MMP §8.8.2).
+-   `by` is the attester, a nodeId in its lowercase form (MMP §3.1.1). `at` is the attester’s clock in milliseconds, information only: it is unwitnessed and confers nothing (MMP §6.6.10).
+-   `room` is the attester’s authenticated room. A receiver in another room MUST discard the attestation.
+-   `method` names the evaluation method (for example `neural` or `heuristic`), as a token matching `^[a-z0-9][a-z0-9_-]{0,31}$`. It is signed.
+-   `verdict` is the whole-record decision: `aligned`, `guarded`, `redundant` or `rejected` (MMP §9.2).
+-   `categories` MUST carry exactly the seven CAT7 categories, and nothing else. Each value is one of `admit`, `guard`, `redundant`, `reject` and `silent`, exactly as MMP §9.2.1 defines them.
+-   `role` is the role the attester claimed when it evaluated, as a token matching `^[a-z0-9][a-z0-9_-]{0,63}$` (long enough for any MMP §6.6.2 role). It is a hint: a receiver resolves the attester’s authority itself (§6).
+-   `seq` counts the attester’s attestations from 1, by one each time. `prev` is `genesis` for `seq` 1. Otherwise it is the lowercase hex SHA-256 of the previous attestation’s signature bytes, so the attestations form one chain per attester.
+
+**Signature.** `sig` is the attester’s Ed25519 identity-key signature over:
+
+```
+UTF8("mmp-attest-v1\n") ||
+lp(of) || lp(assertionId) || lp(by) || lp(decimal(at)) || lp(NFC(room)) ||
+lp(method) || lp(verdict) ||
+lp(categories.focus) || lp(categories.issue) || lp(categories.intent) ||
+lp(categories.motivation) || lp(categories.commitment) ||
+lp(categories.perspective) || lp(categories.mood) ||
+lp(role) || lp(decimal(seq)) || lp(prev)
+```
+
+**Emission.** A node SHOULD emit one attestation for each record it gates through SVAF, whether it admits or refuses it, at gating time. It MUST NOT sign two attestations with the same `seq`. It MUST persist its chain head, so that a restart continues the chain rather than forking it.
+
+-   **Core Secure records only.** A node MUST NOT sign or send an attestation about a record it did not verify under Core Secure (MMP §8.8.5), such as a record held under a Legacy Import profile: that record has no verified assertion identity to name.
+-   **Never about a directed record.** An attestation discloses the attested record’s cognition key, assertion identity and verdict to every peer that receives it, which would make it a confirmation oracle on a one-to-one record. A node MUST NOT send or relay an attestation about a record whose signed `metadata.to` is not null. It MAY keep such attestations for its own operator.
+
+### 5.2 `sym-attest-checkpoint`
+
+```
+{
+  "type": "sym-attest-checkpoint",
+  "checkpoint": {
+    "by": "<attester nodeId>", "room": "<room>", "fromSeq": 41, "uptoSeq": 48,
+    "prev": "<the previous checkpoint's root>", "root": "<64 lowercase hex>",
+    "at": 1786611600000, "sigAlg": "ed25519", "sig": "<unpadded base64url>"
+  }
+}
+```
+
+**Chained, never over a suffix.** Each checkpoint covers the attester’s attestations since its previous checkpoint, `seq` `fromSeq` to `uptoSeq` in order, and is chained to the previous checkpoint’s root. So it commits to the whole history from `seq` 1, while the attester needs to hold only the attestations since its last checkpoint. `fromSeq` is 1 and `prev` is `genesis` for an attester’s first checkpoint. Otherwise `fromSeq` is the previous checkpoint’s `uptoSeq` plus 1, and `prev` is its `root`. `uptoSeq` is at least `fromSeq`. An attester MUST NOT sign a root over anything other than this: a root over the attestations it happens to still hold, after it has dropped older ones, is not a checkpoint.
+
+```
+leaf(i)     = SHA-256(UTF8("mmp-attest-leaf-v1\n") || signatureBytes(attestation i))
+node(l, r)  = SHA-256(UTF8("mmp-attest-node-v1\n") || l || r)
+
+level 0     = leaf(fromSeq), leaf(fromSeq + 1), ..., leaf(uptoSeq)
+level n + 1 = node(level n [0], level n [1]), node(level n [2], level n [3]), ...;
+              a last node with no partner is carried up unchanged, never paired with itself
+segment     = the single node left (leaf(fromSeq) itself when fromSeq = uptoSeq)
+
+root        = lowercaseHex(SHA-256(UTF8("mmp-attest-chain-v1\n") ||
+                                   lp(prev) || lp(decimal(fromSeq)) || lp(decimal(uptoSeq)) ||
+                                   lp(lowercaseHex(segment))))
+```
+
+`signatureBytes` is the 64 bytes the attestation’s `sig` encodes. This is the promote-odd pairing of MMP §8.2.1, with its own domain tags. A checkpoint is self-verifying given its segment and its signed `prev`. Proving that an old attestation is inside the latest root therefore walks back through every checkpoint since, which costs one segment per checkpoint rather than a logarithmic path; that is the price of the attester holding only its last segment. `sig` is the attester’s signature over:
+
+```
+UTF8("mmp-attest-checkpoint-v1\n") ||
+lp(by) || lp(NFC(room)) || lp(decimal(fromSeq)) || lp(decimal(uptoSeq)) ||
+lp(prev) || lp(root) || lp(decimal(at))
+```
+
+**Emission.** An attester SHOULD checkpoint every 8 attestations, and MAY checkpoint at other times. It MUST persist each attestation since its last checkpoint, with that checkpoint’s `uptoSeq` and `root`, before it sends any of them. An attester that has lost them MUST NOT sign a checkpoint over fewer: its checkpoint chain ends there, visibly, and it signs no further checkpoint: a new chain from `fromSeq` 1 would overlap the old one, and is itself equivocation (§5.2).
+
+**Link checks.** A receiver refuses a checkpoint whose `uptoSeq` is below its `fromSeq`. A receiver that holds the checkpoint whose `root` is a new checkpoint’s `prev` MUST check that the new `fromSeq` is that checkpoint’s `uptoSeq` plus 1, and discard the new one otherwise, as malformed rather than as evidence. (The schema already requires `prev` to be `genesis` exactly when `fromSeq` is 1.)
+
+**Equivocation.** Two valid checkpoints from one attester that are not the same checkpoint (the same `fromSeq`, `uptoSeq`, `prev` and `root`) prove that it signed two histories when their ranges `fromSeq`..`uptoSeq` overlap (they share a seq: `a.fromSeq ≤ b.uptoSeq` and `b.fromSeq ≤ a.uptoSeq`), or when they name the same `prev`. One chain never does either: its ranges are consecutive and each `prev` has one successor. The rule catches a fork whatever boundaries the attester cuts each history at. A receiver keeps the copy it held first as that position’s checkpoint and the other as evidence. From then on it MUST NOT witness any checkpoint of that attester, and MAY drop that attester’s further checkpoints unverified, which also bounds the evidence it keeps. It SHOULD report the conflict to its operator. It relays the conflicting copy once, as evidence, to the peers it relays checkpoints to, so that the conflict spreads as the first copy did. A witness it signed before it knew of the conflict stands: a witness states only what its signer held.
+
+### 5.3 `sym-attest-witness`
+
+```
+{
+  "type": "sym-attest-witness",
+  "witness": {
+    "attester": "<attester nodeId>", "room": "<room>", "fromSeq": 41, "uptoSeq": 48,
+    "root": "<64 lowercase hex>", "by": "<witness nodeId>", "role": "participant",
+    "at": 1786611600000, "sigAlg": "ed25519", "sig": "<unpadded base64url>"
+  }
+}
+```
+
+`sig` is the witness’s signature over:
+
+```
+UTF8("mmp-attest-witness-v1\n") ||
+lp(attester) || lp(NFC(room)) || lp(decimal(fromSeq)) || lp(decimal(uptoSeq)) || lp(root) ||
+lp(by) || lp(role) || lp(decimal(at))
+```
+
+`by` is the witness and `attester` the checkpoint’s signer, each a nodeId in its lowercase form (MMP §3.1.1). `fromSeq`, `uptoSeq` and `root` are the witnessed checkpoint’s. `role` follows the attestation’s `role` grammar.
+
+**Emission.** A node that stores a verified checkpoint from another attester SHOULD witness it, once per (`attester`, `uptoSeq`), including across restarts. It MUST NOT witness its own checkpoint, or a checkpoint it knows to be in conflict. A witness states only that its signer held this root for this range; because the root is chained, it vouches for the attester’s history up to `uptoSeq`. Because a witness carries the range, two witnesses, or a witness and a checkpoint, for one attester whose ranges overlap without being the same range and root show that either the attester signed two histories or a witness signed a range the attester never did. They are a lead, not proof. Only two attester-signed checkpoints that conflict under §5.2 are equivocation evidence and have §5.2’s consequences. A receiver that holds the attester-signed checkpoint for a witness’s range, and finds a different `root`, holds evidence against that witness, and MAY mute it.
+
+### 5.4 `sym-attest-node-stats`
+
+```
+{ "type": "sym-attest-node-stats",
+  "stats": { "emitted": 120, "admitted": 37, "memory": 157, "at": 1786611600000 } }
+```
+
+`emitted` is the number of records this node authored that it holds. `admitted` is the number of peer records it holds. `memory` is the total. The frame is unsigned and self-reported. A receiver MUST attribute it to the session’s proven peer, MUST NOT store it as evidence, and MUST NOT use it for admission, authority, trust or ranking. A node SHOULD NOT send it more often than every 15 seconds.
+
+## 6\. Receiving and relaying
+
+A receiver processes an attestation, checkpoint or witness in this order. It MUST discard the frame at the first step that fails:
+
+1.  Validate the frame against the schema (§2): closed objects, every token’s grammar and vocabulary, lowercase nodeIds, exactly seven category verdicts, and a checkpoint’s `uptoSeq` is not below its `fromSeq`.
+2.  Check that the room equals the receiver’s own authenticated room.
+3.  Check that the signature is canonical unpadded base64url of 64 bytes.
+4.  Drop a duplicate. Duplicates are judged by what a frame asserts, not by its bytes: an attestation is a duplicate when its signature is already held; a checkpoint when one is held for the same (`by`, `fromSeq`, `uptoSeq`) with the same `prev` and `root`; a witness when one is held for the same (`attester`, `fromSeq`, `uptoSeq`, `by`) with the same `root`. A later copy of a held statement (a witness signed again after a restart, for example) is a duplicate, never a new statement to store and relay.
+5.  Apply the §5.2 link check against a held checkpoint whose `root` is the new checkpoint’s `prev`: a checkpoint that does not start right after it is discarded as malformed, not kept as evidence.
+6.  Resolve the signer’s key through the receiver’s binding for that nodeId (MMP §3.4). If there is no binding, discard. A key carried by the delivering session never stands in for one.
+7.  Spend the **session gossip budget** of the session that delivered the frame: RECOMMENDED, a token bucket per session. A frame the budget cannot pay for is discarded unverified. The budget is spent _before_ verification, so that it bounds how much signature verification any one peer can make the receiver do. It is charged to the delivering session, which the session proves, never to the attester the frame names. Before verification a receiver MAY also discard, unverified, a checkpoint or witness for a position older than every position it holds from that attester, a frame from a peer it has muted for relaying invalid frames, a witness for a checkpoint it does not hold, and any further checkpoint from an attester it holds equivocation evidence against (two conflicting checkpoints that attester signed, §5.2). It MUST NOT discard as stale a conflicting copy of a position it holds: that copy is the evidence.
+8.  Verify the signature (MMP §18.3.2).
+9.  Apply the limits that need an authenticated signer, only _after_ verification: RECOMMENDED, at most 30 attestations per (`of`, `by`) per 60 s, for checkpoints at most 4 a second per attester, and a **global ceiling** on what the receiver stores and relays across all sessions. `by` is unauthenticated until the signature verifies, so a limit spent earlier would let forgeries naming an honest attester use up that attester’s allowance; and a global budget spent before verification would let one peer’s forgeries starve every other peer.
+10.  Store it, then relay it once to the other peers for which the extension is active, subject to §5.1 (never an attestation about a directed record the receiver holds). Never relay it back to the peer it came from.
+
+An attestation MUST NOT change the receiver’s own admission decision for the record it describes, nor any lifecycle or authority. Receiver autonomy is unconditional (MMP §9.2). An attestation is evidence about its attester. A receiver that weighs it at all finds the attested record by `assertionId`, not by cognition key, and weighs the attestation by the attester’s authority as MMP §6.6.9 and §6.6.10 resolve it:
+
+-   the attester’s role counts only when the key that verifies the attestation’s signature is the subject key of an in-force grant for `by` (§6.6.9);
+-   it is resolved against the receiver’s in-force set at the moment the weight is applied, not when the attestation was signed (§6.6.10);
+-   a scoped grant counts only for an attested record inside its scope, judged from that record’s own signed fields, never from anything the attestation says (§6.6.2);
+-   an issuer, and any role that confers nothing on admission, counts as a participant.
+
+A tally of attestations is not Sybil-resistant: a participant counts once, and identities cost nothing to mint. A count means no more than the authority behind each attestation in it.
+
+## 7\. Relationship to the core
+
+-   **MMP §17.2.** This is the registered wire form of the admission attestations that §17.2 requires a cognitive node to expose. A node also exposes them to its own operator. It exposes them to peers only through this extension, because a node MUST NOT require a peer to support any extension (MMP §16.1).
+-   **MMP §9.2.1** fixes the per-category vocabulary used here.
+-   **Placeholder tokens.** The MMP handshake vector offers the strings `receipts-v1`, `admission-attestation-v1` and `checkpoints-v1`. They are example offers that exercise negotiation. They are not registered, and this document does not define them.
+
+## 8\. Security considerations
+
+-   **Disclosure.** Attestations reveal which records a node evaluated and what it decided, to every peer with the extension active. `of` is a content address, which an outsider can use as a confirmation oracle (MMP §5.9). That is why no attestation about a directed record ever leaves its attester (§5.1). A node SHOULD offer the extension only in rooms where the remaining disclosure is acceptable. A gateway MUST NOT relay interior attestations across its boundary.
+-   **Equivocation.** The chain (`prev`), checkpoints and witnesses together make a forked history detectable. They do not make it impossible.
+-   **Domain separation.** The four signed constructions carry the domain tags `mmp-attest-v1`, `mmp-attest-checkpoint-v1`, `mmp-attest-witness-v1` and, inside the root, the leaf, node and chain tags. They therefore cannot be confused with each other, with the record signature (MMP §8.8.4), with the handshake proof (MMP §5.2.1), or with any other signature made with the same identity key.
+-   **Time.** `at` is attester-asserted and confers nothing. Ordering decisions use receiver-local receipt time, as MMP §6.7 does for outcomes.
+
+## 9\. Differences from the deployed runtime (informative)
+
+The SYM 0.13 runtime differs from this document in eight ways:
+
+-   It uses bare frame types (`attestation`, `checkpoint`, `witness`, `node-stats`) and no negotiation.
+-   Its attestation signature is over a `|`\-joined string with no domain tag, and `method` is not signed. Its checkpoint and witness payloads use the literal prefixes `checkpoint|` and `witness|`.
+-   It names the room field `roster` and the position field `upto_seq`.
+-   It carries no `assertionId`.
+-   Its checkpoint Merkle tree pairs an unpaired node with itself. MMP §8.2.1 rejects that construction for the cognition address, because it lets two different leaf lists share a root.
+-   Its node statistics carry a self-asserted `name` and `nodeId`.
+-   It resolves keys from a roster that can be fed by unproven hellos.
+-   It relays these frames to every peer, whether or not that peer can use them.
+
+This revision also changes what sym 0.14.0 sends under `sym-attest-v1`: checkpoints are chained (§5.2) where sym 0.14.0 commits to the attestations it still holds, and witnesses carry and sign `fromSeq`; `by` and `attester` are lowercase nodeIds where sym accepts any printable string; `role` may be 64 characters where sym accepts 32; and no attestation is sent about a directed record or a Legacy Import record, where sym 0.14.0 sends both.
+
+The bare-name frames are legacy. A Core Secure session never selects, sends or accepts them. An implementation sends them only under an explicitly selected Legacy Import profile (MMP §17.3), and sends the registered frames only under `sym-attest-v1`.
+
+## 10\. Promotion criteria
+
+The extension is promoted to Published when two conditions hold:
+
+-   a second, independent implementation interoperates with the first on all four frames;
+-   a public vector pins the four signed constructions and the checkpoint root, including an odd-length chain and an equivocating pair. The draft vector [sym-attest-v1.json](/spec/mmp/conformance/v2/sym-attest-v1.json) already does; promotion needs it to pass against a second implementation.
+
+## 11\. Change log
+
+-   **1.0.0 (2 October 2026, draft):** first registered form. The receiving order spends the delivering session’s gossip budget before verification and the per-attester limit after it, as sym 0.14.0 does.
+-   **1.0.0 (8 October 2026, revised draft, folded into MMP 2.0 update 1):** checkpoints chained to the previous root, with `fromSeq` and `prev`, never over a suffix; equivocation is overlapping ranges or a shared `prev`, with link checks, no further witnessing after a conflict, and a visible end to a chain whose segment was lost; witnesses carry and sign `fromSeq`; a public vector, `sym-attest-v1.json`; duplicates judged by content; on equivocation the conflicting copy is relayed once as evidence, and an earlier witness stands; only the session budget is spent before verification, the global ceiling after, and three more pre-verification drops are allowed; token grammars for `role` and `method`, lowercase nodeIds, a closed schema with exactly seven category verdicts; no attestations about Legacy Import or directed records; weights by MMP §6.6.9 and §6.6.10, matched by `assertionId`; frames sealed in `control-encrypted`; the §18.3.2 verification rule; tallies are not Sybil-resistant.
 
 
 

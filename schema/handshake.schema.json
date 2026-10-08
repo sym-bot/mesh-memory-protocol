@@ -16,8 +16,8 @@
       ],
       "properties": {
         "protocolVersion": { "const": "2.0" },
-        "room": { "type": "string", "minLength": 1 },
-        "nodeId": { "type": "string", "format": "uuid" },
+        "room": { "type": "string", "pattern": "^[a-z0-9._-]{1,64}$" },
+        "nodeId": { "type": "string", "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" },
         "name": { "type": "string", "minLength": 1 },
         "identityPublicKey": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },
         "e2ePublicKey": { "type": "string", "pattern": "^[A-Za-z0-9_-]{43}$" },

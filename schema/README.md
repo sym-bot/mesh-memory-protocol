@@ -16,6 +16,9 @@ or an unsigned sibling from being mistaken for a forward-compatible field.
 | `cmb-fetch.schema.json` / `cmb-fetch-result.schema.json` | §7, §15.8 |
 | `tether-attestation.schema.json` | §15.8 (`mmp-tether-v1`) |
 | `authority-frame.schema.json` | §6.6 grant, revoke and endorse statements and the `authority-statement`, `authority-digest`, `authority-fetch` and `authority-set` frames |
+| `control-encrypted.schema.json` | §7.1 sealed control-frame envelope (`control-encrypted`) |
+| `room-join.schema.json` | §5.8.1 the `room-join` frame and its owner-signed grant |
+| `sym-attest-frame.schema.json` | §16.4 sym-attest-v1 attestation, checkpoint and witness frames |
 | `control-frame.schema.json` | Peer-info, wake-channel, error, ping and pong frames |
 | `relay-frame.schema.json` | Relay authentication, directory, presence, keepalive and error frames |
 

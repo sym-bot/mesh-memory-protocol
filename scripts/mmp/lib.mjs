@@ -101,6 +101,75 @@ export function applicationCommitmentV1(application) {
   ]));
 }
 
+// §8.8.6 record size limits, in bytes.
+export const MAX_CATEGORY_TEXT = 262144;
+export const MAX_RECORD_TEXT = 524288;
+export const MAX_RECORD_BYTES = 737280;
+// The longest sealed value a MAX_RECORD_BYTES plaintext can produce, the 16-byte tag included.
+export const MAX_SEALED_RECORD_CHARS = Math.ceil((4 * (MAX_RECORD_BYTES + 16)) / 3);
+
+// RFC 8785 (JCS) for the JSON a record holds: members sorted by UTF-16 code units, strings and
+// numbers as ECMAScript writes them, no whitespace.
+export function canonicalJSON(value) {
+  if (value === null || typeof value !== 'object') {
+    if (typeof value === 'number' && !Number.isFinite(value)) throw new Error('RFC 8785 has no non-finite numbers');
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) return `[${value.map(canonicalJSON).join(',')}]`;
+  const keys = Object.keys(value).filter((k) => value[k] !== undefined).sort();
+  return `{${keys.map((k) => `${JSON.stringify(k)}:${canonicalJSON(value[k])}`).join(',')}}`;
+}
+
+// The §8.8.6 measures of one two-section record, and the limits it is over (none when it is within).
+export function recordSize(record) {
+  const categoryTextBytes = Object.fromEntries(CAT7.map((name) => {
+    const text = record?.categories?.[name]?.text;
+    return [name, typeof text === 'string' ? Buffer.byteLength(text.normalize('NFC'), 'utf8') : 0];
+  }));
+  const recordTextBytes = Object.values(categoryTextBytes).reduce((a, b) => a + b, 0);
+  const recordBytes = Buffer.byteLength(canonicalJSON(record), 'utf8');
+  const over = [];
+  if (Object.values(categoryTextBytes).some((n) => n > MAX_CATEGORY_TEXT)) over.push('MAX_CATEGORY_TEXT');
+  if (recordTextBytes > MAX_RECORD_TEXT) over.push('MAX_RECORD_TEXT');
+  if (recordBytes > MAX_RECORD_BYTES) over.push('MAX_RECORD_BYTES');
+  return { categoryTextBytes, recordTextBytes, recordBytes, over };
+}
+
+// §8.8.5 step 1 after the record schema (closed objects, types, lowercase nodeIds, caps): the NFC
+// rule and the canonical signed projection, then the step 4 key checks. Returns the projection, or
+// the rule that refused the record. The projection keeps only what mmp-sig-v2.0 binds, so every
+// node holds one assertion as the same RFC 8785 bytes.
+export function recordProjectionV2(record) {
+  const isNFC = (v) => typeof v === 'string' && v === v.normalize('NFC');
+  for (const name of CAT7) if (!isNFC(record.categories[name].text)) return { ok: false, refusedBy: 'not NFC', member: `categories.${name}.text` };
+  for (const member of ['createdBy', 'room']) if (!isNFC(record.metadata[member])) return { ok: false, refusedBy: 'not NFC', member: `metadata.${member}` };
+  if (record.metadata.application != null && !isNFC(record.metadata.application.schema)) return { ok: false, refusedBy: 'not NFC', member: 'metadata.application.schema' };
+  const categories = Object.fromEntries(CAT7.map((name) => {
+    const c = record.categories[name];
+    return [name, { text: c.text, meta: { key: c.meta.key, parents: sortedBytewise(c.meta.parents) } }];
+  }));
+  const m = record.metadata;
+  const parents = sortedBytewise(m.lineage?.parents ?? []);
+  const metadata = {
+    key: m.key,
+    addressScheme: m.addressScheme,
+    assertionId: m.assertionId,
+    signatureSuite: m.signatureSuite,
+    createdByNodeId: m.createdByNodeId,
+    createdBy: m.createdBy,
+    createdTimestamp: m.createdTimestamp,
+    room: m.room,
+    to: m.to,
+    lineage: parents.length === 0 ? null : { parents },
+    application: m.application ?? null,
+    sigAlg: m.sigAlg,
+    sig: m.sig,
+  };
+  for (const name of CAT7) if (categoryKeyV1(name, categories[name].text) !== categories[name].meta.key) return { ok: false, refusedBy: 'meta.key', member: `categories.${name}.meta.key` };
+  if (blockKeyV2(categories) !== metadata.key) return { ok: false, refusedBy: 'metadata.key', member: 'metadata.key' };
+  return { ok: true, projection: { categories, metadata } };
+}
+
 export function signingPayloadV2_0(record) {
   const m = record?.metadata;
   if (!m) throw new Error('metadata is required');
@@ -206,6 +275,26 @@ export function aeadAADV2({ sessionId, direction, sequence, metadata }) {
     lp(String(metadata.room).normalize('NFC')),
     lp(metadata.to ?? ''),
   ]);
+}
+
+export const CONTROL_AAD_DOMAIN = 'mmp-aead-control-v2\n';
+
+// §18.2.1 control-encrypted: the record AAD's session prefix under its own domain, with no record fields.
+export function controlAADV2({ sessionId, direction, sequence }) {
+  if (direction !== 'client-to-server' && direction !== 'server-to-client') throw new Error('invalid direction');
+  return Buffer.concat([
+    Buffer.from(CONTROL_AAD_DOMAIN, 'utf8'),
+    lp(PROTOCOL_VERSION),
+    lp(sessionId),
+    lp(direction),
+    lp(String(sequence)),
+  ]);
+}
+
+// §7.1: what a control-encrypted envelope never carries. ping and pong may travel either way.
+const CONTROL_NEVER_INNER = new Set(['client-hello', 'server-hello', 'client-finish', 'handshake', 'cmb', 'cmb-encrypted', 'control-encrypted', 'state-sync']);
+export function controlInnerForbidden(type) {
+  return typeof type !== 'string' || CONTROL_NEVER_INNER.has(type) || type.startsWith('relay-');
 }
 
 export function encryptChaChaPoly({ key, sequence, plaintext, aad }) {
@@ -517,6 +606,9 @@ export function authorityWellFormed(s) {
   for (const e of s.sigs) {
     if (!e || typeof e !== 'object' || Object.keys(e).length !== 2 || !canonicalB64u(e.key, B64U_KEY, 32) || !canonicalB64u(e.sig, B64U_SIG, 64)) return false;
   }
+  // Each entry's key is unique within the statement: a repeated key is a shape error, found here,
+  // before any signature is checked, so a copy cannot buy repeated checks under one pinned key.
+  if (new Set(s.sigs.map((e) => e.key)).size !== s.sigs.length) return false;
   if (s.kind === 'grant') {
     const sub = s.subject;
     if (!sub || typeof sub !== 'object' || Object.keys(sub).length !== 2 || typeof sub.nodeId !== 'string' || !NODE_ID.test(sub.nodeId)) return false;
@@ -758,4 +850,101 @@ export function lifecycleAuthority(entries, inScope = () => false) {
 export function authorityOrder(entries) {
   const rank = (s) => (s.kind === 'grant' ? 1 : 0);
   return [...entries].sort((a, b) => a.depth - b.depth || rank(a.s) - rank(b.s) || Buffer.compare(Buffer.from(a.id), Buffer.from(b.id)));
+}
+
+// sym-attest-v1 (Draft Candidate Extension, /spec/mmp/extensions/sym-attest): the four signed
+// constructions and the chained checkpoint root.
+const ATTEST_DOMAIN = {
+  attestation: 'mmp-attest-v1\n',
+  checkpoint: 'mmp-attest-checkpoint-v1\n',
+  witness: 'mmp-attest-witness-v1\n',
+  leaf: 'mmp-attest-leaf-v1\n',
+  node: 'mmp-attest-node-v1\n',
+  chain: 'mmp-attest-chain-v1\n',
+};
+const nfcText = (v) => String(v).normalize('NFC');
+
+export function attestationPayloadV1(a) {
+  return Buffer.concat([
+    Buffer.from(ATTEST_DOMAIN.attestation, 'utf8'),
+    lp(a.of), lp(a.assertionId), lp(a.by), lp(decimal(a.at)), lp(nfcText(a.room)),
+    lp(a.method), lp(a.verdict),
+    ...CAT7.map((name) => lp(a.categories[name])),
+    lp(a.role), lp(decimal(a.seq)), lp(a.prev),
+  ]);
+}
+
+// prev of the next attestation: the lowercase hex SHA-256 of this one's signature bytes.
+export function attestChainLink(sigBase64url) {
+  return sha256Hex(Buffer.from(sigBase64url, 'base64url'));
+}
+
+// The promote-odd Merkle root over a segment's signature bytes, in seq order.
+export function attestSegmentRoot(sigsBase64url) {
+  if (sigsBase64url.length === 0) throw new Error('a segment holds at least one attestation');
+  let level = sigsBase64url.map((s) => sha256(Buffer.concat([Buffer.from(ATTEST_DOMAIN.leaf, 'utf8'), Buffer.from(s, 'base64url')])));
+  while (level.length > 1) {
+    const next = [];
+    for (let i = 0; i < level.length; i += 2) {
+      next.push(i + 1 < level.length ? sha256(Buffer.concat([Buffer.from(ATTEST_DOMAIN.node, 'utf8'), level[i], level[i + 1]])) : level[i]);
+    }
+    level = next;
+  }
+  return level[0].toString('hex');
+}
+
+export function attestCheckpointRoot({ prev, fromSeq, uptoSeq, segmentRoot }) {
+  return sha256Hex(Buffer.concat([
+    Buffer.from(ATTEST_DOMAIN.chain, 'utf8'),
+    lp(prev), lp(decimal(fromSeq)), lp(decimal(uptoSeq)), lp(segmentRoot),
+  ]));
+}
+
+export function attestCheckpointPayloadV1(cp) {
+  return Buffer.concat([
+    Buffer.from(ATTEST_DOMAIN.checkpoint, 'utf8'),
+    lp(cp.by), lp(nfcText(cp.room)), lp(decimal(cp.fromSeq)), lp(decimal(cp.uptoSeq)),
+    lp(cp.prev), lp(cp.root), lp(decimal(cp.at)),
+  ]);
+}
+
+export function attestWitnessPayloadV1(w) {
+  return Buffer.concat([
+    Buffer.from(ATTEST_DOMAIN.witness, 'utf8'),
+    lp(w.attester), lp(nfcText(w.room)), lp(decimal(w.fromSeq)), lp(decimal(w.uptoSeq)), lp(w.root),
+    lp(w.by), lp(w.role), lp(decimal(w.at)),
+  ]);
+}
+
+// §5.2: the same checkpoint is not a conflict; otherwise overlapping ranges, or one prev with two
+// children, prove two histories. Returns the reasons, empty when the two can lie on one chain.
+export function attestCheckpointConflict(a, b) {
+  if (a.by !== b.by) return [];
+  const same = a.fromSeq === b.fromSeq && a.uptoSeq === b.uptoSeq && a.prev === b.prev && a.root === b.root;
+  if (same) return [];
+  const reasons = [];
+  if (a.fromSeq <= b.uptoSeq && b.fromSeq <= a.uptoSeq) reasons.push('overlapping ranges');
+  if (a.prev === b.prev) reasons.push('same prev');
+  return reasons;
+}
+
+// §5.2 link checks: the range is not reversed, and when the checkpoint named by prev is held, the new
+// one starts right after it. A failure is malformed, not evidence.
+export function attestCheckpointLinkValid(cp, prevCheckpoint = null) {
+  if (cp.uptoSeq < cp.fromSeq) return false;
+  if ((cp.fromSeq === 1) !== (cp.prev === 'genesis')) return false;
+  if (prevCheckpoint && prevCheckpoint.root === cp.prev && cp.fromSeq !== prevCheckpoint.uptoSeq + 1) return false;
+  return true;
+}
+
+// §5.3: what a witness can show. A witness is not signed by the attester, so it is never equivocation
+// evidence against the attester (only two conflicting attester-signed checkpoints are, §5.2). One that
+// overlaps a held checkpoint without matching it is a lead; one that names the range of a held
+// attester-signed checkpoint with a different root is evidence against the witness.
+export function attestWitnessAssessment(w, heldCheckpoints) {
+  const mine = heldCheckpoints.filter((cp) => cp.by === w.attester);
+  const overlapsUnlike = mine.some((cp) => cp.fromSeq <= w.uptoSeq && w.fromSeq <= cp.uptoSeq
+    && !(cp.fromSeq === w.fromSeq && cp.uptoSeq === w.uptoSeq && cp.root === w.root));
+  const againstWitness = mine.some((cp) => cp.fromSeq === w.fromSeq && cp.uptoSeq === w.uptoSeq && cp.root !== w.root);
+  return { equivocationEvidence: false, lead: overlapsUnlike, evidenceAgainstWitness: againstWitness };
 }

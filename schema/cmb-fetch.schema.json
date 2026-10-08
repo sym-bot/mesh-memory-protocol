@@ -23,10 +23,6 @@
       "pattern": "^cmb-[0-9a-f]{64}$",
       "description": "Content-address key requested (\u00a78.2.1)"
     },
-    "from": {
-      "type": "string",
-      "format": "uuid"
-    },
     "timestamp": {
       "type": "integer",
       "minimum": 0

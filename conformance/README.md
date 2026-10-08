@@ -12,6 +12,10 @@ exactly.
 | `v2/e2e-v2.json` | Security | IETF ChaCha20-Poly1305 envelopes, directional counter nonces and transcript-bound AAD |
 | `v2/authority-v2.json` | §6.6, §19.1 | Authority by reference: grant, revoke and endorse statement bytes and ids, resolution of each case in every order and with forged copies, the quota and delegation bound, scope narrowing, rescue, and the authority root |
 | `v2/ed25519-strict-v2.json` | §18.3.2 | The one Ed25519 verification rule: cofactorless, A and R canonical and of prime order, S < L, with the speccheck edge cases and small-order and mixed-order keys and points |
+| `v2/control-encrypted-v2.json` | §7.1, §18.2.1 | Sealed control frames on the handshake-v2 session: AAD, nonce, key and envelope bytes, the shared counter, and a refused inner frame that still advances the sequence |
+| `v2/record-size-v2.json` | §8.8.6 | Record size limits measured as the RFC 8785 serialization length, including a case whose verdict differs under an escaping encoder |
+| `v2/record-projection-v2.json` | §8.8.4, §8.8.5 | The canonical signed projection: sorted parents, NFC or refused, empty lineage and absent application as null, code-point caps, §5.8 rooms |
+| `v2/sym-attest-v1.json` | §16.4 (sym-attest-v1) | Attestation bytes and signatures, chained checkpoints over 1-, 2- and 3-leaf segments, a witness, equivocation pairs, link checks and witness leads |
 | `svaf-baseline.json` | §9.2, §9.2.1 | Reference-baseline admission math on fixed field vectors: nearest-anchor redundancy basis (both witness directions), aligned/guarded thresholds, the evaluation-time flip window, cold-start bootstrap |
 | `tether-v1.json` | §15.8 | Lineage-tether drift checks (faithful / severed / unverifiable / α-weighted), `mmp-tether-v1` attestation payload bytes + signature, kernel comparability |
 
