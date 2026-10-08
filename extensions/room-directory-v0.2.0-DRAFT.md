@@ -38,7 +38,8 @@ description: 'Persistent room metadata, admin approval, and directory enumeratio
 ## Abstract
 
 MMP §5.8 mesh rooms give cognitive meshes an isolation primitive: nodes in
-different rooms do not discover each other at mDNS or relay level. This is
+different rooms never exchange application traffic, because the authenticated
+handshake refuses a room mismatch. This is
 sufficient for small dev teams who already know each other's room names
 and coordinate the shared secret out of band.
 
@@ -61,8 +62,11 @@ the minimal primitive.
 ### What MMP §5.8 already provides
 
 - **LAN rooms**: a node setting `SYM_ROOM=<name>` advertises on
-  `_<name>._tcp` via Bonjour/mDNS. Nodes in different rooms never see
-  each other at mDNS. Membership is per-process, constructor-locked.
+  `_sym._tcp` with TXT `room=<name>` (§5.1). Nodes in different rooms are
+  mutually visible at mDNS and are separated by the authenticated handshake,
+  not by discovery. (Per-room service types `_<name>._tcp` are the legacy
+  mapping, kept only during migration.) Membership is per-process,
+  constructor-locked.
 - **Relay channels**: the `sym-relay` server maps tokens to channels
   (`SYM_RELAY_CHANNELS=token1:channel1,...`). Each token reaches exactly
   one channel; channels are isolated routes on the relay. Peers on the

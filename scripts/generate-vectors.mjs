@@ -13,6 +13,23 @@ import {
   blockKeyV2,
   categoryKeyV1,
   categoryParentsCommitment,
+  controlAADV2,
+  MAX_RECORD_BYTES,
+  MAX_RECORD_TEXT,
+  MAX_CATEGORY_TEXT,
+  MAX_SEALED_RECORD_CHARS,
+  recordSize,
+  canonicalJSON,
+  recordProjectionV2,
+  attestationPayloadV1,
+  attestChainLink,
+  attestSegmentRoot,
+  attestCheckpointRoot,
+  attestCheckpointPayloadV1,
+  attestWitnessPayloadV1,
+  attestCheckpointConflict,
+  attestCheckpointLinkValid,
+  attestWitnessAssessment,
   ed25519PrivateKey,
   encryptChaChaPoly,
   handshakeProofV2,
@@ -342,6 +359,7 @@ write('e2e-v2.json', {
   }),
   noApplication: {
     rule: 'metadata.application=null means applicationData is omitted; applicationData="" is reserved for a present zero-byte application',
+    note: 'An alternative to cases[0], not a further frame of the same session: it reuses client-to-server sequence 0 under the same traffic key, which a live session never does (no key seals two frames under one nonce, §18.2.1).',
     protectedPlaintextUtf8: noApplicationPlaintext.toString('utf8'),
     metadata: noApplicationRecord.metadata,
     case: {
@@ -353,6 +371,291 @@ write('e2e-v2.json', {
       sealedBase64url: b64u(noApplicationSealed),
     },
   },
+});
+
+// §18.2.1 control-encrypted: the session of handshake-v2, one envelope per case. The positions continue
+// e2e-v2's counter on that session, since cmb-encrypted and control-encrypted share one per direction.
+const sealControl = ({ direction, sequence, plaintext }) => {
+  const key = direction === 'client-to-server' ? clientToServerKey : serverToClientKey;
+  const aad = controlAADV2({ sessionId, direction, sequence });
+  const sealed = encryptChaChaPoly({ key, sequence, plaintext, aad });
+  return {
+    direction,
+    sequence,
+    trafficKeyHex: hex(key),
+    nonceHex: BigInt(sequence).toString(16).padStart(24, '0'),
+    aadHex: hex(aad),
+    plaintextUtf8: plaintext.toString('utf8'),
+    frame: {
+      type: 'control-encrypted',
+      protocolVersion: PROTOCOL_VERSION,
+      suite: 'X25519-HKDF-SHA256-ChaCha20-Poly1305',
+      sessionId,
+      sequence,
+      direction,
+      sealed: b64u(sealed),
+    },
+  };
+};
+const controlInner = [
+  { direction: 'server-to-client', sequence: '1', inner: { type: 'mood', mood: 'calm, focused', context: null, timestamp: 1786611600000 } },
+  { direction: 'client-to-server', sequence: '2', inner: { type: 'cmb-fetch', reqId: 'fetch-0001', key: `cmb-${'ab'.repeat(32)}` } },
+  { direction: 'server-to-client', sequence: '2', inner: { type: 'cmb-fetch-result', reqId: 'fetch-0001', returned: [], missing: [`cmb-${'ab'.repeat(32)}`] } },
+  { direction: 'client-to-server', sequence: '3', inner: { type: 'ping' } },
+];
+write('control-encrypted-v2.json', {
+  protocolVersion: PROTOCOL_VERSION,
+  suite: 'X25519-HKDF-SHA256-ChaCha20-Poly1305',
+  sessionId,
+  keysFrom: 'handshake-v2.json expected.clientToServerKeyHex and expected.serverToClientKeyHex',
+  positions: 'These positions continue e2e-v2.json cases on the same session, because cmb-encrypted and control-encrypted share one counter per direction: client-to-server 2 and 3 follow e2e-v2 sequences 0 and 1, and server-to-client 1 to 3 follow its 0. No traffic key seals two frames under one nonce.',
+  aadRule: 'UTF8("mmp-aead-control-v2\\n") || lp("2.0") || lp(sessionId) || lp(direction) || lp(sequence); plaintext is the minified JSON of the inner frame',
+  cases: controlInner.map(({ direction, sequence, inner }) => ({
+    ...sealControl({ direction, sequence, plaintext: Buffer.from(JSON.stringify(inner), 'utf8') }),
+    inner,
+  })),
+  innerRefused: {
+    rule: 'An authentic envelope whose inner frame §7.1 forbids: it opens, so the receiver advances to the next sequence, refuses the inner frame, and changes nothing else (§18.2.1).',
+    ...sealControl({ direction: 'server-to-client', sequence: '3', plaintext: Buffer.from(JSON.stringify({ type: 'cmb' }), 'utf8') }),
+    expected: { opens: true, innerAccepted: false, nextSequence: '4', sessionOpen: true },
+  },
+});
+
+// §8.8.6 record-size vector: each case is the base record with the named category texts replaced
+// (unit repeated count times) and, optionally, an application of byteLength bytes of 0x61. The
+// cases pin the measure, not a signature: a case's key and signature are the base record's.
+const sizeBase = structuredClone(signatureCases[0].record);
+const expandSizeCase = ({ fill = {}, applicationBytes: appBytes = null }) => {
+  const r = structuredClone(sizeBase);
+  for (const [name, { unit, count }] of Object.entries(fill)) r.categories[name].text = unit.repeat(count);
+  if (appBytes != null) {
+    const data = Buffer.alloc(appBytes, 0x61);
+    r.metadata.application = { mediaType: 'application/octet-stream', schema: 'https://meshcognition.org/schema/size-fixture-v1.json', encoding: 'base64url', byteLength: data.length, digest: `sha256-${hex(sha256(data))}`, data: b64u(data) };
+  }
+  return r;
+};
+const otherText = (names) => CAT7.filter((n) => !names.includes(n)).reduce((a, n) => a + Buffer.byteLength(sizeBase.categories[n].text, 'utf8'), 0);
+const fullText = MAX_RECORD_TEXT - MAX_CATEGORY_TEXT - otherText(['focus', 'issue']);
+// Solve for the focus length that puts the encoded record at exactly MAX_RECORD_BYTES.
+const sizeApp = 480000;
+const focusForBytes = MAX_RECORD_BYTES - recordSize(expandSizeCase({ fill: { focus: { unit: 'a', count: 0 } }, applicationBytes: sizeApp })).recordBytes;
+// Two CJK categories that together fill MAX_RECORD_TEXT as far as 3-byte characters allow.
+const wideEach = Math.floor((MAX_RECORD_TEXT - otherText(['focus', 'issue'])) / 6);
+const sizeCases = [
+  { label: 'a published record, measured', spec: {} },
+  { label: 'CJK text is measured as its UTF-8 bytes (3 a character), never as \\u escapes (6)', spec: { fill: { focus: { unit: '認知', count: 1000 } } } },
+  { label: 'one category at MAX_CATEGORY_TEXT', spec: { fill: { focus: { unit: 'a', count: MAX_CATEGORY_TEXT } } } },
+  { label: 'one category a byte over MAX_CATEGORY_TEXT', spec: { fill: { focus: { unit: 'a', count: MAX_CATEGORY_TEXT + 1 } } } },
+  { label: 'three-byte characters: within the schema maxLength, over MAX_CATEGORY_TEXT', spec: { fill: { focus: { unit: '漢', count: Math.ceil((MAX_CATEGORY_TEXT + 1) / 3) } } } },
+  { label: 'the seven texts at MAX_RECORD_TEXT', spec: { fill: { focus: { unit: 'a', count: MAX_CATEGORY_TEXT }, issue: { unit: 'b', count: fullText } } } },
+  { label: 'the seven texts a byte over MAX_RECORD_TEXT', spec: { fill: { focus: { unit: 'a', count: MAX_CATEGORY_TEXT }, issue: { unit: 'b', count: fullText + 1 } } } },
+  { label: 'CJK text within every limit, which an encoder that escapes non-ASCII would measure over MAX_RECORD_BYTES', spec: { fill: { focus: { unit: '漢', count: wideEach }, issue: { unit: '漢', count: wideEach } } } },
+  { label: 'the encoded record at MAX_RECORD_BYTES', spec: { fill: { focus: { unit: 'a', count: focusForBytes } }, applicationBytes: sizeApp } },
+  { label: 'the encoded record a byte over MAX_RECORD_BYTES, every text within', spec: { fill: { focus: { unit: 'a', count: focusForBytes + 1 } }, applicationBytes: sizeApp } },
+];
+write('record-size-v2.json', {
+  protocolVersion: PROTOCOL_VERSION,
+  measure: 'MAX_CATEGORY_TEXT and MAX_RECORD_TEXT count the UTF-8 bytes of each category text after NFC; MAX_RECORD_BYTES counts the bytes of the RFC 8785 serialization of the two-section record, metadata.application.data included, which equals the UTF-8 length of ECMAScript JSON.stringify of it in any member order (§8.8.6)',
+  usage: 'Expand each case: the base record with each fill category text set to unit repeated count times and, when applicationBytes is given, metadata.application set to { mediaType: "application/octet-stream", schema: "https://meshcognition.org/schema/size-fixture-v1.json", encoding: "base64url", byteLength, digest, data } over that many bytes of 0x61. Its digest is "sha256-" followed by the lowercase hex SHA-256 of those bytes (§8.8.3), and data is their unpadded base64url. Measure; compare. Only the size verdict is pinned: an expanded record keeps the base key and signature.',
+  limits: { MAX_CATEGORY_TEXT, MAX_RECORD_TEXT, MAX_RECORD_BYTES, MAX_SEALED_RECORD_CHARS },
+  base: sizeBase,
+  cases: sizeCases.map(({ label, spec }) => {
+    const r = expandSizeCase(spec);
+    const m = recordSize(r);
+    const asciiEscaped = Buffer.byteLength(JSON.stringify(r).replace(/[\u0080-\uffff]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`), 'utf8');
+    return {
+      label,
+      ...spec,
+      expected: {
+        categoryTextBytes: m.categoryTextBytes,
+        recordTextBytes: m.recordTextBytes,
+        recordBytes: m.recordBytes,
+        ...(asciiEscaped !== m.recordBytes ? { notTheMeasure: { asciiEscapedBytes: asciiEscaped, ...(asciiEscaped > MAX_RECORD_BYTES && m.recordBytes <= MAX_RECORD_BYTES ? { asciiEscapedVerdict: 'over MAX_RECORD_BYTES: the wrong measure refuses a record that is within' } : {}) } } : {}),
+        within: m.over.length === 0,
+        over: m.over,
+      },
+    };
+  }),
+});
+
+// §8.8.5 canonical signed projection vector. Each base is signed with the record-signature-v2 test
+// key; each case is a base as a relayer might deliver it. The signature verifies on every case
+// that changes only unsigned or order-only members, and the projection must not change.
+const signRecord = (record) => {
+  record.metadata.assertionId = assertionId(record);
+  record.metadata.sigAlg = 'ed25519';
+  record.metadata.sig = b64u(crypto.sign(null, signingPayloadV2_0(record), signingPrivate));
+  return record;
+};
+const projParentA = `cmb-${'0a'.repeat(32)}`;
+const projParentB = `cmb-${'f0'.repeat(32)}`;
+const projTexts = { ...categoryTexts, focus: 'review the café menu', mood: 'calm' };
+const projCategories = (texts, metaParents = {}) => Object.fromEntries(CAT7.map((name) => [name, {
+  text: texts[name],
+  meta: { key: categoryKeyV1(name, texts[name]), parents: metaParents[name] ?? [] },
+}]));
+const projBase = (over = {}) => {
+  const cats = projCategories(over.texts ?? projTexts, over.metaParents ?? { issue: [projParentA, projParentB] });
+  return signRecord({
+    categories: cats,
+    metadata: {
+      key: blockKeyV2(cats),
+      addressScheme: ADDRESS_SCHEME,
+      signatureSuite: SIGNATURE_SUITE,
+      createdByNodeId: '018f47a0-7b21-7abc-8def-0123456789ab',
+      createdBy: over.createdBy ?? 'zoë',
+      createdTimestamp: 1786611600000,
+      room: 'conformance-room',
+      to: over.to ?? null,
+      lineage: over.lineage === undefined ? { parents: [projParentA, projParentB], method: 'SVAF-v2' } : over.lineage,
+      application: over.application ?? null,
+    },
+  });
+};
+const withExtras = (r) => { r.categories.mood.valence = 0.2; r.categories.mood.arousal = -0.1; return r; };
+const projSigned = withExtras(projBase());
+const projAppData = utf8('{"menu":"café"}');
+const projApplication = { mediaType: 'application/json', schema: 'https://meshcognition.org/schema/café-v1.json', encoding: 'base64url', byteLength: projAppData.length, digest: `sha256-${hex(sha256(projAppData))}`, data: b64u(projAppData) };
+const projWithApp = projBase({ application: projApplication });
+const projDirected = projBase({ to: '018f47a0-7b21-7abc-8def-fedcba987654' });
+const projNoParents = projBase({ lineage: { parents: [] }, metaParents: {} });
+const mut = (r, f) => { const c = structuredClone(r); f(c); return c; };
+const projectionCases = [
+  ['accepted', 'a signed record with an application, as published', projWithApp],
+  ['accepted', 'valence, arousal and lineage.method are dropped', projSigned],
+  ['accepted', 'an unrecognised category is dropped', mut(projSigned, (r) => { r.categories['x-vendor-note'] = { text: 'not a CAT7 category' }; })],
+  ['accepted', 'lineage.parents and meta.parents in another order: the same projection', mut(projSigned, (r) => { r.metadata.lineage.parents.reverse(); r.categories.issue.meta.parents.reverse(); })],
+  ['accepted', 'lineage with no parents is null', projNoParents],
+  ['accepted', 'lineage null: the same projection as no parents', mut(projNoParents, (r) => { r.metadata.lineage = null; })],
+  ['accepted', 'an absent application is null', mut(projSigned, (r) => { delete r.metadata.application; })],
+  ['accepted', 'createdBy of 256 astral characters: the cap counts code points, not UTF-16 units', projBase({ createdBy: '\u{1D11E}'.repeat(256) })],
+  ['refused', 'a rewritten meta.key', mut(projSigned, (r) => { r.categories.focus.meta.key = '0'.repeat(64); })],
+  ['refused', 'category text in NFD, though it signs the same', mut(projSigned, (r) => { r.categories.focus.text = r.categories.focus.text.normalize('NFD'); })],
+  ['refused', 'createdBy in NFD, though it signs the same', mut(projSigned, (r) => { r.metadata.createdBy = r.metadata.createdBy.normalize('NFD'); })],
+  ['refused', 'application.schema in NFD, though it signs the same', mut(projWithApp, (r) => { r.metadata.application.schema = r.metadata.application.schema.normalize('NFD'); }), 'step 1: not NFC'],
+  ['refused', 'a room outside the §5.8 grammar (an NFD spelling)', mut(projSigned, (r) => { r.metadata.room = 'équipe'.normalize('NFD'); }), 'step 1: record schema'],
+  ['refused', 'an uppercase to', mut(projDirected, (r) => { r.metadata.to = r.metadata.to.toUpperCase(); }), 'step 1: record schema'],
+  ['refused', 'createdBy of 257 astral characters', projBase({ createdBy: '\u{1D11E}'.repeat(257) }), 'step 1: record schema'],
+  ['refused', 'an uppercase createdByNodeId', mut(projSigned, (r) => { r.metadata.createdByNodeId = r.metadata.createdByNodeId.toUpperCase(); })],
+  ['refused', 'a timestamp sent as its decimal string', mut(projSigned, (r) => { r.metadata.createdTimestamp = String(r.metadata.createdTimestamp); })],
+  ['refused', 'an embedding vector beside a category', mut(projSigned, (r) => { r.categories.focus.vector = [0.1, 0.2, 0.3]; })],
+  ['refused', 'a member outside categories and metadata', mut(projSigned, (r) => { r.payload = {}; })],
+  ['refused', 'createdBy over 256 characters', withExtras(projBase({ createdBy: 'z'.repeat(257) }))],
+  ['refused', '257 lineage parents', projBase({ lineage: { parents: Array.from({ length: 257 }, (_, i) => `cmb-${i.toString(16).padStart(64, '0')}`) } })],
+];
+write('record-projection-v2.json', {
+  protocolVersion: PROTOCOL_VERSION,
+  rule: '§8.8.5 step 1: validate the record schema (closed objects except categories, JSON types, lowercase nodeIds, the 256 caps), refuse a signed string that is not NFC, then keep the canonical signed projection: the seven categories with text and meta {key, parents sorted bytewise}, and metadata with lineage {parents sorted bytewise} or null when it has none, application or null, and nothing unsigned. Step 4 then recomputes every meta.key and metadata.key.',
+  usage: 'For an accepted case, compute the projection and compare it, and the SHA-256 of its RFC 8785 serialization, with expected; the signature (record-signature-v2 testKey) verifies on the record as given and on the projection. For a refused case, refuse at the rule named; which rule reports first is not pinned when several apply.',
+  testKey: { publicKeyBase64url: b64u(signingPublic) },
+  cases: projectionCases.map(([verdict, label, record, explicitRule]) => {
+    if (verdict === 'refused') {
+      const rule = explicitRule ?? (/meta\.key/.test(label) ? 'step 4: meta.key' : /NFD/.test(label) ? 'step 1: not NFC' : 'step 1: record schema');
+      return { label, record, expected: { accepted: false, refusedBy: rule } };
+    }
+    const p = recordProjectionV2(record);
+    if (!p.ok) throw new Error(`${label}: ${p.refusedBy}`);
+    return { label, record, expected: { accepted: true, projection: p.projection, projectionSha256: hex(sha256(Buffer.from(canonicalJSON(p.projection), 'utf8'))) } };
+  }),
+});
+
+// sym-attest-v1 (Draft Candidate Extension): attestations, a chain of three checkpoints with 1-, 2- and
+// 3-leaf segments, a witness, and conflicting pairs. Fixed test keys; Ed25519 signing in Node is
+// deterministic, but a conforming verifier checks the signatures and never reproduces them.
+const attesterSeed = repeat(0x51);
+const witnessSeed = repeat(0x52);
+const attesterPrivate = ed25519PrivateKey(attesterSeed);
+const witnessPrivate = ed25519PrivateKey(witnessSeed);
+const attesterNode = '018f47a0-7b21-7abc-8def-a77e57000001';
+const witnessNode = '018f47a0-7b21-7abc-8def-a77e57000002';
+const attestRoom = 'team-room';
+const attestVerdicts = [
+  ['aligned', { focus: 'admit', issue: 'admit', intent: 'admit', motivation: 'admit', commitment: 'admit', perspective: 'admit', mood: 'admit' }],
+  ['guarded', { focus: 'admit', issue: 'guard', intent: 'guard', motivation: 'admit', commitment: 'silent', perspective: 'admit', mood: 'admit' }],
+  ['rejected', { focus: 'reject', issue: 'reject', intent: 'reject', motivation: 'silent', commitment: 'silent', perspective: 'reject', mood: 'admit' }],
+  ['redundant', { focus: 'redundant', issue: 'redundant', intent: 'redundant', motivation: 'redundant', commitment: 'silent', perspective: 'redundant', mood: 'admit' }],
+];
+const signWith = (key, payload) => b64u(crypto.sign(null, payload, key));
+const makeAttestations = (count, variant = () => ({})) => {
+  const out = [];
+  for (let seq = 1; seq <= count; seq += 1) {
+    const [verdict, categories] = attestVerdicts[(seq - 1) % attestVerdicts.length];
+    const a = {
+      of: `cmb-${hex(sha256(utf8(`attested record ${seq}`)))}`,
+      assertionId: `asrt-${hex(sha256(utf8(`attested assertion ${seq}`)))}`,
+      by: attesterNode, at: 1786611600000 + seq * 1000, room: attestRoom, method: 'neural',
+      verdict, categories: { ...categories }, role: 'participant', seq,
+      prev: seq === 1 ? 'genesis' : attestChainLink(out[seq - 2].sig),
+      ...variant(seq),
+    };
+    a.sigAlg = 'ed25519';
+    a.sig = signWith(attesterPrivate, attestationPayloadV1(a));
+    out.push(a);
+  }
+  return out;
+};
+const makeCheckpoint = (atts, fromSeq, uptoSeq, prev, at) => {
+  const segmentRoot = attestSegmentRoot(atts.slice(fromSeq - 1, uptoSeq).map((a) => a.sig));
+  const cp = { by: attesterNode, room: attestRoom, fromSeq, uptoSeq, prev, root: attestCheckpointRoot({ prev, fromSeq, uptoSeq, segmentRoot }), at, sigAlg: 'ed25519' };
+  cp.sig = signWith(attesterPrivate, attestCheckpointPayloadV1(cp));
+  return { checkpoint: cp, segmentRootHex: segmentRoot, payloadHex: hex(attestCheckpointPayloadV1(cp)) };
+};
+const honestAtts = makeAttestations(6);
+const cp1 = makeCheckpoint(honestAtts, 1, 1, 'genesis', 1786611601500);
+const cp2 = makeCheckpoint(honestAtts, 2, 3, cp1.checkpoint.root, 1786611603500);
+const cp3 = makeCheckpoint(honestAtts, 4, 6, cp2.checkpoint.root, 1786611606500);
+// The attester forks at seq 5 (rejected where the honest history says aligned): a second history shown
+// to other peers.
+const forkAtts = makeAttestations(6, (seq) => (seq === 5 ? { verdict: attestVerdicts[2][0], categories: { ...attestVerdicts[2][1] } } : {}));
+const forkSameCut = makeCheckpoint(forkAtts, 4, 6, cp2.checkpoint.root, 1786611606600);
+const forkFirst = makeCheckpoint(forkAtts, 1, 2, 'genesis', 1786611602600);
+const forkOtherCut = makeCheckpoint(forkAtts, 3, 5, forkFirst.checkpoint.root, 1786611605600);
+const forkSamePrev = makeCheckpoint(honestAtts, 2, 4, cp1.checkpoint.root, 1786611604600);
+const cp3Again = makeCheckpoint(honestAtts, 4, 6, cp2.checkpoint.root, 1786611609000);
+const linkSkip = makeCheckpoint(honestAtts, 3, 3, cp1.checkpoint.root, 1786611603700);
+const witness = { attester: attesterNode, room: attestRoom, fromSeq: cp3.checkpoint.fromSeq, uptoSeq: cp3.checkpoint.uptoSeq, root: cp3.checkpoint.root, by: witnessNode, role: 'participant', at: 1786611607000, sigAlg: 'ed25519' };
+witness.sig = signWith(witnessPrivate, attestWitnessPayloadV1(witness));
+// A reversed range, signed over its own fields, so that it tests the link rule and not the signature.
+const reversed = { ...cp2.checkpoint, fromSeq: 3, uptoSeq: 2 };
+reversed.sig = signWith(attesterPrivate, attestCheckpointPayloadV1(reversed));
+// Witnesses the attester never signed: a range no checkpoint has, and a held range with another root.
+const signWitness = (w) => ({ ...w, sigAlg: 'ed25519', sig: signWith(witnessPrivate, attestWitnessPayloadV1({ ...w, sigAlg: 'ed25519' })) });
+const strayWitness = signWitness({ attester: attesterNode, room: attestRoom, fromSeq: 2, uptoSeq: 4, root: 'f0'.repeat(32), by: witnessNode, role: 'participant', at: 1786611608000 });
+const falseWitness = signWitness({ attester: attesterNode, room: attestRoom, fromSeq: 4, uptoSeq: 6, root: '0f'.repeat(32), by: witnessNode, role: 'participant', at: 1786611608500 });
+const heldForWitnesses = [cp1.checkpoint, cp2.checkpoint, cp3.checkpoint];
+const pairCase = (label, a, b) => ({ label, a: a.checkpoint, b: b.checkpoint, expected: { conflict: attestCheckpointConflict(a.checkpoint, b.checkpoint).length > 0, because: attestCheckpointConflict(a.checkpoint, b.checkpoint) } });
+write('sym-attest-v1.json', {
+  extension: 'sym-attest-v1',
+  status: 'Draft Candidate Extension (/spec/mmp/extensions/sym-attest)',
+  usage: 'Verification only for signatures: check that your implementation ACCEPTS each sig over its pinned payload and key (§18.3.2), and never sign and compare bytes. Every payload, chain link, segment root and checkpoint root is deterministic and MUST reproduce exactly. The attestations of forkAttestations differ from attestations only from seq 5.',
+  testKeys: {
+    warning: 'fixed test keys; never use as identities',
+    attester: { nodeId: attesterNode, privateSeedBase64url: b64u(attesterSeed), publicKeyBase64url: b64u(rawPublicKey(crypto.createPublicKey(attesterPrivate))) },
+    witness: { nodeId: witnessNode, privateSeedBase64url: b64u(witnessSeed), publicKeyBase64url: b64u(rawPublicKey(crypto.createPublicKey(witnessPrivate))) },
+  },
+  attestations: honestAtts.map((a) => ({ attestation: a, payloadHex: hex(attestationPayloadV1(a)), chainLinkOfThis: attestChainLink(a.sig) })),
+  forkAttestations: forkAtts.map((a) => ({ attestation: a, payloadHex: hex(attestationPayloadV1(a)) })),
+  checkpoints: [cp1, cp2, cp3],
+  witness: { witness, payloadHex: hex(attestWitnessPayloadV1(witness)) },
+  forkCheckpoints: { forkSameCut, forkFirst, forkOtherCut, forkSamePrev },
+  conflicts: [
+    pairCase('the same uptoSeq with different roots (the fork cut at the same boundary)', cp3, forkSameCut),
+    pairCase('overlapping ranges at different boundaries (2..3 against 3..5): no position or prev in common', cp2, forkOtherCut),
+    pairCase('one prev with two children (2..3 and 2..4 after 1..1)', cp2, forkSamePrev),
+  ],
+  notConflicts: [
+    pairCase('consecutive checkpoints of one chain', cp1, cp2),
+    pairCase('the same checkpoint signed again later: a duplicate, not a conflict', cp3, cp3Again),
+  ],
+  witnessLeads: [
+    { label: 'a witness over a range no attester-signed checkpoint has (2..4, against held 1..1, 2..3 and 4..6): a lead, never equivocation evidence', witness: strayWitness, payloadHex: hex(attestWitnessPayloadV1(strayWitness)), held: heldForWitnesses, expected: attestWitnessAssessment(strayWitness, heldForWitnesses) },
+    { label: 'a witness naming a held checkpoint\'s range with another root: evidence against the witness, not the attester', witness: falseWitness, payloadHex: hex(attestWitnessPayloadV1(falseWitness)), held: heldForWitnesses, expected: attestWitnessAssessment(falseWitness, heldForWitnesses) },
+  ],
+  linkChecks: [
+    { label: 'a checkpoint whose prev is held but which does not start right after it: malformed, not evidence', checkpoint: linkSkip.checkpoint, prev: cp1.checkpoint, expected: { valid: attestCheckpointLinkValid(linkSkip.checkpoint, cp1.checkpoint) } },
+    { label: 'a reversed range, signed over its own fields: refused by the rule, not the signature', checkpoint: reversed, prev: cp1.checkpoint, expected: { valid: attestCheckpointLinkValid(reversed, cp1.checkpoint) } },
+    { label: 'the honest second checkpoint: valid', checkpoint: cp2.checkpoint, prev: cp1.checkpoint, expected: { valid: attestCheckpointLinkValid(cp2.checkpoint, cp1.checkpoint) } },
+  ],
 });
 
 function exampleFrame({ createdBy, createdByNodeId, createdTimestamp, texts, mood, parent = null, method }) {
@@ -568,7 +871,16 @@ named('rVbyW', 'revoke', ['gV'], idOf('gW'), [K.W]);
 grant('gA2', K.A, 'admin', 'anchor', [K.a1, K.a2]); // a fresh grant to A after rA
 // Statements a receiver must find invalid.
 grant('xThin', K.M, 'validator', 'anchor', [K.a1]); // one anchor signature, threshold 2
-grant('xDupKey', K.M, 'validator', 'anchor', [K.a1, K.a1]); // one key counted once
+grant('xDupKey', K.M, 'validator', 'anchor', [K.a1, K.a1]); // a repeated key: not well formed (§6.6.3, rule 1)
+// A repeated key with a different signature: a1's genuine entry, a second a1 entry whose signature
+// does not verify, and a2's. Without the shape rule this copy meets the threshold of 2 (a1 and a2);
+// with it, the copy is not well formed and no signature is checked at all.
+{
+  const body = { kind: 'grant', authorisedBy: 'anchor', subject: { nodeId: K.M.nodeId, key: K.M.key }, role: 'validator', nonce: nonceOf('xRepeatKey') };
+  const signed = sign(body, [K.a1, K.a2]);
+  const bogus = `${signed.sigs[0].sig.slice(0, 40)}${signed.sigs[0].sig[40] === 'A' ? 'B' : 'A'}${signed.sigs[0].sig.slice(41)}`;
+  statementDefs.xRepeatKey = { ...signed, sigs: [signed.sigs[0], { key: K.a1.key, sig: bogus }, signed.sigs[1]] };
+}
 grant('xValidatorByValidator', K.M, 'validator', idOf('gV'), [K.V]);
 named('xEndorseByValidator', 'endorse', ['gQ'], idOf('gW'), [K.W]);
 grant('xByParticipant', K.M, 'participant', idOf('gP'), [K.P]);
@@ -749,10 +1061,10 @@ const authorityCases = [
   {
     label: 'invalid statements are inert',
     pin: 'anchor-2-of-3',
-    statements: [...tree, 'xThin', 'xDupKey', 'xValidatorByValidator', 'xEndorseByValidator', 'xByParticipant', 'xWrongKey', 'xIdentityKey', 'xUpperNodeId'],
+    statements: [...tree, 'xThin', 'xDupKey', 'xRepeatKey', 'xValidatorByValidator', 'xEndorseByValidator', 'xByParticipant', 'xWrongKey', 'xIdentityKey', 'xUpperNodeId'],
     status: {
       ...inForce(...tree),
-      ...st('invalid', 'xThin', 'xDupKey', 'xValidatorByValidator', 'xEndorseByValidator', 'xByParticipant', 'xWrongKey', 'xIdentityKey', 'xUpperNodeId'),
+      ...st('invalid', 'xThin', 'xDupKey', 'xRepeatKey', 'xValidatorByValidator', 'xEndorseByValidator', 'xByParticipant', 'xWrongKey', 'xIdentityKey', 'xUpperNodeId'),
     },
     sameRootAs: 'a delegation tree is in force',
   },
