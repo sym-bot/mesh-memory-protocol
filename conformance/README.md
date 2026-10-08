@@ -10,6 +10,8 @@ exactly.
 | `v2/record-signature-v2.json` | Record model, security | `cmb-` Merkle cognition address, `mmp-sig-v2.0`, assertion identity, signed author nodeId and application commitment |
 | `v2/handshake-v2.json` | Identity, connection, security | Transcript bytes, Ed25519 proofs, X25519 key confirmation, HKDF finished and traffic keys |
 | `v2/e2e-v2.json` | Security | IETF ChaCha20-Poly1305 envelopes, directional counter nonces and transcript-bound AAD |
+| `v2/authority-v2.json` | §6.6, §19.1 | Authority by reference: grant, revoke and endorse statement bytes and ids, resolution of each case in every order and with forged copies, the quota and delegation bound, scope narrowing, rescue, and the authority root |
+| `v2/ed25519-strict-v2.json` | §18.3.2 | The one Ed25519 verification rule: cofactorless, A and R canonical and of prime order, S < L, with the speccheck edge cases and small-order and mixed-order keys and points |
 | `svaf-baseline.json` | §9.2, §9.2.1 | Reference-baseline admission math on fixed field vectors: nearest-anchor redundancy basis (both witness directions), aligned/guarded thresholds, the evaluation-time flip window, cold-start bootstrap |
 | `tether-v1.json` | §15.8 | Lineage-tether drift checks (faithful / severed / unverifiable / α-weighted), `mmp-tether-v1` attestation payload bytes + signature, kernel comparability |
 
